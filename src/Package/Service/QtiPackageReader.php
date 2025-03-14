@@ -1,0 +1,115 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Domain\Qti\Package\Service;
+
+use App\SharedKernel\Domain\Qti\Package\IQtiPackageFactory;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
+use App\SharedKernel\Domain\Qti\Package\Model\Manifest\IManifestFactory;
+use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
+use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
+use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
+use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
+use App\SharedKernel\Domain\Qti\Package\Model\QtiPackageId;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
+use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
+use DateTimeImmutable;
+
+readonly class QtiPackageReader implements IQtiPackageFactory
+{
+    public function __construct(
+        private IManifestFactory $manifestFactory,
+        private IXmlReader $xmlReader,
+        private IPackageFactory $zipPackageFactory,
+        private IPackageFactory $filesystemPackageFactory,
+    ) {}
+
+    public function fromFilesystem(string $filePath, ?QtiPackageId $id = null): QtiPackage
+    {
+        $reader = $this->filesystemPackageFactory->getReader($filePath);
+
+        return $this->fromReader($reader, $id);
+    }
+
+    public function fromZip(string $filePath, ?QtiPackageId $id = null): QtiPackage
+    {
+        $reader = $this->zipPackageFactory->getReader($filePath);
+
+        return $this->fromReader($reader, $id);
+    }
+
+    private function fromReader(IPackageReader $reader, ?QtiPackageId $id = null): QtiPackage
+    {
+        $resources = new ResourceCollection();
+
+        $manifest = $this->manifestFactory->createFromXmlString($reader->readFile('imsmanifest.xml'));
+
+        foreach ($manifest->getResources() as $manifestResource) {
+            $files = new ResourceFileCollection();
+            foreach ($manifestResource->files as $manifestFile) {
+                $extension = pathinfo($manifestFile->href, PATHINFO_EXTENSION);
+                if ($extension === 'xml') {
+                    $fileContent = XmlFileContent::fromString($reader->readFile($manifestFile->href), $this->xmlReader);
+                } else {
+                    $fileContent = new MemoryFileContent($reader->readFile($manifestFile->href));
+                }
+
+                $files->add(new ResourceFile(
+                    $manifestFile->href,
+                    $fileContent
+                ));
+            }
+            $resources[] = new Resource(
+                $manifestResource->identifier,
+                $manifestResource->type,
+                $manifestResource->href,
+                $files,
+                $manifestResource->dependencies,
+                $this->determineMetadata($manifestResource, $manifest, $reader, $this->xmlReader),
+            );
+
+        }
+
+        return new QtiPackage(
+            $id ?? QtiPackageId::generate(),
+            $resources,
+            $manifest,
+            $reader->getLastModified() ?? new DateTimeImmutable()
+        );
+    }
+
+    private function determineMetadata(ManifestResource $resource, Manifest $manifest, IPackageReader $reader, IXmlReader $xmlReader): ?Metadata
+    {
+        foreach ($resource->dependencies as $dependency) {
+            $metadataResources = $manifest->getResources()->filter(
+                fn(ManifestResource $manifestResource): bool =>
+                    $manifestResource->identifier === $dependency->identifierref &&
+                    $manifestResource->type === ResourceType::RESOURCE_METADATA
+            );
+
+            if ($metadataResources->count() === 0) {
+                continue;
+            }
+
+            /** @var ManifestResource $metadataResource */
+            $metadataResource = $metadataResources->first();
+
+            // Metadata resource always contains a href
+            /** @var string $href */
+            $href = $metadataResource->href;
+
+            $fileContent = XmlFileContent::fromString($reader->readFile($href), $xmlReader);
+
+            return new Metadata($fileContent->xmlDocument);
+        }
+
+        return null;
+    }
+}
