@@ -86,14 +86,6 @@ class Manifest extends PackageFile
         $this->getDocumentElement()->appendChild($resourceNode);
     }
 
-    public function getTitle(): string
-    {
-        $query = $this->xpath->query('//lom:title/lom:string');
-        $titleNode = $query ? $query->item(0) : null;
-
-        return $titleNode ? $titleNode->nodeValue ?? '' : '';
-    }
-
     private function getFiles(DOMElement $resourceNode): ManifestResourceFileCollection
     {
         $fileNodes = $resourceNode->getElementsByTagName('file');

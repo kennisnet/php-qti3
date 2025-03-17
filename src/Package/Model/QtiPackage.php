@@ -11,15 +11,12 @@ use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
-use DateTimeImmutable;
 
 class QtiPackage
 {
     public function __construct(
-        public readonly QtiPackageId $id,
         public readonly ResourceCollection $resources,
         public readonly Manifest $manifest,
-        public readonly DateTimeImmutable $lastModified = new DateTimeImmutable()
     ) {}
 
     public function addResource(Resource $resource): void

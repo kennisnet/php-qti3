@@ -13,14 +13,12 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
 use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackageId;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
-use DateTimeImmutable;
 
 readonly class QtiPackageReader implements IQtiPackageFactory
 {
@@ -31,21 +29,21 @@ readonly class QtiPackageReader implements IQtiPackageFactory
         private IPackageFactory $filesystemPackageFactory,
     ) {}
 
-    public function fromFilesystem(string $filePath, ?QtiPackageId $id = null): QtiPackage
+    public function fromFilesystem(string $filePath): QtiPackage
     {
         $reader = $this->filesystemPackageFactory->getReader($filePath);
 
-        return $this->fromReader($reader, $id);
+        return $this->fromReader($reader);
     }
 
-    public function fromZip(string $filePath, ?QtiPackageId $id = null): QtiPackage
+    public function fromZip(string $filePath): QtiPackage
     {
         $reader = $this->zipPackageFactory->getReader($filePath);
 
-        return $this->fromReader($reader, $id);
+        return $this->fromReader($reader);
     }
 
-    private function fromReader(IPackageReader $reader, ?QtiPackageId $id = null): QtiPackage
+    private function fromReader(IPackageReader $reader): QtiPackage
     {
         $resources = new ResourceCollection();
 
@@ -78,10 +76,8 @@ readonly class QtiPackageReader implements IQtiPackageFactory
         }
 
         return new QtiPackage(
-            $id ?? QtiPackageId::generate(),
             $resources,
             $manifest,
-            $reader->getLastModified() ?? new DateTimeImmutable()
         );
     }
 

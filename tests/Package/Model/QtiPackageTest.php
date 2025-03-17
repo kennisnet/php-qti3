@@ -10,7 +10,6 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependenc
 use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackageId;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
@@ -32,7 +31,6 @@ class QtiPackageTest extends TestCase
         $this->manifest = $this->createMock(Manifest::class);
 
         $this->qtiPackage = new QtiPackage(
-            QtiPackageId::fromString('test-id'),
             $this->resources,
             $this->manifest,
             new DateTimeImmutable(),

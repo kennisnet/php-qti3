@@ -70,7 +70,7 @@ class QtiPackageEnhancer
                     new AssessmentSectionCollection([
                         new AssessmentSection(
                             'section',
-                            $package->manifest->getTitle(),
+                            'Section',
                             $this->getAssessmentItemRefs($package),
                         ),
                     ])

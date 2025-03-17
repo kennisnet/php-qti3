@@ -65,7 +65,6 @@ class QtiPackageEnhancerTest extends TestCase
     {
         // Arrange
         $manifest = $this->createMock(Manifest::class); // Maak een mock van het verwachte manifest
-        $manifest->method('getTitle')->willReturn('Test Title');
 
         $package = new QtiPackageMock(
             resources: new ResourceCollection(),
@@ -82,7 +81,7 @@ class QtiPackageEnhancerTest extends TestCase
         $xmlContent = (string) $assessmentTest->files->first()->getContent();
 
         // Assert
-        self::assertStringContainsString('Test Title', $xmlContent);
+        self::assertStringContainsString('qti-assessment-section', $xmlContent);
     }
 
 }

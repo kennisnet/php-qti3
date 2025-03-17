@@ -29,7 +29,7 @@ readonly class ZipPackageWriter implements IPackageWriter
         $zipArchive = $this->getZipArchive($this->zipFilepath);
 
         foreach ($qtiPackage->getFiles() as $file) {
-            $this->addFile($file, $zipArchive, (string) $qtiPackage->id);
+            $this->addFile($file, $zipArchive);
         }
     }
 
@@ -50,7 +50,7 @@ readonly class ZipPackageWriter implements IPackageWriter
         return $zipArchive;
     }
 
-    private function addFile(IPackageFile $file, ZipArchive $zipArchive, string $packageName): void
+    private function addFile(IPackageFile $file, ZipArchive $zipArchive): void
     {
         $content = $file->getContent();
         if ($content instanceof IMemoryFileContent) {
@@ -59,7 +59,7 @@ readonly class ZipPackageWriter implements IPackageWriter
             $zipArchive->addFile($content->filepath, $file->getFilepath());
         } elseif ($content instanceof ExternalFileContent) {
             $zipArchive->addFile(
-                $this->resourceDownloader->downloadFile($content->url, $packageName . '/' . $file->getFilepath()),
+                $this->resourceDownloader->downloadFile($content->url, md5($content->url)),
                 $file->getFilepath()
             );
         } else {

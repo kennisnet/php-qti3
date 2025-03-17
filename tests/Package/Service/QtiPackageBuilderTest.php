@@ -76,7 +76,6 @@ class QtiPackageBuilderTest extends TestCase
         $qtiPackage = $this->qtiPackageBuilder->buildForTest($assessmentTest, [AssessmentItemStub::assessmentItemWithImage(), AssessmentItemStub::assessmentItemWithImage()]);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals('IMSCP_QTI30_1', $qtiPackage->id);
     }
 
     #[Test]
@@ -90,7 +89,6 @@ class QtiPackageBuilderTest extends TestCase
         $qtiPackage = $this->qtiPackageBuilder->buildFromAssessmentId($assessmentTest->identifier);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals('IMSCP_QTI30_1', $qtiPackage->id);
     }
 
     #[Test]
@@ -119,7 +117,6 @@ class QtiPackageBuilderTest extends TestCase
         $qtiPackage = $this->qtiPackageBuilder->buildFromAssessmentId($assessmentTest->identifier);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals('IMSCP_QTI30_1', $qtiPackage->id);
 
         $controlfiles = $qtiPackage->resources->filterByType(ResourceType::CONTROLFILE);
         $this->assertCount(1, $controlfiles);

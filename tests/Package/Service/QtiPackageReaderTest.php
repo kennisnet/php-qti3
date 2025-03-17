@@ -14,7 +14,6 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependenc
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackageId;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 use App\SharedKernel\Domain\Qti\Package\Service\IPackageFactory;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageReader;
@@ -52,7 +51,6 @@ class QtiPackageReaderTest extends TestCase
     public function testFromFilesystem(): void
     {
         $filePath = '/path/to/qti-package.xml';
-        $qtiPackageId = QtiPackageId::generate();
 
         $this->filesystemPackageFactory
             ->method('getReader')
@@ -75,17 +73,15 @@ class QtiPackageReaderTest extends TestCase
             ->method('readFile')
             ->willReturn('<xml></xml>');
 
-        $qtiPackage = $this->qtiPackageReader->fromFilesystem($filePath, $qtiPackageId);
+        $qtiPackage = $this->qtiPackageReader->fromFilesystem($filePath);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals($qtiPackageId, $qtiPackage->id);
     }
 
     #[Test]
     public function readPackageFromZip(): void
     {
         $filePath = '/path/to/qti-package.zip';
-        $qtiPackageId = QtiPackageId::generate();
 
         $this->zipPackageFactory
             ->method('getReader')
@@ -106,10 +102,9 @@ class QtiPackageReaderTest extends TestCase
             ->method('readFile')
             ->willReturn('<xml></xml>');
 
-        $qtiPackage = $this->qtiPackageReader->fromZip($filePath, $qtiPackageId);
+        $qtiPackage = $this->qtiPackageReader->fromZip($filePath);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals($qtiPackageId, $qtiPackage->id);
     }
 
     #[Test]
@@ -150,7 +145,6 @@ class QtiPackageReaderTest extends TestCase
         );
 
         $filePath = '/path/to/qti-package.zip';
-        $qtiPackageId = QtiPackageId::generate();
 
         $this->zipPackageFactory
             ->method('getReader')
@@ -169,10 +163,9 @@ class QtiPackageReaderTest extends TestCase
             ->method('readFile')
             ->willReturn('<xml></xml>');
 
-        $qtiPackage = $this->qtiPackageReader->fromZip($filePath, $qtiPackageId);
+        $qtiPackage = $this->qtiPackageReader->fromZip($filePath);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals($qtiPackageId, $qtiPackage->id);
     }
 
     #[Test]
@@ -205,7 +198,6 @@ class QtiPackageReaderTest extends TestCase
         );
 
         $filePath = '/path/to/qti-package.zip';
-        $qtiPackageId = QtiPackageId::generate();
 
         $this->zipPackageFactory
             ->method('getReader')
@@ -224,9 +216,8 @@ class QtiPackageReaderTest extends TestCase
             ->method('readFile')
             ->willReturn('<xml></xml>');
 
-        $qtiPackage = $this->qtiPackageReader->fromZip($filePath, $qtiPackageId);
+        $qtiPackage = $this->qtiPackageReader->fromZip($filePath);
 
         $this->assertInstanceOf(QtiPackage::class, $qtiPackage);
-        $this->assertEquals($qtiPackageId, $qtiPackage->id);
     }
 }

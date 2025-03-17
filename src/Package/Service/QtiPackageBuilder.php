@@ -13,7 +13,6 @@ use App\SharedKernel\Domain\Qti\AssessmentTest\Repository\IAssessmentTestReposit
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependency;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackageId;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Warnings;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Webcontent;
@@ -88,7 +87,6 @@ class QtiPackageBuilder
         }
 
         return new QtiPackage(
-            QtiPackageId::fromString(sprintf('IMSCP_QTI30_%s', $assessmentTest->identifier->questionnaireId())),
             $resources,
             $this->manifestBuilder->buildForResources($resources)
         );
