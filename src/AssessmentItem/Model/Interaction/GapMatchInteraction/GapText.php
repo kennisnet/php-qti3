@@ -36,5 +36,4 @@ final class GapText extends QtiElement
     {
         return $this->content->all();
     }
-
 }

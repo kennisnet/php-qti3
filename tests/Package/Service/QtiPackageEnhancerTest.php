@@ -33,7 +33,7 @@ class QtiPackageEnhancerTest extends TestCase
         $enhancer->enhancePackage($package);
 
         // Assert
-        self::assertCount(1, $package->resources);
+        self::assertCount(6, $package->resources);
         self::assertEquals(ResourceType::ASSESSMENT_TEST, $package->resources->first()->type);
     }
 
