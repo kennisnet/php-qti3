@@ -6,27 +6,35 @@ namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model;
 
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 use App\SharedKernel\Infrastructure\Xml\XmlReader;
+use DOMDocument;
 
 class QtiPackageMock extends QtiPackage
 {
     public function __construct(
-        ResourceCollection $resources = new ResourceCollection([
+        ?ResourceCollection $resources = null,
+        ?Manifest $manifest = null,
+    ) {
+        $metadataLom = new DOMDocument();
+        $metadataLom->loadXML(file_get_contents(__DIR__ . '/resources/metadata.xml'));
+
+        $resources ??= new ResourceCollection([
             new Resource(
                 'test-id',
                 ResourceType::ASSESSMENT_TEST,
                 'test.xml',
                 new ResourceFileCollection([]),
                 new ManifestResourceDependencyCollection(),
+                new Metadata($metadataLom)
             ),
-        ]),
-        ?Manifest $manifest = null,
-    ) {
+        ]);
+
         parent::__construct(
             $resources,
             $manifest ?? Manifest::fromString(
