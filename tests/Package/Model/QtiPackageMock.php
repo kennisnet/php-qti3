@@ -79,7 +79,7 @@ class QtiPackageMock extends QtiPackage
         );
     }
 
-    public function getMetadata(): ?Metadata
+    public function getMetadata($noMetadata = false): ?Metadata
     {
         $dom = new DOMDocument();
         $dom->loadXML($this->readMetadata());
