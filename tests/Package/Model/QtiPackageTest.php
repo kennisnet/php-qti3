@@ -15,7 +15,6 @@ use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
-use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +32,6 @@ class QtiPackageTest extends TestCase
         $this->qtiPackage = new QtiPackage(
             $this->resources,
             $this->manifest,
-            new DateTimeImmutable(),
         );
     }
 
