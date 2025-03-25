@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest;
 
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
-use App\SharedKernel\Infrastructure\Xml\XmlReader;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 
 class ManifestMock extends Manifest
 {

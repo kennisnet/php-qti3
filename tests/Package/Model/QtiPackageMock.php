@@ -12,7 +12,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
-use App\SharedKernel\Infrastructure\Xml\XmlReader;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use DOMDocument;
 
 class QtiPackageMock extends QtiPackage
