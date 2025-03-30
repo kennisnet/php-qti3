@@ -27,6 +27,6 @@ readonly class FilesystemPackageReader implements IPackageReader
 
     public function getLastModified(): ?DateTimeImmutable
     {
-        return (new DateTimeImmutable())->setTimestamp($this->qtiPackageStorage->lastModified($this->folderName));
+        return new DateTimeImmutable()->setTimestamp($this->qtiPackageStorage->lastModified($this->folderName));
     }
 }
