@@ -10,6 +10,18 @@ use SplFileObject;
 
 class FileSystemUtils implements IFileSystemUtils
 {
+    public function generateTempFilename(): string
+    {
+        return tempnam(sys_get_temp_dir(), 'qti_');
+    }
+
+    public function removeFile(string $filename): void
+    {
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+    }
+
     public function ensureDirectory(string $directory): void
     {
         if (is_dir($directory)) {
