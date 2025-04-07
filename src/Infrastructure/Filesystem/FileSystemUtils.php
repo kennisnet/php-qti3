@@ -8,7 +8,7 @@ use Exception;
 use RuntimeException;
 use SplFileObject;
 
-class FileSystemUtils implements IFileSystemUtils
+class FileSystemUtils
 {
     public function generateTempFilename(): string
     {
