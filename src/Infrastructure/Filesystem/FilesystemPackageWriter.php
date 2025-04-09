@@ -16,23 +16,23 @@ readonly class FilesystemPackageWriter implements IPackageWriter
 {
     public function __construct(
         private string $folderName,
-        private FilesystemOperator $qtiPackageStorage,
+        private FilesystemOperator $dataStorage,
         private FileSystemUtils $fileSystemUtils,
         private ResourceDownloader $resourceDownloader
     ) {}
 
     public function write(QtiPackage $qtiPackage): void
     {
-        $this->qtiPackageStorage->createDirectory($this->folderName);
+        $this->dataStorage->createDirectory($this->folderName);
 
         foreach ($qtiPackage->getFiles() as $resourceFile) {
             $filePath = $this->folderName . '/' . $resourceFile->getFilepath();
             $content = $resourceFile->getContent();
             if ($content instanceof IMemoryFileContent) {
-                $this->qtiPackageStorage->write($filePath, (string) $content);
+                $this->dataStorage->write($filePath, (string) $content);
             } elseif ($content instanceof LocalFileContent) {
                 $fileContents = $this->fileSystemUtils->getFileContents($content->filepath);
-                $this->qtiPackageStorage->write($filePath, $fileContents);
+                $this->dataStorage->write($filePath, $fileContents);
             } elseif ($content instanceof ExternalFileContent) {
                 $this->resourceDownloader->downloadFile($content->url, $filePath);
             } else {
@@ -43,6 +43,6 @@ readonly class FilesystemPackageWriter implements IPackageWriter
 
     public function getPublicUrl(): string
     {
-        return $this->qtiPackageStorage->publicUrl($this->folderName);
+        return $this->dataStorage->publicUrl($this->folderName);
     }
 }

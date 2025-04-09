@@ -15,7 +15,8 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
-use App\SharedKernel\Domain\Qti\Package\Service\IPackageFactory;
+use App\SharedKernel\Domain\Qti\Package\Service\IFilesystemPackageFactory;
+use App\SharedKernel\Domain\Qti\Package\Service\IZipPackageFactory;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageReader;
 use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,8 +26,8 @@ class QtiPackageReaderTest extends TestCase
 {
     private IManifestFactory $manifestFactory;
     private IXmlReader $xmlReader;
-    private IPackageFactory $zipPackageFactory;
-    private IPackageFactory $filesystemPackageFactory;
+    private IZipPackageFactory $zipPackageFactory;
+    private IFilesystemPackageFactory $filesystemPackageFactory;
     private IPackageReader $packageReader;
     private Manifest $manifest;
     private QtiPackageReader $qtiPackageReader;
@@ -35,8 +36,8 @@ class QtiPackageReaderTest extends TestCase
     {
         $this->manifestFactory = $this->createMock(IManifestFactory::class);
         $this->xmlReader = $this->createMock(IXmlReader::class);
-        $this->zipPackageFactory = $this->createMock(IPackageFactory::class);
-        $this->filesystemPackageFactory = $this->createMock(IPackageFactory::class);
+        $this->zipPackageFactory = $this->createMock(IZipPackageFactory::class);
+        $this->filesystemPackageFactory = $this->createMock(IFilesystemPackageFactory::class);
         $this->packageReader = $this->createMock(IPackageReader::class);
         $this->manifest = $this->createMock(Manifest::class);
 

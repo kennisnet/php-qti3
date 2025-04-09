@@ -6,11 +6,11 @@ namespace App\SharedKernel\Infrastructure\Filesystem\Zip;
 
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
-use App\SharedKernel\Domain\Qti\Package\Service\IPackageFactory;
+use App\SharedKernel\Domain\Qti\Package\Service\IZipPackageFactory;
 use App\SharedKernel\Infrastructure\Filesystem\ResourceDownloader;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 
-class ZipPackageFactory implements IPackageFactory
+class ZipPackageFactory implements IZipPackageFactory
 {
     public function __construct(
         private readonly string $dataFolder,
@@ -18,13 +18,13 @@ class ZipPackageFactory implements IPackageFactory
         private readonly ZipArchiveFactory $zipArchiveFactory,
     ) {}
 
-    public function getReader(string $filepath): IPackageReader
+    public function getReader(string $zipfilePath): IPackageReader
     {
-        return new ZipPackageReader($filepath, $this->zipArchiveFactory);
+        return new ZipPackageReader($zipfilePath, $this->zipArchiveFactory);
     }
 
-    public function getWriter(string $filename): IPackageWriter
+    public function getWriter(string $zipfilePath): IPackageWriter
     {
-        return new ZipPackageWriter($this->dataFolder . '/' . $filename, $this->resourceDownloader, $this->zipArchiveFactory);
+        return new ZipPackageWriter($this->dataFolder . '/' . $zipfilePath, $this->resourceDownloader, $this->zipArchiveFactory);
     }
 }

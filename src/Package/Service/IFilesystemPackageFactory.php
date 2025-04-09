@@ -7,9 +7,9 @@ namespace App\SharedKernel\Domain\Qti\Package\Service;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
 
-interface IPackageFactory
+interface IFilesystemPackageFactory
 {
-    public function getReader(string $filepath): IPackageReader;
+    public function getReader(string $folder): IPackageReader;
 
-    public function getWriter(string $filename): IPackageWriter;
+    public function getWriter(string $folder): IPackageWriter;
 }

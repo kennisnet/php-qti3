@@ -25,8 +25,8 @@ readonly class QtiPackageReader implements IQtiPackageFactory
     public function __construct(
         private IManifestFactory $manifestFactory,
         private IXmlReader $xmlReader,
-        private IPackageFactory $zipPackageFactory,
-        private IPackageFactory $filesystemPackageFactory,
+        private IZipPackageFactory $zipPackageFactory,
+        private IFilesystemPackageFactory $filesystemPackageFactory,
     ) {}
 
     public function fromFilesystem(string $filePath): QtiPackage
