@@ -14,7 +14,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\Value;
 
 class OutcomeSet
 {
-    /** @var array<string,string|int|float|bool|array<int,string|int|float|bool|null>|null> $outcomes */
+    /** @var array<string,string|int|float|bool|array<int|string,string|int|float|bool|null>|null> $outcomes */
     public array $outcomes = [];
 
     public function __construct(
@@ -54,15 +54,6 @@ class OutcomeSet
 
         // Convert the value to ensure it matches the expected type
         $convertedValue = ValueConverter::convert($value, $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
-
-        // Ensure array values have integer keys
-        if (is_array($convertedValue)) {
-            $intKeyedValue = [];
-            foreach ($convertedValue as $item) {
-                $intKeyedValue[] = $item;
-            }
-            $convertedValue = $intKeyedValue;
-        }
 
         $this->outcomes[$identifier] = $convertedValue;
     }
