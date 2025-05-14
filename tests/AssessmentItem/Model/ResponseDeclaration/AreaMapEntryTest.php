@@ -17,7 +17,7 @@ class AreaMapEntryTest extends TestCase
     {
         $this->areaMapEntry = new AreaMapEntry(
             shape: Rectangle::fromString('0,0,100,100'),
-            mappedValue: 'mapped-value',
+            mappedValue: 1,
         );
     }
 
@@ -27,7 +27,7 @@ class AreaMapEntryTest extends TestCase
         $expectedAttributes = [
             'shape' => 'rect',
             'coords' => '0,0,100,100',
-            'mapped-value' => 'mapped-value',
+            'mapped-value' => 1,
         ];
 
         $this->assertEquals($expectedAttributes, $this->areaMapEntry->attributes());

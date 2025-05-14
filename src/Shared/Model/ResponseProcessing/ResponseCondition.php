@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing;
 
 use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\BaseValue;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Correct;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IBooleanExpression;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IsNull;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\qtiMatch;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\SetOutcomeValue;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Variable;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\xMatch;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
 class ResponseCondition extends QtiElement implements IProcessingElement
 {
@@ -30,14 +31,14 @@ class ResponseCondition extends QtiElement implements IProcessingElement
     ): self {
         return new ResponseCondition(
             if: new ResponseIf(
-                new xMatch(
+                new qtiMatch(
                     new Variable('RESPONSE'),
                     new Correct('RESPONSE')
                 ),
-                new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreCorrect))
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreCorrect))]
             ),
             else: new ResponseElse(
-                new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreIncorrect))
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreIncorrect))]
             )
         );
     }
@@ -47,23 +48,23 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         return new ResponseCondition(
             if: new ResponseIf(
                 new IsNull(new Variable('RESPONSE')),
-                new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))]
             ),
             else: new ResponseElse(
-                new SetOutcomeValue('SCORE', new MapResponse('RESPONSE'))
+                [new SetOutcomeValue('SCORE', new MapResponse('RESPONSE'))]
             )
         );
     }
 
-    public static function feedbackCorrect(IBooleanExpression $correctCondition): self
+    public static function feedbackCorrect(AbstractQtiExpression $correctCondition): self
     {
         return new ResponseCondition(
             if: new ResponseIf(
                 $correctCondition,
-                new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'correct'))
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'correct'))]
             ),
             else: new ResponseElse(
-                new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'incorrect'))
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'incorrect'))]
             ),
         );
     }
@@ -73,10 +74,10 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         return new ResponseCondition(
             if: new ResponseIf(
                 new IsNull(new Variable('SCORE')),
-                new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'false'))
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'false'))]
             ),
             else: new ResponseElse(
-                new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'true'))
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'true'))]
             ),
         );
     }
@@ -88,5 +89,22 @@ class ResponseCondition extends QtiElement implements IProcessingElement
             ...$this->elseIfs,
             $this->else,
         ];
+    }
+
+    public function processResponses(ItemState $state): void
+    {
+        if ($this->if->condition->evaluate($state)) {
+            $this->if->processResponses($state);
+            return;
+        }
+        foreach ($this->elseIfs as $elseIf) {
+            if ($elseIf->condition->evaluate($state)) {
+                $elseIf->processResponses($state);
+                return;
+            }
+        }
+        if ($this->else) {
+            $this->else->processResponses($state);
+        }
     }
 }

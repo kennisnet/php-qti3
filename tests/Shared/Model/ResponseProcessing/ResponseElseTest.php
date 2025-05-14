@@ -18,7 +18,7 @@ class ResponseElseTest extends TestCase
     protected function setUp(): void
     {
         $this->responseElse = new ResponseElse(
-            new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))
+            [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))]
         );
     }
 

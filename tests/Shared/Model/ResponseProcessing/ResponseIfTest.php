@@ -21,7 +21,7 @@ class ResponseIfTest extends TestCase
     {
         $this->responseIf = new ResponseIf(
             new IsNull(new Variable('variable')),
-            new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))
+            [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))]
         );
     }
 

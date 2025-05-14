@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
-class Divide extends QtiElement implements INumericExpression
+class Divide extends AbstractQtiExpression
 {
     public function __construct(
-        public readonly INumericExpression $element1,
-        public readonly INumericExpression $element2
+        public readonly AbstractQtiExpression $element1,
+        public readonly AbstractQtiExpression $element2
     ) {}
 
     public function children(): array
@@ -19,5 +19,13 @@ class Divide extends QtiElement implements INumericExpression
             $this->element1,
             $this->element2,
         ];
+    }
+
+    public function evaluate(ItemState $state): int|float
+    {
+        $value1 = $this->element1->evaluateNumber($state);
+        $value2 = $this->element2->evaluateNumber($state);
+
+        return $value1 / $value2;
     }
 }

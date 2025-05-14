@@ -16,7 +16,7 @@ class QtiTagNameTest extends TestCase
     protected function setUp(): void
     {
         $textInteraction = new ExtendedTextInteractionStub();
-        $this->tagName = new QtiTagName($textInteraction);
+        $this->tagName = new QtiTagName($textInteraction::class);
     }
 
     #[Test]

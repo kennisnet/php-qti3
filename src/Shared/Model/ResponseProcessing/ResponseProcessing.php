@@ -6,6 +6,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing;
 
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
 class ResponseProcessing extends QtiElement
 {
@@ -39,5 +40,12 @@ class ResponseProcessing extends QtiElement
     public function children(): array
     {
         return $this->elements;
+    }
+
+    public function processResponses(ItemState $state): void
+    {
+        foreach ($this->elements as $element) {
+            $element->processResponses($state);
+        }
     }
 }

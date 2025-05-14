@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 
-class OutcomeCondition extends QtiElement implements IProcessingElement
+class OutcomeCondition extends QtiElement implements IOutcomeProcessingElement
 {
     public function __construct(
         public readonly OutcomeIf $if,

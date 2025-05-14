@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
-class Variable extends QtiElement implements IQtiExpression, INumericExpression
+class Variable extends AbstractQtiExpression
 {
     public function __construct(
         public readonly string $identifier
@@ -17,5 +17,10 @@ class Variable extends QtiElement implements IQtiExpression, INumericExpression
         return [
             'identifier' => $this->identifier,
         ];
+    }
+
+    public function evaluate(ItemState $state): mixed
+    {
+        return $state->getValue($this->identifier);
     }
 }

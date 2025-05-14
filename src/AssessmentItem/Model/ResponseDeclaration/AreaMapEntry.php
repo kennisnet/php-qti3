@@ -11,14 +11,14 @@ class AreaMapEntry extends QtiElement
 {
     public function __construct(
         public IShapeWithCoords $shape,
-        public readonly string|int|float $mappedValue
+        public readonly float $mappedValue
     ) {}
 
     public function attributes(): array
     {
         return [
             'shape' => $this->shape->name()->value,
-            'coords' => (string) $this->shape->coords(),
+            'coords' => $this->shape->coords(),
             'mapped-value' => (string) $this->mappedValue,
         ];
     }

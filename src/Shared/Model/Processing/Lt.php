@@ -4,20 +4,28 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
-class Lt extends QtiElement implements IBooleanExpression
+class Lt extends AbstractQtiExpression
 {
     public function __construct(
-        public readonly IQtiExpression $expression1,
-        public readonly IQtiExpression $expression2,
+        public readonly AbstractQtiExpression $element1,
+        public readonly AbstractQtiExpression $element2,
     ) {}
 
     public function children(): array
     {
         return [
-            $this->expression1,
-            $this->expression2,
+            $this->element1,
+            $this->element2,
         ];
+    }
+
+    public function evaluate(ItemState $state): bool
+    {
+        $value1 = $this->element1->evaluateNumber($state);
+        $value2 = $this->element2->evaluateNumber($state);
+
+        return $value1 < $value2;
     }
 }

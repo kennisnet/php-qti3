@@ -16,7 +16,7 @@ class MappingTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->mapEntry = new MapEntry('key', 'value');
+        $this->mapEntry = new MapEntry('key', 1);
         $this->mapping = new Mapping([$this->mapEntry], 'default');
     }
 

@@ -6,11 +6,16 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model;
 
 abstract class QtiElement implements IXmlElement
 {
-    public function tagName(): string
+    public static function qtiTagName(): string
     {
-        $tagName = new QtiTagName($this);
+        $tagName = new QtiTagName(static::class);
 
         return (string) $tagName;
+    }
+
+    public function tagName(): string
+    {
+        return static::qtiTagName();
     }
 
     /**

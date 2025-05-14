@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\INumericExpression;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
-class TestVariables extends QtiElement implements INumericExpression
+class TestVariables extends AbstractQtiExpression
 {
     public function __construct(
         public readonly string $variableIdentifier,
@@ -21,4 +21,11 @@ class TestVariables extends QtiElement implements INumericExpression
             'include-category' => $this->includeCategory,
         ];
     }
+
+    // @codeCoverageIgnoreStart
+    public function evaluate(ItemState $state): mixed
+    {
+        return null;
+    }
+    // @codeCoverageIgnoreEnd
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use App\SharedKernel\Domain\Qti\State\ItemState;
 
-class Correct extends QtiElement implements IQtiExpression
+class Correct extends AbstractQtiExpression
 {
     public function __construct(
         public readonly string $identifier,
@@ -17,5 +17,10 @@ class Correct extends QtiElement implements IQtiExpression
         return [
             'identifier' => $this->identifier,
         ];
+    }
+
+    public function evaluate(ItemState $state): mixed
+    {
+        return $state->responseSet->getCorrectResponse($this->identifier);
     }
 }

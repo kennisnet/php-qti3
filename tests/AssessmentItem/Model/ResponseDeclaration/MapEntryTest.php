@@ -14,7 +14,7 @@ class MapEntryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->mapEntry = new MapEntry('key', 'value');
+        $this->mapEntry = new MapEntry('key', 1);
     }
 
     #[Test]
@@ -22,7 +22,7 @@ class MapEntryTest extends TestCase
     {
         $expectedAttributes = [
             'map-key' => 'key',
-            'mapped-value' => 'value',
+            'mapped-value' => 1,
             'case-sensitive' => null,
         ];
 
