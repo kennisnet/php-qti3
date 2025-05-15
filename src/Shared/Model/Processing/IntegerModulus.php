@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
+
+use App\SharedKernel\Domain\Qti\State\ItemState;
+
+class IntegerModulus extends AbstractQtiExpression
+{
+    public function __construct(
+        private readonly AbstractQtiExpression $numerator,
+        private readonly AbstractQtiExpression $denominator
+    ) {}
+
+    public function children(): array
+    {
+        return [$this->numerator, $this->denominator];
+    }
+
+    public function evaluate(ItemState $state): int
+    {
+        $numerator = $this->numerator->evaluateNumber($state);
+        $denominator = $this->denominator->evaluateNumber($state);
+
+        if ($denominator == 0) {
+            return 0; // Handle division by zero
+        }
+
+        return $numerator % $denominator;
+    }
+}

@@ -49,4 +49,14 @@ abstract class AbstractQtiExpression extends QtiElement
         }
         return $intKeyedResult;
     }
+
+    public function evaluateString(ItemState $state): string
+    {
+        $value = $this->evaluate($state);
+        if (!is_string($value)) {
+            throw new InvalidArgumentException('Element is not a string');
+        }
+
+        return $value;
+    }
 }

@@ -316,6 +316,20 @@ class ResponseProcessorTest extends TestCase
     }
 
     #[Test]
+    public function testVariousExpressions(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/various-expressions.xml',
+            ['RESPONSE' =>  ['AA']],
+            [
+                'completionStatus' => 'unknown',
+                'SCORE' => 1.0,
+                'FEEDBACK' => 'incorrect',
+            ]
+        );
+    }
+
+    #[Test]
     public function testNumberComparisons2(): void
     {
         $this->assertOutcomes(
