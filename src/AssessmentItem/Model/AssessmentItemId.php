@@ -12,8 +12,6 @@ final class AssessmentItemId implements Stringable
 {
     private const string NAMESPACE_UUID = '12345678-1234-5678-1234-567812345678';
 
-    public const int QUESTIONNAIRE_INTRODUCTION = -1;
-
     private readonly string $value;
 
     private ?int $questionnaireId = null;

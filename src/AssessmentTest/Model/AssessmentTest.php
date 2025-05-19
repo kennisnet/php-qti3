@@ -6,6 +6,7 @@ namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model;
 
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
+use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\RubricBlock;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Feedback\TestFeedbackCollection;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPartCollection;
@@ -24,6 +25,7 @@ class AssessmentTest extends QtiElement
         public readonly ?string $title = null,
         public readonly ?OutcomeProcessing $outcomeProcessing = null,
         public readonly TestFeedbackCollection $testFeedback = new TestFeedbackCollection(),
+        public readonly ?RubricBlock $rubricBlock = null,
     ) {}
 
     /**
@@ -47,6 +49,7 @@ class AssessmentTest extends QtiElement
     {
         return [
             ...$this->outcomeDeclarations->all(),
+            $this->rubricBlock,
             ...$this->testParts->all(),
             $this->outcomeProcessing,
             ...$this->testFeedback->all(),
