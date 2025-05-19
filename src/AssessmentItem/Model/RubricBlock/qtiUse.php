@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock;
 
-enum xUse: string
+enum qtiUse: string
 {
     case INSTRUCTIONS = 'instructions';
     case SCORING = 'scoring';

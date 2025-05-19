@@ -6,7 +6,7 @@ namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBloc
 
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\RubricBlock;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\View;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\xUse;
+use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\qtiUse;
 use App\SharedKernel\Domain\Qti\Shared\Model\ContentBody;
 use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
 use App\SharedKernel\Domain\Qti\Shared\Model\TextNode;
@@ -22,7 +22,7 @@ class RubricBlockTest extends TestCase
         parent::setUp();
 
         $this->rubricBlock = new RubricBlock(
-            use: xUse::INSTRUCTIONS,
+            use: qtiUse::INSTRUCTIONS,
             view: View::TUTOR,
             contentBody: new ContentBody(new ContentNodeCollection([new TextNode('contentBody')])),
             class: 'test'

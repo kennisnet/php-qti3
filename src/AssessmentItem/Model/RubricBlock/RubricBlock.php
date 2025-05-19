@@ -10,7 +10,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 class RubricBlock extends QtiElement
 {
     public function __construct(
-        public readonly xUse $use,
+        public readonly qtiUse $use,
         public readonly View $view,
         public readonly ContentBody $contentBody,
         public readonly ?string $class = null
