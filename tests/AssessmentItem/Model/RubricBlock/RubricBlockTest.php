@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock;
 
+use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\qtiUse;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\RubricBlock;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\View;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\qtiUse;
 use App\SharedKernel\Domain\Qti\Shared\Model\ContentBody;
 use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
 use App\SharedKernel\Domain\Qti\Shared\Model\TextNode;
