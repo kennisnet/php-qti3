@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
 
+use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use App\SharedKernel\Infrastructure\Serializer\XmlBuilder;
@@ -25,7 +26,8 @@ class TestResourceBuilderTest extends TestCase
     public function testBuild(): void
     {
         $assessmentTestResource = $this->assessmentTestBuilder->build(
-            AssessmentTestStub::assessmentTest()
+            AssessmentTestStub::assessmentTest(),
+            new ManifestResourceDependencyCollection()
         );
 
         $this->assertInstanceOf(Resource::class, $assessmentTestResource);

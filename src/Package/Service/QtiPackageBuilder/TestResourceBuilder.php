@@ -22,8 +22,11 @@ readonly class TestResourceBuilder
         private IXmlBuilder $xmlBuilder
     ) {}
 
-    public function build(AssessmentTest $assessmentTest, string $identifier = 'TEST'): Resource
-    {
+    public function build(
+        AssessmentTest $assessmentTest,
+        ManifestResourceDependencyCollection $resourceDependencies,
+        string $identifier = 'TEST',
+    ): Resource {
         return new Resource(
             $identifier,
             ResourceType::ASSESSMENT_TEST,
@@ -31,10 +34,13 @@ readonly class TestResourceBuilder
             new ResourceFileCollection([
                 new ResourceFile(self::ASSESSMENT_TEST_FILE_NAME, new XmlFileContent($this->xmlBuilder->generateXmlFromObject($assessmentTest))),
             ]),
-            new ManifestResourceDependencyCollection(array_map(
-                fn(AssessmentItemRef $itemRef): ManifestResourceDependency => new ManifestResourceDependency($itemRef->identifier),
-                $assessmentTest->getItemRefs()
-            )),
+            new ManifestResourceDependencyCollection([
+                ...array_map(
+                    fn(AssessmentItemRef $itemRef): ManifestResourceDependency => new ManifestResourceDependency($itemRef->identifier),
+                    $assessmentTest->getItemRefs()
+                ),
+                ...$resourceDependencies->all(),
+            ]),
         );
     }
 }

@@ -14,6 +14,7 @@ use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\NavigationMode;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\SubmissionMode;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPart;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPartCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
@@ -38,7 +39,8 @@ class QtiPackageEnhancer
     private function addTestResource(QtiPackage $package): void
     {
         $package->addResource($this->testResourceBuilder->build(
-            $this->generateTest($package)
+            $this->generateTest($package),
+            new ManifestResourceDependencyCollection()
         ));
     }
 

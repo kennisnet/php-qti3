@@ -65,10 +65,12 @@ class QtiPackageBuilder
 
         $resources = new ResourceCollection();
 
-        $resources->add($this->testResourceBuilder->build($assessmentTest));
-
         $warnings = new StringCollection();
         $webcontent = new WebcontentCollection();
+
+        $dependencies = $this->processWebcontent($webcontent, $assessmentTest, $warnings);
+        $resources->add($this->testResourceBuilder->build($assessmentTest, $dependencies));
+
         foreach ($assessmentItems as $assessmentItem) {
             $itemRef = $assessmentTest->findItemRef($assessmentItem->identifier());
             $dependencies = $this->processWebcontent($webcontent, $assessmentItem, $warnings);
@@ -117,10 +119,10 @@ class QtiPackageBuilder
 
     private function processWebcontent(
         WebcontentCollection $webcontent,
-        AssessmentItem $assessmentItem,
+        IXmlElement $element,
         StringCollection $warnings
     ): ManifestResourceDependencyCollection {
-        $qtiResources = $this->getQtiResources($assessmentItem, $warnings);
+        $qtiResources = $this->getQtiResources($element, $warnings);
 
         $dependencies = new ManifestResourceDependencyCollection();
         foreach ($qtiResources as $qtiResource) {
