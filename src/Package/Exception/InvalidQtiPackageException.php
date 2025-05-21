@@ -7,10 +7,21 @@ namespace App\SharedKernel\Domain\Qti\Package\Exception;
 use App\SharedKernel\Domain\Exception\DomainError;
 use App\SharedKernel\Domain\StringCollection;
 
-class InvalidQtiPackageException extends DomainError
+final class InvalidQtiPackageException extends DomainError
 {
-    public function __construct(string $message, public readonly StringCollection $validationErrors)
+    public function __construct(
+        public readonly StringCollection $validationErrors,
+    ) {
+        parent::__construct();
+    }
+
+    public function errorCode(): string
     {
-        parent::__construct($message);
+        return 'invalid_qti_package';
+    }
+
+    protected function errorMessage(): string
+    {
+        return 'QTI package is invalid';
     }
 }

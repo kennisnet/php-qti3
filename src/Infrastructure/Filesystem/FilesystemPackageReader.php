@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Infrastructure\Filesystem;
 
-use App\SharedKernel\Domain\Exception\ResourceNotFoundException;
+use App\SharedKernel\Domain\Exception\NotFoundException;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
 use DateTimeImmutable;
 use League\Flysystem\FilesystemOperator;
@@ -16,7 +16,7 @@ readonly class FilesystemPackageReader implements IPackageReader
         private FilesystemOperator $dataStorage,
     ) {
         if (!$this->dataStorage->directoryExists($this->folderName)) {
-            throw new ResourceNotFoundException(sprintf('Folder %s not found', $this->folderName));
+            throw new NotFoundException(sprintf('Folder `%s` not found', $this->folderName), 'folder_not_found');
         }
     }
 
