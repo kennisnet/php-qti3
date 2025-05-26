@@ -415,6 +415,7 @@ class AbstractQtiExpressionTest extends TestCase
             new BaseValue(BaseType::STRING, 'banana'),
             new BaseValue(BaseType::STRING, 'cherry'),
         ]);
+        $this->assertCount(3, $expression->children());
 
         $result = $expression->evaluate($this->itemState);
         $this->assertIsArray($result);
