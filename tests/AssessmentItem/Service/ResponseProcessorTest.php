@@ -368,6 +368,18 @@ class ResponseProcessorTest extends TestCase
         );
     }
 
+    #[Test]
+    public function processResponsesWithoutResponseProcessingWorks(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/without-response-processing.xml',
+            ['RESPONSE' => 'answer'],
+            [
+                'completionStatus' => 'unknown',
+            ]
+        );
+    }
+
     public function getResponseProcessor(): ResponseProcessor
     {
         $responseDeclarationParser = new ResponseDeclarationParser();

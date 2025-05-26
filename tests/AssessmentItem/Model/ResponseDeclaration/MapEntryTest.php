@@ -28,4 +28,12 @@ class MapEntryTest extends TestCase
 
         $this->assertEquals($expectedAttributes, $this->mapEntry->attributes());
     }
+
+    #[Test]
+    public function evaluateSingularValue(): void
+    {
+        $this->assertEquals(1, $this->mapEntry->evaluate(
+            'key'
+        ));
+    }
 }

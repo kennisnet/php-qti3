@@ -39,4 +39,5 @@ class TestVariables extends AbstractQtiExpression
     {
         return Cardinality::SINGLE;
     }
+    // @codeCoverageIgnoreEnd
 }

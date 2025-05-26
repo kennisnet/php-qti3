@@ -34,12 +34,20 @@ class MapResponsePointTest extends TestCase
     #[Test]
     public function testMapResponsePoint(): void
     {
+        $responseDeclaration = new ResponseDeclaration(BaseType::STRING, Cardinality::SINGLE, 'identifier');
+        $responseDeclarations = new ResponseDeclarationCollection([$responseDeclaration]);
+        $responseSet = new ResponseSet($responseDeclarations);
+        $outcomeSet = new OutcomeSet(new OutcomeDeclarationCollection([]));
+        $itemState = new ItemState($responseSet, $outcomeSet, new ResponseProcessing([]));
+
         $this->assertEquals(
             [
                 'identifier' => 'identifier',
             ],
             $this->mapResponsePoint->attributes()
         );
+        $this->assertEquals(BaseType::FLOAT, $this->mapResponsePoint->getBaseType($itemState));
+        $this->assertEquals(Cardinality::SINGLE, $this->mapResponsePoint->getCardinality($itemState));
     }
 
     #[Test]

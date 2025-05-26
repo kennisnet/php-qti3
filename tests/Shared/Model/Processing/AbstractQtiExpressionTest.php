@@ -11,23 +11,36 @@ use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\BaseValue;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Contains;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Correct;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Delete;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Divide;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Equal;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Gt;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Gte;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Index;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IndexExpression;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IntegerDivide;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IntegerModulus;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IsNull;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Lt;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Lte;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Max;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Member;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Min;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Multiple;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Ordered;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Power;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Product;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\qtiAnd;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\qtiMatch;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\qtiNot;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\qtiOr;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Round;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\RoundTo;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Substring;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Subtract;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Sum;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Variable;
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 use App\SharedKernel\Domain\Qti\State\OutcomeSet;
@@ -84,6 +97,226 @@ class AbstractQtiExpressionTest extends TestCase
     }
 
     #[Test]
+    public function testQtiAnd(): void
+    {
+        // Test with all true values
+        $expression = new qtiAnd([
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+        ]);
+
+        $this->assertTrue($expression->evaluate($this->itemState));
+        $this->assertCount(3, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+
+        // Test with one false value
+        $expression = new qtiAnd([
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+        ]);
+
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with all false values
+        $expression = new qtiAnd([
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+        ]);
+
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with empty array
+        $expression = new qtiAnd([]);
+        $this->assertTrue($expression->evaluate($this->itemState));
+    }
+
+    #[Test]
+    public function testQtiMatch(): void
+    {
+        $expression = new qtiMatch(new Variable('variable'), new Correct('identifier'));
+        $this->assertEquals('qti-match', $expression->tagName());
+        $this->assertInstanceOf(Variable::class, $expression->children()[0]);
+        $this->assertInstanceOf(Correct::class, $expression->children()[1]);
+
+        // Test with matching strings
+        $expression = new qtiMatch(
+            new BaseValue(BaseType::STRING, 'apple'),
+            new BaseValue(BaseType::STRING, 'apple')
+        );
+        $this->assertTrue($expression->evaluate($this->itemState));
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+
+        // Test with non-matching strings
+        $expression = new qtiMatch(
+            new BaseValue(BaseType::STRING, 'apple'),
+            new BaseValue(BaseType::STRING, 'banana')
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with different base types
+        $expression = new qtiMatch(
+            new BaseValue(BaseType::STRING, 'apple'),
+            new BaseValue(BaseType::INTEGER, 1)
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with multiple cardinality, different order
+        $expression = new qtiMatch(
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+                new BaseValue(BaseType::STRING, 'banana'),
+            ]),
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ])
+        );
+        $this->assertTrue($expression->evaluate($this->itemState));
+
+        // Test with multiple cardinality, different counts
+        $expression = new qtiMatch(
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ]),
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+            ])
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with multiple cardinality, different values
+        $expression = new qtiMatch(
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ]),
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'grape'),
+            ])
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with ordered cardinality, same order
+        $expression = new qtiMatch(
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ]),
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ])
+        );
+        $this->assertTrue($expression->evaluate($this->itemState));
+
+        // Test with ordered cardinality, different order
+        $expression = new qtiMatch(
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+                new BaseValue(BaseType::STRING, 'banana'),
+            ]),
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ])
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with ordered cardinality, different counts
+        $expression = new qtiMatch(
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ]),
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+            ])
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with multiple cardinality, different values
+        $expression = new qtiMatch(
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ]),
+            new Ordered([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'grape'),
+            ])
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with different cardinality
+        $expression = new qtiMatch(
+            new Multiple([
+                new BaseValue(BaseType::STRING, 'apple'),
+                new BaseValue(BaseType::STRING, 'banana'),
+                new BaseValue(BaseType::STRING, 'cherry'),
+            ]),
+            new BaseValue(BaseType::STRING, 'apple'),
+        );
+        $this->assertFalse($expression->evaluate($this->itemState));
+    }
+
+    #[Test]
+    public function testQtiOr(): void
+    {
+        // Test with at least one true value
+        $expression = new qtiOr([
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+        ]);
+
+        $this->assertTrue($expression->evaluate($this->itemState));
+        $this->assertCount(3, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+
+        // Test with all true values
+        $expression = new qtiOr([
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+        ]);
+
+        $this->assertTrue($expression->evaluate($this->itemState));
+
+        // Test with all false values
+        $expression = new qtiOr([
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+            new BaseValue(BaseType::BOOLEAN, 'false'),
+        ]);
+
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with empty array
+        $expression = new qtiOr([]);
+        $this->assertFalse($expression->evaluate($this->itemState));
+    }
+
+    #[Test]
     public function evaluateNumberReturnsCorrectValue(): void
     {
         // Arrange
@@ -100,19 +333,120 @@ class AbstractQtiExpressionTest extends TestCase
     }
 
     #[Test]
-    public function evaluateArrayReturnsCorrectValue(): void
+    public function testSum(): void
     {
-        // Arrange
-        $expression = new Multiple([
-            new BaseValue(BaseType::STRING, 'test'),
+        // Test with integers
+        $expression = new Sum([
+            new BaseValue(BaseType::INTEGER, '5'),
+            new BaseValue(BaseType::INTEGER, '10'),
+            new BaseValue(BaseType::INTEGER, '15'),
         ]);
 
-        // Act
-        $result = $expression->evaluateArray($this->itemState);
+        $this->assertEquals(30, $expression->evaluate($this->itemState));
+        $this->assertCount(3, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
 
-        // Assert
-        $this->assertSame(['test'], $result);
+        // Test with floats
+        $expression = new Sum([
+            new BaseValue(BaseType::FLOAT, '1.5'),
+            new BaseValue(BaseType::FLOAT, '2.5'),
+            new BaseValue(BaseType::FLOAT, '3.5'),
+        ]);
+
+        $this->assertEquals(7.5, $expression->evaluate($this->itemState));
+
+        // Test with mixed types
+        $expression = new Sum([
+            new BaseValue(BaseType::INTEGER, '10'),
+            new BaseValue(BaseType::FLOAT, '10'),
+        ]);
+
+        $this->assertEquals(20, $expression->evaluate($this->itemState));
     }
+
+    #[Test]
+    public function testMultiple(): void
+    {
+        // Test with single elements
+        $expression = new Multiple([
+            new BaseValue(BaseType::STRING, 'apple'),
+            new BaseValue(BaseType::STRING, 'banana'),
+            new BaseValue(BaseType::STRING, 'cherry'),
+        ]);
+
+        $result = $expression->evaluate($this->itemState);
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+        $this->assertEquals(['apple', 'banana', 'cherry'], $result);
+        $this->assertEquals(Cardinality::MULTIPLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::STRING, $expression->getBaseType($this->itemState));
+
+        // Test with nested arrays (Multiple inside Multiple)
+        $nestedMultiple = new Multiple([
+            new BaseValue(BaseType::STRING, 'nested1'),
+            new BaseValue(BaseType::STRING, 'nested2'),
+        ]);
+
+        $expression = new Multiple([
+            new BaseValue(BaseType::STRING, 'apple'),
+            $nestedMultiple,
+        ]);
+
+        $result = $expression->evaluate($this->itemState);
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+        $this->assertEquals(['apple', 'nested1', 'nested2'], $result);
+
+        // Test with empty Multiple
+        $expression = new Multiple([]);
+        $result = $expression->evaluate($this->itemState);
+        $this->assertIsArray($result);
+        $this->assertCount(0, $result);
+        $this->assertEquals(BaseType::STRING, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testOrdered(): void
+    {
+        // Test with single elements
+        $expression = new Ordered([
+            new BaseValue(BaseType::STRING, 'apple'),
+            new BaseValue(BaseType::STRING, 'banana'),
+            new BaseValue(BaseType::STRING, 'cherry'),
+        ]);
+
+        $result = $expression->evaluate($this->itemState);
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+        $this->assertEquals(['apple', 'banana', 'cherry'], $result);
+        $this->assertEquals(Cardinality::ORDERED, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::STRING, $expression->getBaseType($this->itemState));
+
+        // Test with nested arrays (Ordered inside Ordered)
+        $nestedMultiple = new Ordered([
+            new BaseValue(BaseType::STRING, 'nested1'),
+            new BaseValue(BaseType::STRING, 'nested2'),
+        ]);
+
+        $expression = new Ordered([
+            new BaseValue(BaseType::STRING, 'apple'),
+            $nestedMultiple,
+        ]);
+
+        $result = $expression->evaluate($this->itemState);
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+        $this->assertEquals(['apple', 'nested1', 'nested2'], $result);
+
+        // Test with empty Ordered
+        $expression = new Ordered([]);
+        $result = $expression->evaluate($this->itemState);
+        $this->assertIsArray($result);
+        $this->assertCount(0, $result);
+        $this->assertEquals(BaseType::STRING, $expression->getBaseType($this->itemState));
+    }
+
     #[Test]
     public function evaluateWithNonNumericTypeResultsInException(): void
     {
@@ -159,14 +493,72 @@ class AbstractQtiExpressionTest extends TestCase
     }
 
     #[Test]
+    public function testMember(): void
+    {
+        // Test when element is a member
+        $multiple = new Multiple([
+            new BaseValue(BaseType::STRING, 'apple'),
+            new BaseValue(BaseType::STRING, 'banana'),
+            new BaseValue(BaseType::STRING, 'cherry'),
+        ]);
+
+        $expression = new Member(
+            new BaseValue(BaseType::STRING, 'banana'),
+            $multiple
+        );
+
+        $this->assertTrue($expression->evaluate($this->itemState));
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+
+        // Test when element is not a member
+        $expression = new Member(
+            new BaseValue(BaseType::STRING, 'grape'),
+            $multiple
+        );
+
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test with numeric values
+        $numericMultiple = new Multiple([
+            new BaseValue(BaseType::INTEGER, '1'),
+            new BaseValue(BaseType::INTEGER, '2'),
+            new BaseValue(BaseType::INTEGER, '3'),
+        ]);
+
+        $expression = new Member(
+            new BaseValue(BaseType::INTEGER, '2'),
+            $numericMultiple
+        );
+
+        $this->assertTrue($expression->evaluate($this->itemState));
+    }
+
+    #[Test]
     public function testQtiNot(): void
     {
         $expression = new qtiNot(new BaseValue(BaseType::BOOLEAN, 'true'));
         $this->assertFalse($expression->evaluate($this->itemState));
         $this->assertCount(1, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
 
         $expression = new qtiNot(new BaseValue(BaseType::BOOLEAN, 'false'));
         $this->assertTrue($expression->evaluate($this->itemState));
+
+        // Test with expressions that evaluate to boolean
+        $andExpression = new qtiAnd([
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+            new BaseValue(BaseType::BOOLEAN, 'true'),
+        ]);
+        $expression = new qtiNot($andExpression);
+        $this->assertFalse($expression->evaluate($this->itemState));
+
+        // Test exception when non-boolean is provided
+        $expression = new qtiNot(new BaseValue(BaseType::STRING, 'not a boolean'));
+        $this->expectExceptionMessage('Element is not boolean');
+        $expression->evaluate($this->itemState);
     }
 
     #[Test]
@@ -181,6 +573,8 @@ class AbstractQtiExpressionTest extends TestCase
         $expression = new Contains($multiple, new Multiple([new BaseValue(BaseType::STRING, 'banana')]));
         $this->assertTrue($expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
 
         $expression = new Contains($multiple, new Multiple([new BaseValue(BaseType::STRING, 'grape')]));
         $this->assertFalse($expression->evaluate($this->itemState));
@@ -196,6 +590,8 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertTrue($expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
         $this->assertCount(1, $expression->attributes());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
 
         $expression = new Substring(
             new BaseValue(BaseType::STRING, 'Hello World'),
@@ -227,10 +623,34 @@ class AbstractQtiExpressionTest extends TestCase
         );
         $this->assertEquals(5.3, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
 
+        // Test with integers
         $expression = new Subtract(
             new BaseValue(BaseType::INTEGER, '10'),
             new BaseValue(BaseType::INTEGER, '5')
+        );
+        $this->assertEquals(5, $expression->evaluate($this->itemState));
+
+        // Test with mixed types
+        $expression = new Subtract(
+            new BaseValue(BaseType::INTEGER, '10'),
+            new BaseValue(BaseType::FLOAT, '3.5')
+        );
+        $this->assertEquals(6.5, $expression->evaluate($this->itemState));
+
+        // Test with negative result
+        $expression = new Subtract(
+            new BaseValue(BaseType::INTEGER, '5'),
+            new BaseValue(BaseType::INTEGER, '10')
+        );
+        $this->assertEquals(-5, $expression->evaluate($this->itemState));
+
+        // Test with zero
+        $expression = new Subtract(
+            new BaseValue(BaseType::INTEGER, '5'),
+            new BaseValue(BaseType::INTEGER, '0')
         );
         $this->assertEquals(5, $expression->evaluate($this->itemState));
     }
@@ -244,12 +664,29 @@ class AbstractQtiExpressionTest extends TestCase
         );
         $this->assertEquals(8, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
 
+        // Test with fractional exponent (square root)
         $expression = new Power(
             new BaseValue(BaseType::FLOAT, '2'),
             new BaseValue(BaseType::FLOAT, '0.5')
         );
         $this->assertEquals(sqrt(2), $expression->evaluate($this->itemState));
+
+        // Test with integer base and exponent
+        $expression = new Power(
+            new BaseValue(BaseType::INTEGER, '3'),
+            new BaseValue(BaseType::INTEGER, '2')
+        );
+        $this->assertEquals(9, $expression->evaluate($this->itemState));
+
+        // Test with negative exponent
+        $expression = new Power(
+            new BaseValue(BaseType::FLOAT, '2'),
+            new BaseValue(BaseType::FLOAT, '-1')
+        );
+        $this->assertEquals(0.5, $expression->evaluate($this->itemState));
     }
 
     #[Test]
@@ -260,25 +697,52 @@ class AbstractQtiExpressionTest extends TestCase
         );
         $this->assertEquals(4, $expression->evaluate($this->itemState));
         $this->assertCount(1, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::INTEGER, $expression->getBaseType($this->itemState));
 
         $expression = new Round(
             new BaseValue(BaseType::FLOAT, '3.2')
         );
         $this->assertEquals(3, $expression->evaluate($this->itemState));
 
+        // Test floor rounding mode
         $expression = new Round(
             new BaseValue(BaseType::FLOAT, '3.7'),
             'floor'
         );
         $this->assertEquals(3, $expression->evaluate($this->itemState));
 
+        // Test ceiling rounding mode
         $expression = new Round(
             new BaseValue(BaseType::FLOAT, '3.2'),
             'ceiling'
         );
         $this->assertEquals(4, $expression->evaluate($this->itemState));
+
+        // Test with negative numbers
+        $expression = new Round(
+            new BaseValue(BaseType::FLOAT, '-3.7')
+        );
+        $this->assertEquals(-4, $expression->evaluate($this->itemState));
+
+        $expression = new Round(
+            new BaseValue(BaseType::FLOAT, '-3.2')
+        );
+        $this->assertEquals(-3, $expression->evaluate($this->itemState));
+
+        // Test with edge cases
+        $expression = new Round(
+            new BaseValue(BaseType::FLOAT, '3.5')
+        );
+        $this->assertEquals(4, $expression->evaluate($this->itemState));
+
+        $expression = new Round(
+            new BaseValue(BaseType::FLOAT, '-3.5')
+        );
+        $this->assertEquals(-4, $expression->evaluate($this->itemState));
     }
 
+    #[Test]
     public function testRoundTo(): void
     {
         // Test rounding to 2 decimal places
@@ -288,6 +752,8 @@ class AbstractQtiExpressionTest extends TestCase
         );
         $this->assertEquals(3.14, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
 
         // Test rounding up to 1 decimal place
         $expression = new RoundTo(
@@ -332,6 +798,13 @@ class AbstractQtiExpressionTest extends TestCase
             'ceiling'
         );
         $this->assertEquals(4.0, $expression->evaluate($this->itemState));
+
+        // Test with negative numbers
+        $expression = new RoundTo(
+            new BaseValue(BaseType::FLOAT, '-3.14159'),
+            new BaseValue(BaseType::INTEGER, '2')
+        );
+        $this->assertEquals(-3.14, $expression->evaluate($this->itemState));
     }
 
     public function testIntegerDivide(): void
@@ -348,6 +821,8 @@ class AbstractQtiExpressionTest extends TestCase
         );
         $this->assertEquals(0, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::INTEGER, $expression->getBaseType($this->itemState));
     }
 
     public function testIntegerModulus(): void
@@ -358,6 +833,8 @@ class AbstractQtiExpressionTest extends TestCase
         );
         $this->assertEquals(1, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::INTEGER, $expression->getBaseType($this->itemState));
 
         $expression = new IntegerModulus(
             new BaseValue(BaseType::INTEGER, '10'),
@@ -366,6 +843,7 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertEquals(0, $expression->evaluate($this->itemState));
     }
 
+    #[Test]
     public function testMin(): void
     {
         $expression = new Min([
@@ -375,11 +853,23 @@ class AbstractQtiExpressionTest extends TestCase
         ]);
         $this->assertEquals(3, $expression->evaluate($this->itemState));
         $this->assertCount(3, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
 
+        // Test with floats
+        $expression = new Min([
+            new BaseValue(BaseType::FLOAT, '5.5'),
+            new BaseValue(BaseType::FLOAT, '3.3'),
+            new BaseValue(BaseType::FLOAT, '8.8'),
+        ]);
+        $this->assertEquals(3.3, $expression->evaluate($this->itemState));
+
+        // Test with empty array
         $expression = new Min([]);
         $this->assertEquals(0, $expression->evaluate($this->itemState));
     }
 
+    #[Test]
     public function testMax(): void
     {
         $expression = new Max([
@@ -389,7 +879,18 @@ class AbstractQtiExpressionTest extends TestCase
         ]);
         $this->assertEquals(8, $expression->evaluate($this->itemState));
         $this->assertCount(3, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
 
+        // Test with floats
+        $expression = new Max([
+            new BaseValue(BaseType::FLOAT, '5.5'),
+            new BaseValue(BaseType::FLOAT, '3.3'),
+            new BaseValue(BaseType::FLOAT, '8.8'),
+        ]);
+        $this->assertEquals(8.8, $expression->evaluate($this->itemState));
+
+        // Test with empty array
         $expression = new Max([]);
         $this->assertEquals(0, $expression->evaluate($this->itemState));
     }
@@ -406,6 +907,8 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertEquals('banana', $expression->evaluate($this->itemState));
         $this->assertCount(1, $expression->children());
         $this->assertCount(1, $expression->attributes());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::STRING, $expression->getBaseType($this->itemState));
 
         $expression = new Index($multiple, new IndexExpression('4'));
         $this->assertNull($expression->evaluate($this->itemState));
@@ -433,6 +936,8 @@ class AbstractQtiExpressionTest extends TestCase
         ]);
         $expression = new Delete(new BaseValue(BaseType::STRING, 'banana'), $multiple);
         $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::MULTIPLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::STRING, $expression->getBaseType($this->itemState));
 
         // Act
 
@@ -485,5 +990,192 @@ class AbstractQtiExpressionTest extends TestCase
         // Assert
 
         $this->assertNull($result);
+    }
+
+    #[Test]
+    public function testDivide(): void
+    {
+        // Arrange
+
+        $expression = new Divide(
+            new BaseValue(BaseType::INTEGER, 4),
+            new BaseValue(BaseType::INTEGER, 2),
+        );
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertEquals(2, $result);
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testEqual(): void
+    {
+        // Arrange
+
+        $expression = new Equal(
+            new BaseValue(BaseType::INTEGER, 4),
+            new BaseValue(BaseType::INTEGER, 4),
+        );
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertTrue($result);
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testGte(): void
+    {
+        // Arrange
+
+        $expression = new Gte(
+            new BaseValue(BaseType::INTEGER, 4),
+            new BaseValue(BaseType::INTEGER, 3),
+        );
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertTrue($result);
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testGt(): void
+    {
+        // Arrange
+
+        $expression = new Gt(
+            new BaseValue(BaseType::INTEGER, 4),
+            new BaseValue(BaseType::INTEGER, 3),
+        );
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertTrue($result);
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testLte(): void
+    {
+        // Arrange
+
+        $expression = new Lte(
+            new BaseValue(BaseType::INTEGER, 4),
+            new BaseValue(BaseType::INTEGER, 3),
+        );
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertFalse($result);
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testLt(): void
+    {
+        // Arrange
+
+        $expression = new Lt(
+            new BaseValue(BaseType::INTEGER, 4),
+            new BaseValue(BaseType::INTEGER, 3),
+        );
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertFalse($result);
+        $this->assertCount(2, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testIsNull(): void
+    {
+        // Arrange
+
+        $expression = new IsNull(new Variable('RESPONSE'));
+
+        // Act
+
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+
+        $this->assertTrue($result);
+        $this->assertCount(1, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::BOOLEAN, $expression->getBaseType($this->itemState));
+    }
+
+    #[Test]
+    public function testProduct(): void
+    {
+        // Test with multiple integers
+        $expression = new Product([
+            new BaseValue(BaseType::INTEGER, '2'),
+            new BaseValue(BaseType::INTEGER, '3'),
+            new BaseValue(BaseType::INTEGER, '4'),
+        ]);
+
+        $this->assertEquals(24, $expression->evaluate($this->itemState));
+        $this->assertCount(3, $expression->children());
+        $this->assertEquals(Cardinality::SINGLE, $expression->getCardinality($this->itemState));
+        $this->assertEquals(BaseType::FLOAT, $expression->getBaseType($this->itemState));
+
+        // Test with floats
+        $expression = new Product([
+            new BaseValue(BaseType::FLOAT, '1.5'),
+            new BaseValue(BaseType::FLOAT, '2.5'),
+        ]);
+
+        $this->assertEquals(3.75, $expression->evaluate($this->itemState));
+
+        // Test with mixed types
+        $expression = new Product([
+            new BaseValue(BaseType::INTEGER, '2'),
+            new BaseValue(BaseType::FLOAT, '1.5'),
+        ]);
+
+        $this->assertEquals(3.0, $expression->evaluate($this->itemState));
+
+        // Test with empty array
+        $expression = new Product([]);
+        $this->assertEquals(1, $expression->evaluate($this->itemState));
     }
 }

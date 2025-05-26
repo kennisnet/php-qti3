@@ -36,7 +36,7 @@ class qtiOr extends AbstractQtiExpression
 
                 return $carry || $value;
             },
-            true
+            false
         );
     }
 
