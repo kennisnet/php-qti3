@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
+use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 
 class qtiNot extends AbstractQtiExpression
@@ -27,5 +29,15 @@ class qtiNot extends AbstractQtiExpression
         $value = $this->expression->evaluateBoolean($state);
 
         return !$value;
+    }
+
+    public function getBaseType(ItemState $state): BaseType
+    {
+        return BaseType::BOOLEAN;
+    }
+
+    public function getCardinality(ItemState $state): Cardinality
+    {
+        return Cardinality::SINGLE;
     }
 }

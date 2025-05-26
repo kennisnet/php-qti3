@@ -24,7 +24,7 @@ class ValueConverter
                 $value = $value[0];
             }
             return self::convertSingle($value, $baseType);
-        } elseif ($cardinality === Cardinality::MULTIPLE) {
+        } elseif ($cardinality === Cardinality::MULTIPLE || $cardinality === Cardinality::ORDERED) {
             return self::convertMultiple($value, $baseType);
         }
         throw new InvalidArgumentException('Unsupported cardinality: ' . $cardinality->value);

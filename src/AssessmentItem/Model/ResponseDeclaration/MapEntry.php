@@ -24,10 +24,13 @@ class MapEntry extends QtiElement
     }
 
     /**
-     * @param array<int,bool|string|int|float> $response
+     * @param array<int,bool|string|int|float>|bool|string|int|float|null $response
      */
-    public function evaluate(array $response): float
+    public function evaluate(mixed $response): float
     {
+        if (!is_array($response)) {
+            $response = [$response];
+        }
         if (in_array(
             $this->processKey($this->mapKey),
             array_map([$this, 'processKey'], $response),

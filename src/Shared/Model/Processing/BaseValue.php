@@ -6,6 +6,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ValueConverter;
 use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\TextNode;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 
@@ -37,5 +38,15 @@ class BaseValue extends AbstractQtiExpression
     public function evaluate(ItemState $state): string|int|float|bool|null
     {
         return ValueConverter::convertSingle($this->value, $this->baseType);
+    }
+
+    public function getBaseType(ItemState $state): BaseType
+    {
+        return $this->baseType;
+    }
+
+    public function getCardinality(ItemState $state): Cardinality
+    {
+        return Cardinality::SINGLE;
     }
 }

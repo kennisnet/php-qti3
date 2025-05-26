@@ -11,12 +11,12 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseDeclaratio
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 use App\SharedKernel\Domain\Qti\State\OutcomeSet;
 use App\SharedKernel\Domain\Qti\State\ResponseSet;
 use DOMDocument;
 use DOMElement;
-use RuntimeException;
 
 class ResponseProcessor
 {
@@ -47,11 +47,11 @@ class ResponseProcessor
 
         $responseProcessingTag = $xmlDocument->getElementsByTagName('qti-response-processing')->item(0);
 
-        if ($responseProcessingTag === null) {
-            throw new RuntimeException('Response processing tag not found'); // @codeCoverageIgnore
+        if ($responseProcessingTag) {
+            $responseProcessing = $this->responseProcessingParser->parse($responseProcessingTag);
+        } else {
+            $responseProcessing = new ResponseProcessing([]);
         }
-
-        $responseProcessing = $this->responseProcessingParser->parse($responseProcessingTag);
 
         /** @var DOMElement $item */
         $item = $xmlDocument->getElementsByTagName('qti-assessment-item')->item(0);

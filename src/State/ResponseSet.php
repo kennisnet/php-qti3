@@ -70,9 +70,6 @@ class ResponseSet
         }
 
         $response = $this->getResponseValue($identifier);
-        if (!is_array($response)) {
-            throw new InvalidArgumentException("Response for response declaration with identifier $identifier is not an array"); // @codeCoverageIgnore
-        }
 
         $result = 0;
         foreach ($mapping->entries as $entry) {

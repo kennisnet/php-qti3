@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
+use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 
 class Equal extends AbstractQtiExpression
@@ -21,11 +23,21 @@ class Equal extends AbstractQtiExpression
         ];
     }
 
-    public function evaluate(ItemState $state): mixed
+    public function evaluate(ItemState $state): bool
     {
         $value1 = $this->expression1->evaluateNumber($state);
         $value2 = $this->expression2->evaluateNumber($state);
 
         return (float) $value1 === (float) $value2;
+    }
+
+    public function getBaseType(ItemState $state): BaseType
+    {
+        return BaseType::BOOLEAN;
+    }
+
+    public function getCardinality(ItemState $state): Cardinality
+    {
+        return Cardinality::SINGLE;
     }
 }

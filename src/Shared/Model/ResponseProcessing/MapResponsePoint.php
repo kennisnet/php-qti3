@@ -9,6 +9,8 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Coordinate;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\IShapeWithCoords;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Polygon;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Rectangle;
+use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 use Exception;
@@ -99,5 +101,15 @@ class MapResponsePoint extends AbstractQtiExpression
         }
 
         throw new Exception(sprintf('Shape %s not implemented', $shape::class)); // @codeCoverageIgnore
+    }
+
+    public function getBaseType(ItemState $state): BaseType
+    {
+        return BaseType::FLOAT;
+    }
+
+    public function getCardinality(ItemState $state): Cardinality
+    {
+        return Cardinality::SINGLE;
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 
+use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 
 class Delete extends AbstractQtiExpression
@@ -40,5 +42,15 @@ class Delete extends AbstractQtiExpression
         });
 
         return array_values($result);
+    }
+
+    public function getBaseType(ItemState $state): BaseType
+    {
+        return $this->container->getBaseType($state);
+    }
+
+    public function getCardinality(ItemState $state): Cardinality
+    {
+        return $this->container->getCardinality($state);
     }
 }
