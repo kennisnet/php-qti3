@@ -52,7 +52,7 @@ class Ordered extends AbstractQtiExpression
         if (count($this->elements) === 0) {
             return BaseType::STRING;
         }
-        return $this->elements[0]->getBaseType($state);
+        return current($this->elements)->getBaseType($state);
     }
 
     public function getCardinality(ItemState $state): Cardinality
