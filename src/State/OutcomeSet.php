@@ -28,21 +28,17 @@ class OutcomeSet
                 new DefaultValue(new Value('not_attempted')),
             )
         );
+
+        foreach ($this->outcomeDeclarations as $outcomeDeclaration) {
+            $this->set($outcomeDeclaration->identifier, $outcomeDeclaration->defaultValue?->value->value);
+        }
     }
 
     public function getOutcomeValue(string $identifier): mixed
     {
         $outcomeDeclaration = $this->outcomeDeclarations->getByIdentifier($identifier);
 
-        if (array_key_exists($identifier, $this->outcomes)) {
-            return ValueConverter::convert($this->outcomes[$identifier], $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
-        }
-
-        if ($outcomeDeclaration->defaultValue) {
-            return ValueConverter::convert($outcomeDeclaration->defaultValue->value->value, $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
-        }
-
-        return null;
+        return ValueConverter::convert($this->outcomes[$identifier], $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
     }
 
     /**

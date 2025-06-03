@@ -25,9 +25,10 @@ class ResponseProcessorTest extends TestCase
             ],
             [
                 'completionStatus' => 'unknown',
-                'SCORE' => '1',
+                'SCORE' => 1.0,
                 'FEEDBACK' => 'correct',
                 'PROCESSED' => true,
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -42,9 +43,10 @@ class ResponseProcessorTest extends TestCase
             ],
             [
                 'completionStatus' => 'unknown',
-                'SCORE' => '0',
+                'SCORE' => 0.0,
                 'FEEDBACK' => 'incorrect',
                 'PROCESSED' => true,
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -61,6 +63,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'unknown',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'true',
+                'MAXSCORE' => 1.0,
             ]
         );
 
@@ -78,6 +81,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'unknown',
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'true',
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -94,6 +98,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'unknown',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'correct',
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -110,6 +115,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'unknown',
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'incorrect',
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -204,8 +210,9 @@ class ResponseProcessorTest extends TestCase
             ],
             [
                 'completionStatus' => 'unknown',
-                'SCORE' => '0.5',
+                'SCORE' => 0.5,
                 'FEEDBACK' => 'incorrect',
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -234,6 +241,8 @@ class ResponseProcessorTest extends TestCase
         $this->assertEquals([
             'completionStatus' => 'incomplete',
             'BODY' => ['part2', 'option2'],
+            'SCORE' => 0.0,
+            'FEEDBACK' => null,
         ], $itemState->outcomeSet->outcomes);
 
         // Step 2
@@ -280,6 +289,8 @@ class ResponseProcessorTest extends TestCase
         $this->assertEquals([
             'completionStatus' => 'incomplete',
             'BODY' => ['part2', 'option2'],
+            'SCORE' => 0.0,
+            'FEEDBACK' => null,
         ], $itemState->outcomeSet->outcomes);
 
         // Step 2
@@ -311,6 +322,7 @@ class ResponseProcessorTest extends TestCase
             [
                 'completionStatus' => 'unknown',
                 'SCORE' => 1.0,
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -325,6 +337,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'unknown',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'incorrect',
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -338,6 +351,7 @@ class ResponseProcessorTest extends TestCase
             [
                 'completionStatus' => 'unknown',
                 'SCORE' => 0.7,
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -351,6 +365,7 @@ class ResponseProcessorTest extends TestCase
             [
                 'completionStatus' => 'unknown',
                 'SCORE' => 0.0,
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -364,6 +379,7 @@ class ResponseProcessorTest extends TestCase
             [
                 'completionStatus' => 'unknown',
                 'SCORE' => 0.3,
+                'MAXSCORE' => 1.0,
             ]
         );
     }
@@ -376,6 +392,9 @@ class ResponseProcessorTest extends TestCase
             ['RESPONSE' => 'answer'],
             [
                 'completionStatus' => 'unknown',
+                'SCORE' => 0.0,
+                'MAXSCORE' => 1.0,
+                'FEEDBACK' => null,
             ]
         );
     }

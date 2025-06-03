@@ -57,9 +57,10 @@ class OutcomeSetTest extends TestCase
                 new DefaultValue(new Value('default'))
             )
         );
+        $outcomeSet = new OutcomeSet($this->outcomeDeclarations);
 
         // Act
-        $result = $this->outcomeSet->getOutcomeValue('test');
+        $result = $outcomeSet->getOutcomeValue('test');
 
         // Assert
         $this->assertEquals('default', $result);
