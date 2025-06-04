@@ -8,7 +8,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 
 interface IQtiPackageFactory
 {
-    public function fromFilesystem(string $filePath): QtiPackage;
+    public function fromFilesystem(string $folder): QtiPackage;
 
     public function fromZip(string $filePath): QtiPackage;
 

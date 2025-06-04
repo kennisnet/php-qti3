@@ -89,7 +89,9 @@ class QtiPackageReaderTest extends TestCase
             ->with($filePath)
             ->willReturn($this->packageReader);
 
-        $manifestResource = new ManifestResource('identifier', ResourceType::ASSESSMENT_TEST, new ManifestResourceFileCollection(), new ManifestResourceDependencyCollection(), 'href');
+        $manifestResource = new ManifestResource('identifier', ResourceType::ASSESSMENT_TEST, new ManifestResourceFileCollection([
+            new ManifestResourceFile('test.xml'),
+        ]), new ManifestResourceDependencyCollection(), 'test.xml');
 
         $this->manifestFactory
             ->method('createFromXmlString')
@@ -114,7 +116,9 @@ class QtiPackageReaderTest extends TestCase
         $resource1 = new ManifestResource(
             'resource1',
             ResourceType::ASSESSMENT_TEST,
-            new ManifestResourceFileCollection(),
+            new ManifestResourceFileCollection([
+                new ManifestResourceFile('file1.xml'),
+            ]),
             new ManifestResourceDependencyCollection([new ManifestResourceDependency('resource4')]),
             'file1.xml'
         );
@@ -123,6 +127,7 @@ class QtiPackageReaderTest extends TestCase
             'resource2',
             ResourceType::ASSESSMENT_ITEM,
             new ManifestResourceFileCollection([
+                new ManifestResourceFile('file2.xml'),
                 new ManifestResourceFile('image.jpeg'),
             ]),
             new ManifestResourceDependencyCollection(),
@@ -132,7 +137,9 @@ class QtiPackageReaderTest extends TestCase
         $resource3 = new ManifestResource(
             'resource3',
             ResourceType::WEBCONTENT,
-            new ManifestResourceFileCollection(),
+            new ManifestResourceFileCollection([
+                new ManifestResourceFile('file3.css'),
+            ]),
             new ManifestResourceDependencyCollection(),
             'file3.css'
         );
@@ -140,7 +147,9 @@ class QtiPackageReaderTest extends TestCase
         $resource4 = new ManifestResource(
             'resource4',
             ResourceType::RESOURCE_METADATA,
-            new ManifestResourceFileCollection(),
+            new ManifestResourceFileCollection([
+                new ManifestResourceFile('file4.xml'),
+            ]),
             new ManifestResourceDependencyCollection(),
             'file4.xml'
         );
@@ -175,7 +184,9 @@ class QtiPackageReaderTest extends TestCase
         $resource1 = new ManifestResource(
             'resource1',
             ResourceType::ASSESSMENT_TEST,
-            new ManifestResourceFileCollection(),
+            new ManifestResourceFileCollection([
+                new ManifestResourceFile('file1.xml'),
+            ]),
             new ManifestResourceDependencyCollection([new ManifestResourceDependency('resource4')]),
             'file1.xml'
         );
@@ -184,6 +195,7 @@ class QtiPackageReaderTest extends TestCase
             'resource2',
             ResourceType::ASSESSMENT_ITEM,
             new ManifestResourceFileCollection([
+                new ManifestResourceFile('file2.xml'),
                 new ManifestResourceFile('image.jpeg'),
             ]),
             new ManifestResourceDependencyCollection(),
@@ -193,7 +205,9 @@ class QtiPackageReaderTest extends TestCase
         $resource3 = new ManifestResource(
             'resource3',
             ResourceType::WEBCONTENT,
-            new ManifestResourceFileCollection(),
+            new ManifestResourceFileCollection([
+                new ManifestResourceFile('file3.css'),
+            ]),
             new ManifestResourceDependencyCollection(),
             'file3.css'
         );

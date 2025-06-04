@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model;
 
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 use App\SharedKernel\Infrastructure\Serializer\XmlReader;
@@ -29,7 +31,9 @@ class QtiPackageMock extends QtiPackage
                 'test-id',
                 ResourceType::ASSESSMENT_TEST,
                 'test.xml',
-                new ResourceFileCollection([]),
+                new ResourceFileCollection([
+                    new ResourceFile('test.xml', new MemoryFileContent('content')),
+                ]),
                 new ManifestResourceDependencyCollection(),
                 new Metadata($metadataLom)
             ),
@@ -37,35 +41,45 @@ class QtiPackageMock extends QtiPackage
                 'test-item-id1',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item1.xml',
-                new ResourceFileCollection([]),
+                new ResourceFileCollection([
+                    new ResourceFile('test-item1.xml', new MemoryFileContent('content')),
+                ]),
                 new ManifestResourceDependencyCollection(),
             ),
             new Resource(
                 'test-item-id2',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item2.xml',
-                new ResourceFileCollection([]),
+                new ResourceFileCollection([
+                    new ResourceFile('test-item2.xml', new MemoryFileContent('content')),
+                ]),
                 new ManifestResourceDependencyCollection(),
             ),
             new Resource(
                 'test-item-id3',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item3.xml',
-                new ResourceFileCollection([]),
+                new ResourceFileCollection([
+                    new ResourceFile('test-item3.xml', new MemoryFileContent('content')),
+                ]),
                 new ManifestResourceDependencyCollection(),
             ),
             new Resource(
                 'test-item-id4',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item4.xml',
-                new ResourceFileCollection([]),
+                new ResourceFileCollection([
+                    new ResourceFile('test-item4.xml', new MemoryFileContent('content')),
+                ]),
                 new ManifestResourceDependencyCollection(),
             ),
             new Resource(
                 'test-item-id5',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item5.xml',
-                new ResourceFileCollection([]),
+                new ResourceFileCollection([
+                    new ResourceFile('test-item5.xml', new MemoryFileContent('content')),
+                ]),
                 new ManifestResourceDependencyCollection(),
             ),
         ]);

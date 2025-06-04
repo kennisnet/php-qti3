@@ -29,9 +29,9 @@ readonly class QtiPackageReader implements IQtiPackageFactory
         private IFilesystemPackageFactory $filesystemPackageFactory,
     ) {}
 
-    public function fromFilesystem(string $filePath): QtiPackage
+    public function fromFilesystem(string $folder): QtiPackage
     {
-        $reader = $this->filesystemPackageFactory->getReader($filePath);
+        $reader = $this->filesystemPackageFactory->getReader($folder);
 
         return $this->fromReader($reader);
     }
