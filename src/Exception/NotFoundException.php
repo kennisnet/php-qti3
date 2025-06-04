@@ -10,7 +10,7 @@ final class NotFoundException extends DomainError
         private readonly string $customMessage,
         private readonly string $errorCode,
     ) {
-        parent::__construct();
+        parent::__construct($this->errorMessage());
     }
 
     public function errorCode(): string

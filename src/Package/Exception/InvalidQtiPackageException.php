@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Package\Exception;
 
 use App\SharedKernel\Domain\Exception\DomainError;
+use App\SharedKernel\Domain\Exception\HasValidationErrors;
 use App\SharedKernel\Domain\StringCollection;
 
-final class InvalidQtiPackageException extends DomainError
+final class InvalidQtiPackageException extends DomainError implements HasValidationErrors
 {
     public function __construct(
-        public readonly StringCollection $validationErrors,
+        private readonly StringCollection $validationErrors,
     ) {
-        parent::__construct();
+        parent::__construct($this->errorMessage());
     }
 
     public function errorCode(): string
@@ -23,5 +24,10 @@ final class InvalidQtiPackageException extends DomainError
     protected function errorMessage(): string
     {
         return 'QTI package is invalid';
+    }
+
+    public function validationErrors(): StringCollection
+    {
+        return $this->validationErrors;
     }
 }

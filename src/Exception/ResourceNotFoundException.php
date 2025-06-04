@@ -13,7 +13,7 @@ final class ResourceNotFoundException extends DomainError
         private readonly string|Stringable $resourceId,
         private readonly ?string $customMessage = null,
     ) {
-        parent::__construct();
+        parent::__construct($this->errorMessage());
     }
 
     public function errorCode(): string

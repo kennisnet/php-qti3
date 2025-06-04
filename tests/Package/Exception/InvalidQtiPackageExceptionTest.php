@@ -19,7 +19,7 @@ final class InvalidQtiPackageExceptionTest extends TestCase
 
         $this->assertSame('invalid_qti_package', $exception->errorCode());
         $this->assertSame('QTI package is invalid', $exception->getMessage());
-        $this->assertSame($errors, $exception->validationErrors);
+        $this->assertSame($errors, $exception->validationErrors());
     }
 
     #[Test]
@@ -30,6 +30,6 @@ final class InvalidQtiPackageExceptionTest extends TestCase
 
         $this->assertSame('invalid_qti_package', $exception->errorCode());
         $this->assertSame('QTI package is invalid', $exception->getMessage());
-        $this->assertCount(0, $exception->validationErrors);
+        $this->assertCount(0, $exception->validationErrors());
     }
 }
