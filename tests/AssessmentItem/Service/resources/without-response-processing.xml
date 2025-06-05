@@ -17,7 +17,7 @@
     <qti-extended-text-interaction response-identifier="RESPONSE">
       <qti-prompt>Hoe kan technologie het onderwijs in de komende tien jaar veranderen? Beschrijf drie specifieke innovaties of ontwikkelingen en leg uit hoe deze het leerproces van leerlingen zullen verbeteren.</qti-prompt>
     </qti-extended-text-interaction>
-    <qti-rubric-block use="scoring" view="scorer" class="qti-rubric-discretionary-placement">
+    <qti-rubric-block use="scoring" view="scorer">
       <qti-content-body>
         <ul>
           <li>De student moet drie specifieke technologische innovaties of ontwikkelingen noemen.</li>
