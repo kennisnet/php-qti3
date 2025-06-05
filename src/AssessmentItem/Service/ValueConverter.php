@@ -16,6 +16,9 @@ class ValueConverter
      */
     public static function convert(mixed $value, Cardinality $cardinality, BaseType $baseType): mixed
     {
+        if ($value === null) {
+            return null;
+        }
         if ($cardinality === Cardinality::SINGLE) {
             if (is_array($value)) {
                 if (count($value) !== 1) {
