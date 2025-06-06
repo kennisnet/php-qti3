@@ -24,7 +24,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => ['A1 B1', 'A2 B2'],
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'correct',
                 'PROCESSED' => true,
@@ -42,7 +42,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => ['A1 B2', 'A2 B1'],
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'incorrect',
                 'PROCESSED' => true,
@@ -60,7 +60,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => 'CHOICE1',
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'true',
                 'MAXSCORE' => 1.0,
@@ -78,7 +78,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => 'CHOICE2',
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'true',
                 'MAXSCORE' => 1.0,
@@ -95,7 +95,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => ['476 255', '397 433', '143 197'],
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'correct',
                 'MAXSCORE' => 1.0,
@@ -112,7 +112,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => ['176 55', '97 33', '443 597'],
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'incorrect',
                 'MAXSCORE' => 1.0,
@@ -209,7 +209,7 @@ class ResponseProcessorTest extends TestCase
                 'RESPONSE' => ['A1 B1'], // Partial answer
             ],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.5,
                 'FEEDBACK' => 'incorrect',
                 'MAXSCORE' => 1.0,
@@ -320,7 +320,7 @@ class ResponseProcessorTest extends TestCase
             __DIR__ . '/resources/number-comparison-expressions.xml',
             ['RESPONSE' => 1],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'MAXSCORE' => 1.0,
             ]
@@ -334,7 +334,7 @@ class ResponseProcessorTest extends TestCase
             __DIR__ . '/resources/various-expressions.xml',
             ['RESPONSE' =>  ['AA']],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'incorrect',
                 'MAXSCORE' => 1.0,
@@ -349,7 +349,7 @@ class ResponseProcessorTest extends TestCase
             __DIR__ . '/resources/number-comparison-expressions.xml',
             ['RESPONSE' => 0.6],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.7,
                 'MAXSCORE' => 1.0,
             ]
@@ -363,7 +363,7 @@ class ResponseProcessorTest extends TestCase
             __DIR__ . '/resources/number-comparison-expressions.xml',
             ['RESPONSE' => 0],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.0,
                 'MAXSCORE' => 1.0,
             ]
@@ -377,7 +377,7 @@ class ResponseProcessorTest extends TestCase
             __DIR__ . '/resources/number-comparison-expressions.xml',
             ['RESPONSE' => 0.2],
             [
-                'completionStatus' => 'unknown',
+                'completionStatus' => 'completed',
                 'SCORE' => 0.3,
                 'MAXSCORE' => 1.0,
             ]

@@ -8,9 +8,9 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\ExtendedTextInt
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
 use DOMDocument;
 
-class AssessmentItemTypeDeterminator
+class AssessmentItemDeterminator
 {
-    public function determine(DOMDocument $itemXml): string
+    public function determineType(DOMDocument $itemXml): string
     {
         $hasResponseProcessing = $itemXml->getElementsByTagName(ResponseProcessing::qtiTagName())->length > 0;
         $hasExtendedTextInteraction = $itemXml->getElementsByTagName(ExtendedTextInteraction::qtiTagName())->length > 0;
@@ -20,5 +20,12 @@ class AssessmentItemTypeDeterminator
         }
 
         return 'info';
+    }
+
+    public function determineManualScoring(DOMDocument $itemXml): bool
+    {
+        $hasExtendedTextInteraction = $itemXml->getElementsByTagName(ExtendedTextInteraction::qtiTagName())->length > 0;
+
+        return $hasExtendedTextInteraction;
     }
 }
