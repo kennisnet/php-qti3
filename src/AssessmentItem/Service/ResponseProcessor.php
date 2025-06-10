@@ -85,6 +85,8 @@ class ResponseProcessor
             if ($itemState->outcomeSet->getOutcomeValue('completionStatus') === 'unknown') {
                 $itemState->outcomeSet->set('completionStatus', 'incomplete');
             }
+        } elseif (count($itemState->responseProcessing->children()) > 0) {
+            $itemState->outcomeSet->set('completionStatus', 'complete');
         }
     }
 }

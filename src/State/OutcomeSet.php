@@ -52,9 +52,5 @@ class OutcomeSet
         $convertedValue = ValueConverter::convert($value, $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
 
         $this->outcomes[$identifier] = $convertedValue;
-
-        if ($identifier === 'SCORE' && $convertedValue !== null) {
-            $this->outcomes['completionStatus'] = 'completed';
-        }
     }
 }
