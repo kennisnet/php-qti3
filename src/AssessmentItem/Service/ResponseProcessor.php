@@ -86,7 +86,7 @@ class ResponseProcessor
                 $itemState->outcomeSet->set('completionStatus', 'incomplete');
             }
         } elseif (count($itemState->responseProcessing->children()) > 0) {
-            $itemState->outcomeSet->set('completionStatus', 'complete');
+            $itemState->outcomeSet->set('completionStatus', 'completed');
         }
     }
 }
