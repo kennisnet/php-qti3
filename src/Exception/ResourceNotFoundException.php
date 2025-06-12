@@ -21,6 +21,11 @@ final class ResourceNotFoundException extends DomainError
         return 'resource_not_found';
     }
 
+    public function errorType(): ErrorType
+    {
+        return ErrorType::NOT_FOUND;
+    }
+
     protected function errorMessage(): string
     {
         if ($this->customMessage !== null) {

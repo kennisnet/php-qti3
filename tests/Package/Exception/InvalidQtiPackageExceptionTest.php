@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Exception;
 
+use App\SharedKernel\Domain\Exception\ErrorType;
 use App\SharedKernel\Domain\Qti\Package\Exception\InvalidQtiPackageException;
 use App\SharedKernel\Domain\StringCollection;
 use PHPUnit\Framework\Attributes\Test;
@@ -31,5 +32,6 @@ final class InvalidQtiPackageExceptionTest extends TestCase
         $this->assertSame('invalid_qti_package', $exception->errorCode());
         $this->assertSame('QTI package is invalid', $exception->getMessage());
         $this->assertCount(0, $exception->validationErrors());
+        $this->assertSame(ErrorType::INTERNAL, $exception->errorType());
     }
 }

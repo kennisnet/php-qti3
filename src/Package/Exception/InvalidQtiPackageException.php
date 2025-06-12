@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Package\Exception;
 
 use App\SharedKernel\Domain\Exception\DomainError;
+use App\SharedKernel\Domain\Exception\ErrorType;
 use App\SharedKernel\Domain\Exception\HasValidationErrors;
 use App\SharedKernel\Domain\StringCollection;
 
@@ -19,6 +20,11 @@ final class InvalidQtiPackageException extends DomainError implements HasValidat
     public function errorCode(): string
     {
         return 'invalid_qti_package';
+    }
+
+    public function errorType(): ErrorType
+    {
+        return ErrorType::INTERNAL;
     }
 
     protected function errorMessage(): string

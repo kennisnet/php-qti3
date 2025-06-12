@@ -9,4 +9,6 @@ use DomainException;
 abstract class DomainError extends DomainException
 {
     abstract public function errorCode(): string; // @codeCoverageIgnore
+
+    abstract public function errorType(): ErrorType;
 }

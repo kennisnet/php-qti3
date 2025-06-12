@@ -18,6 +18,11 @@ final class NotFoundException extends DomainError
         return $this->errorCode;
     }
 
+    public function errorType(): ErrorType
+    {
+        return ErrorType::NOT_FOUND;
+    }
+
     protected function errorMessage(): string
     {
         return $this->customMessage;
