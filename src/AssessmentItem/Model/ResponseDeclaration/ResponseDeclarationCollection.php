@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration;
 
 use App\SharedKernel\Domain\AbstractCollection;
+use App\SharedKernel\Domain\StringCollection;
 use InvalidArgumentException;
 
 /**
@@ -28,5 +29,13 @@ class ResponseDeclarationCollection extends AbstractCollection
         }
 
         return $first;
+    }
+
+    public function getIdentifiers(): StringCollection
+    {
+        return new StringCollection(array_map(
+            fn(ResponseDeclaration $responseDeclaration): string => $responseDeclaration->identifier,
+            $this->all()
+        ));
     }
 }

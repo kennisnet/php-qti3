@@ -7,7 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Package\Validator;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\StringCollection;
 
-interface IValidationRuleSet
+interface IValidator
 {
     public function validate(QtiPackage $qtiPackage): StringCollection;
 }

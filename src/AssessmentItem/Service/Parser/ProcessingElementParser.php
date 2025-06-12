@@ -10,6 +10,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseConditio
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseElse;
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseElseIf;
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseIf;
+use App\SharedKernel\Domain\StringCollection;
 use DOMElement;
 
 class ProcessingElementParser extends AbstractParser
@@ -18,12 +19,12 @@ class ProcessingElementParser extends AbstractParser
         private readonly QtiExpressionParser $qtiExpressionParser,
     ) {}
 
-    public function parse(DOMElement $element): IProcessingElement
+    public function parse(DOMElement $element, StringCollection $identifiers): IProcessingElement
     {
         $tagName = $element->nodeName;
 
         if ($tagName === SetOutcomeValue::qtiTagName()) {
-            return $this->parseSetOutcomeValue($element);
+            return $this->parseSetOutcomeValue($element, $identifiers);
         }
 
         if ($tagName === ResponseCondition::qtiTagName()) {
@@ -33,7 +34,7 @@ class ProcessingElementParser extends AbstractParser
         throw new ParseError("Unknown processing element $tagName");
     }
 
-    public function parseSetOutcomeValue(DOMElement|null $element): SetOutcomeValue
+    public function parseSetOutcomeValue(DOMElement|null $element, StringCollection $identifiers): SetOutcomeValue
     {
         $this->validateTag($element, SetOutcomeValue::qtiTagName());
 
@@ -41,8 +42,13 @@ class ProcessingElementParser extends AbstractParser
 
         $children = $this->getChildren($element);
 
+        $identifier = $element->getAttribute('identifier');
+        if (!$identifiers->has($identifier)) {
+            throw new ParseError('Unknown identifier: ' . $identifier);
+        }
+
         return new SetOutcomeValue(
-            $element->getAttribute('identifier'),
+            $identifier,
             $this->qtiExpressionParser->parse($children[0])
         );
     }

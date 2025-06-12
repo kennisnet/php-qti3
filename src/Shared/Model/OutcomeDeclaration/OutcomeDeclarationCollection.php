@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration;
 
 use App\SharedKernel\Domain\AbstractCollection;
+use App\SharedKernel\Domain\StringCollection;
 use InvalidArgumentException;
 
 /**
@@ -28,6 +29,14 @@ class OutcomeDeclarationCollection extends AbstractCollection
         }
 
         return $first;
+    }
+
+    public function getIdentifiers(): StringCollection
+    {
+        return new StringCollection(array_map(
+            fn(OutcomeDeclaration $outcomeDeclaration): string => $outcomeDeclaration->identifier,
+            $this->all()
+        ));
     }
 
 }
