@@ -31,6 +31,8 @@ readonly class ZipPackageWriter implements IPackageWriter
         foreach ($qtiPackage->getFiles() as $file) {
             $this->addFile($file, $zipArchive);
         }
+
+        $zipArchive->close();
     }
 
     public function getPublicUrl(): string

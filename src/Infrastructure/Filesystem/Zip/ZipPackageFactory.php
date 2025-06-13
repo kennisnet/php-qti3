@@ -13,7 +13,6 @@ use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 class ZipPackageFactory implements IZipPackageFactory
 {
     public function __construct(
-        private readonly string $dataFolder,
         private readonly ResourceDownloader $resourceDownloader,
         private readonly ZipArchiveFactory $zipArchiveFactory,
     ) {}
@@ -25,6 +24,6 @@ class ZipPackageFactory implements IZipPackageFactory
 
     public function getWriter(string $zipfilePath): IPackageWriter
     {
-        return new ZipPackageWriter($this->dataFolder . '/' . $zipfilePath, $this->resourceDownloader, $this->zipArchiveFactory);
+        return new ZipPackageWriter($zipfilePath, $this->resourceDownloader, $this->zipArchiveFactory);
     }
 }
