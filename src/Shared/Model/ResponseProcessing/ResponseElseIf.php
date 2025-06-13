@@ -8,6 +8,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class ResponseElseIf extends QtiElement
 {
@@ -30,5 +31,16 @@ class ResponseElseIf extends QtiElement
         foreach ($this->processingElements as $processingElement) {
             $processingElement->processResponses($state);
         }
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        $errors = $this->condition->validate($identifiers);
+
+        foreach ($this->processingElements as $processingElement) {
+            $errors = $errors->mergeWith($processingElement->validate($identifiers));
+        }
+
+        return $errors;
     }
 }

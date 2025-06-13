@@ -7,6 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\IOutcomeProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcomeProcessingElement
 {
@@ -38,5 +39,18 @@ class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcome
             $this->identifier,
             $value
         );
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        $errors = new StringCollection();
+
+        if (!$identifiers->has($this->identifier)) {
+            $errors->add('Identifier ' . $this->identifier . ' not found');
+        }
+
+        $errors = $errors->mergeWith($this->value->validate($identifiers));
+
+        return $errors;
     }
 }

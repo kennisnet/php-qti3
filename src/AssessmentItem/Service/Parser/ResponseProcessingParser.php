@@ -6,7 +6,6 @@ namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser;
 
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
-use App\SharedKernel\Domain\StringCollection;
 use DOMElement;
 
 class ResponseProcessingParser extends AbstractParser
@@ -15,13 +14,13 @@ class ResponseProcessingParser extends AbstractParser
         private readonly ProcessingElementParser $processingElementParser,
     ) {}
 
-    public function parse(DOMElement $element, StringCollection $identifiers): ResponseProcessing
+    public function parse(DOMElement $element): ResponseProcessing
     {
         $this->validateTag($element, ResponseProcessing::qtiTagName());
 
         return new ResponseProcessing(
             array_map(
-                fn($child): IProcessingElement => $this->processingElementParser->parse($child, $identifiers),
+                fn($child): IProcessingElement => $this->processingElementParser->parse($child),
                 $this->getChildren($element)
             )
         );

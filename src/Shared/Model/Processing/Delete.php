@@ -7,6 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class Delete extends AbstractQtiExpression
 {
@@ -52,5 +53,10 @@ class Delete extends AbstractQtiExpression
     public function getCardinality(ItemState $state): Cardinality
     {
         return $this->container->getCardinality($state);
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        return $this->valueToRemove->validate($identifiers)->mergeWith($this->container->validate($identifiers));
     }
 }

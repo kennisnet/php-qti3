@@ -196,7 +196,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/non-existing-outcome.xml',
             ['RESPONSE' => ['A1 B1', 'A2 B2']],
-            'Outcome declaration with identifier NON-EXISTING not found'
+            'Validation errors in response processing: Identifier NON-EXISTING not found'
         );
     }
 

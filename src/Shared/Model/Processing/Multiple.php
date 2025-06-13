@@ -7,6 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class Multiple extends AbstractQtiExpression
 {
@@ -58,5 +59,15 @@ class Multiple extends AbstractQtiExpression
     public function getCardinality(ItemState $state): Cardinality
     {
         return Cardinality::MULTIPLE;
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        $errors = new StringCollection();
+        foreach ($this->elements as $element) {
+            $errors = $errors->mergeWith($element->validate($identifiers));
+        }
+
+        return $errors;
     }
 }

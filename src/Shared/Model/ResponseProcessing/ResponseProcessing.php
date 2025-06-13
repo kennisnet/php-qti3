@@ -7,6 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class ResponseProcessing extends QtiElement
 {
@@ -47,5 +48,16 @@ class ResponseProcessing extends QtiElement
         foreach ($this->elements as $element) {
             $element->processResponses($state);
         }
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        $errors = new StringCollection();
+
+        foreach ($this->elements as $element) {
+            $errors = $errors->mergeWith($element->validate($identifiers));
+        }
+
+        return $errors;
     }
 }

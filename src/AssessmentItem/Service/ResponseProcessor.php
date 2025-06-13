@@ -45,12 +45,10 @@ class ResponseProcessor
             $outcomeDeclarations->add($this->outcomeDeclarationParser->parse($outcomeDeclarationTag));
         }
 
-        $identifiers = $responseDeclarations->getIdentifiers()->mergeWith($outcomeDeclarations->getIdentifiers());
-
         $responseProcessingTag = $xmlDocument->getElementsByTagName('qti-response-processing')->item(0);
 
         if ($responseProcessingTag) {
-            $responseProcessing = $this->responseProcessingParser->parse($responseProcessingTag, $identifiers);
+            $responseProcessing = $this->responseProcessingParser->parse($responseProcessingTag);
         } else {
             $responseProcessing = new ResponseProcessing([]);
         }

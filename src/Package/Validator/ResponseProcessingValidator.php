@@ -2,19 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Toetsen\Domain\StoredQtiPackage\Validator;
+namespace App\SharedKernel\Domain\Qti\Package\Validator;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
 use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
-use App\SharedKernel\Domain\Qti\Package\Validator\IValidator;
 use App\SharedKernel\Domain\StringCollection;
 
-class ResponseProcessingValidator implements IValidator
+readonly class ResponseProcessingValidator implements IQtiPackageValidator
 {
     public function __construct(
         private ResponseProcessor $responseProcessor,
@@ -33,7 +31,12 @@ class ResponseProcessingValidator implements IValidator
 
             /** @var XmlFileContent $xmlFileContent */
             $xmlFileContent = $itemFile->getContent();
-            $itemState = $this->responseProcessor->initItemState($xmlFileContent->xmlDocument->saveXML());
+
+            try {
+                $this->responseProcessor->initItemState((string) $xmlFileContent);
+            } catch (ValidationError $error) {
+                $errors = $errors->mergeWith($error->validationErrors);
+            }
         }
 
         return $errors;

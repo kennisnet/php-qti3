@@ -8,6 +8,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 use InvalidArgumentException;
 
 abstract class AbstractQtiExpression extends QtiElement
@@ -17,6 +18,8 @@ abstract class AbstractQtiExpression extends QtiElement
     abstract public function getBaseType(ItemState $state): BaseType;
 
     abstract public function getCardinality(ItemState $state): Cardinality;
+
+    abstract public function validate(StringCollection $identifiers): StringCollection;
 
     public function evaluateBoolean(ItemState $state): bool
     {

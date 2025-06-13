@@ -8,6 +8,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class TestVariables extends AbstractQtiExpression
 {
@@ -38,6 +39,13 @@ class TestVariables extends AbstractQtiExpression
     public function getCardinality(ItemState $state): Cardinality
     {
         return Cardinality::SINGLE;
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        // TODO: Implement validate() method.
+
+        return new StringCollection();
     }
     // @codeCoverageIgnoreEnd
 }

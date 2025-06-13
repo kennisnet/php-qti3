@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Package\Validator;
 
+use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\StringCollection;
 
-interface IImsQtiPackageValidator
+interface IImsQtiPackageValidator extends IQtiPackageValidator
 {
-    public function validateQtiPackage(string $qtiPackageFilename): StringCollection;
+    public function validateZipPackage(string $qtiPackageFilename): StringCollection;
+
+    public function validate(QtiPackage $qtiPackage): StringCollection;
 }

@@ -25,6 +25,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Max;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Member;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Min;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Multiple;
+use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Ordered;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Power;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Product;
 use App\SharedKernel\Domain\Qti\Shared\Model\Processing\qtiAnd;
@@ -277,6 +278,15 @@ class QtiExpressionParser extends AbstractParser
             return new Delete(
                 $this->parse($children[0]),
                 $this->parse($children[1])
+            );
+        }
+
+        if ($tagName === Ordered::qtiTagName()) {
+            return new Ordered(
+                array_map(
+                    fn($child): AbstractQtiExpression => $this->parse($child),
+                    $children
+                )
             );
         }
 

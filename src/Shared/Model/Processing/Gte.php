@@ -7,6 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
 use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
+use App\SharedKernel\Domain\StringCollection;
 
 class Gte extends AbstractQtiExpression
 {
@@ -39,5 +40,10 @@ class Gte extends AbstractQtiExpression
     public function getCardinality(ItemState $state): Cardinality
     {
         return Cardinality::SINGLE;
+    }
+
+    public function validate(StringCollection $identifiers): StringCollection
+    {
+        return $this->element1->validate($identifiers)->mergeWith($this->element2->validate($identifiers));
     }
 }
