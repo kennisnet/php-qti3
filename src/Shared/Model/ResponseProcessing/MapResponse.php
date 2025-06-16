@@ -38,11 +38,11 @@ class MapResponse extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
 
-        if (!$identifiers->has($this->identifier)) {
+        if (!$itemState->responseSet->responseDeclarations->getIdentifiers()->has($this->identifier)) {
             $errors->add('Identifier ' . $this->identifier . ' not found');
         }
 

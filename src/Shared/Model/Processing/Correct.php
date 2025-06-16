@@ -8,6 +8,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\State\ItemState;
 use App\SharedKernel\Domain\StringCollection;
+use InvalidArgumentException;
 
 class Correct extends AbstractQtiExpression
 {
@@ -37,12 +38,18 @@ class Correct extends AbstractQtiExpression
         return $state->responseSet->responseDeclarations->getByIdentifier($this->identifier)->cardinality;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
 
-        if (!$identifiers->has($this->identifier)) {
+        if (!$itemState->responseSet->responseDeclarations->getIdentifiers()->has($this->identifier)) {
             $errors->add('Identifier ' . $this->identifier . ' not found');
+        } else {
+            try {
+                $itemState->responseSet->getCorrectResponse($this->identifier);
+            } catch (InvalidArgumentException $error) {
+                $errors->add($error->getMessage());
+            }
         }
 
         return $errors;

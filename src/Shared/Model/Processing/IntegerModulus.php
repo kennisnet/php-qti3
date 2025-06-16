@@ -43,8 +43,8 @@ class IntegerModulus extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->numerator->validate($identifiers)->mergeWith($this->denominator->validate($identifiers));
+        return $this->numerator->validate($itemState)->mergeWith($this->denominator->validate($itemState));
     }
 }

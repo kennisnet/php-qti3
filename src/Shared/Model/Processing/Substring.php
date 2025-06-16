@@ -51,8 +51,8 @@ class Substring extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->haystack->validate($identifiers)->mergeWith($this->needle->validate($identifiers));
+        return $this->haystack->validate($itemState)->mergeWith($this->needle->validate($itemState));
     }
 }

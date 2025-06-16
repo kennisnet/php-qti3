@@ -61,11 +61,11 @@ class Multiple extends AbstractQtiExpression
         return Cardinality::MULTIPLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
         foreach ($this->elements as $element) {
-            $errors = $errors->mergeWith($element->validate($identifiers));
+            $errors = $errors->mergeWith($element->validate($itemState));
         }
 
         return $errors;

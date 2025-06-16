@@ -37,11 +37,11 @@ class Variable extends AbstractQtiExpression
         return $state->responseSet->responseDeclarations->getByIdentifier($this->identifier)->cardinality;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
 
-        if (!$identifiers->has($this->identifier)) {
+        if (!$itemState->getIdentifiers()->has($this->identifier)) {
             $errors->add('Identifier ' . $this->identifier . ' not found');
         }
 

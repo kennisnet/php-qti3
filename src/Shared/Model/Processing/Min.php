@@ -47,11 +47,11 @@ class Min extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
         foreach ($this->expressions as $expression) {
-            $errors = $errors->mergeWith($expression->validate($identifiers));
+            $errors = $errors->mergeWith($expression->validate($itemState));
         }
 
         return $errors;

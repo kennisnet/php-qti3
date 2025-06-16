@@ -42,8 +42,8 @@ class Gt extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->element1->validate($identifiers)->mergeWith($this->element2->validate($identifiers));
+        return $this->element1->validate($itemState)->mergeWith($this->element2->validate($itemState));
     }
 }

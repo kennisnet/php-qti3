@@ -39,8 +39,8 @@ class Subtract extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->minuend->validate($identifiers)->mergeWith($this->subtrahend->validate($identifiers));
+        return $this->minuend->validate($itemState)->mergeWith($this->subtrahend->validate($itemState));
     }
 }

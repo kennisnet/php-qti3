@@ -82,6 +82,6 @@ class QtiPackageValidatorTest extends TestCase
 
         // Assert
 
-        $this->assertCount(4, $errors);
+        $this->assertCount(5, $errors);
     }
 }

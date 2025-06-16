@@ -30,12 +30,12 @@ class ResponseElse extends QtiElement
         }
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
 
         foreach ($this->processingElements as $processingElement) {
-            $errors = $errors->mergeWith($processingElement->validate($identifiers));
+            $errors = $errors->mergeWith($processingElement->validate($itemState));
         }
 
         return $errors;

@@ -80,8 +80,8 @@ class qtiMatch extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->expression1->validate($identifiers)->mergeWith($this->expression2->validate($identifiers));
+        return $this->expression1->validate($itemState)->mergeWith($this->expression2->validate($itemState));
     }
 }

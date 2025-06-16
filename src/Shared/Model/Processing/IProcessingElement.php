@@ -12,5 +12,5 @@ interface IProcessingElement extends IXmlElement
 {
     public function processResponses(ItemState $state): void;
 
-    public function validate(StringCollection $identifiers): StringCollection;
+    public function validate(ItemState $itemState): StringCollection;
 }

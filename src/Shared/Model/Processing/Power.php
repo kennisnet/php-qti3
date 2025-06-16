@@ -39,8 +39,8 @@ class Power extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->base->validate($identifiers)->mergeWith($this->exponent->validate($identifiers));
+        return $this->base->validate($itemState)->mergeWith($this->exponent->validate($itemState));
     }
 }

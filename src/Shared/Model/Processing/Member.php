@@ -44,8 +44,8 @@ class Member extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->needle->validate($identifiers)->mergeWith($this->haystack->validate($identifiers));
+        return $this->needle->validate($itemState)->mergeWith($this->haystack->validate($itemState));
     }
 }

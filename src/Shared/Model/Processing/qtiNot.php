@@ -42,8 +42,8 @@ class qtiNot extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->expression->validate($identifiers);
+        return $this->expression->validate($itemState);
     }
 }

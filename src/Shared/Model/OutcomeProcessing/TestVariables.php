@@ -41,7 +41,7 @@ class TestVariables extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         // TODO: Implement validate() method.
 

@@ -53,8 +53,8 @@ class Index extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->container->validate($identifiers);
+        return $this->container->validate($itemState);
     }
 }

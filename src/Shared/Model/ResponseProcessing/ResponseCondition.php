@@ -109,16 +109,16 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         }
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        $errors = $this->if->validate($identifiers);
+        $errors = $this->if->validate($itemState);
 
         foreach ($this->elseIfs as $elseIf) {
-            $errors = $errors->mergeWith($elseIf->validate($identifiers));
+            $errors = $errors->mergeWith($elseIf->validate($itemState));
         }
 
         if ($this->else) {
-            $errors = $errors->mergeWith($this->else->validate($identifiers));
+            $errors = $errors->mergeWith($this->else->validate($itemState));
         }
 
         return $errors;

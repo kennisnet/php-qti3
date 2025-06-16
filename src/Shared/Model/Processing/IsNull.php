@@ -37,8 +37,8 @@ class IsNull extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->variable->validate($identifiers);
+        return $this->variable->validate($itemState);
     }
 }

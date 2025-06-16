@@ -39,8 +39,8 @@ class Contains extends AbstractQtiExpression
         return Cardinality::SINGLE;
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->container->validate($identifiers)->mergeWith($this->contains->validate($identifiers));
+        return $this->container->validate($itemState)->mergeWith($this->contains->validate($itemState));
     }
 }

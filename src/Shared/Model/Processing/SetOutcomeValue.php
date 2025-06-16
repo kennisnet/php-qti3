@@ -41,15 +41,15 @@ class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcome
         );
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
 
-        if (!$identifiers->has($this->identifier)) {
+        if (!$itemState->getIdentifiers()->has($this->identifier)) {
             $errors->add('Identifier ' . $this->identifier . ' not found');
         }
 
-        $errors = $errors->mergeWith($this->value->validate($identifiers));
+        $errors = $errors->mergeWith($this->value->validate($itemState));
 
         return $errors;
     }

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\State;
 
-use App\SharedKernel\Domain\Qti\Package\Validator\ValidationError;
+use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
+use App\SharedKernel\Domain\StringCollection;
 use InvalidArgumentException;
 
 class ItemState
@@ -28,16 +29,19 @@ class ItemState
         }
     }
 
-    private function validate(): void
+    public function getIdentifiers(): StringCollection
     {
-        $identifiers = $this->responseSet->responseDeclarations->getIdentifiers()->mergeWith(
+        return $this->responseSet->responseDeclarations->getIdentifiers()->mergeWith(
             $this->outcomeSet->outcomeDeclarations->getIdentifiers()
         );
+    }
 
-        $errors = $this->responseProcessing->validate($identifiers);
+    private function validate(): void
+    {
+        $errors = $this->responseProcessing->validate($this);
 
         if ($errors->count() > 0) {
-            throw new ValidationError($errors, 'Validation errors in response processing');
+            throw new QtiPackageValidationError($errors, 'Validation errors in response processing');
         }
     }
 

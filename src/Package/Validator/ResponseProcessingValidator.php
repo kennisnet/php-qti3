@@ -34,8 +34,11 @@ readonly class ResponseProcessingValidator implements IQtiPackageValidator
 
             try {
                 $this->responseProcessor->initItemState((string) $xmlFileContent);
-            } catch (ValidationError $error) {
-                $errors = $errors->mergeWith($error->validationErrors);
+            } catch (QtiPackageValidationError $error) {
+                /** @var string $validationError */
+                foreach ($error->validationErrors() as $validationError) {
+                    $errors->add($itemFile->getFilepath() . ': ' . $validationError);
+                }
             }
         }
 

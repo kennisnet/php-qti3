@@ -19,7 +19,7 @@ abstract class AbstractQtiExpression extends QtiElement
 
     abstract public function getCardinality(ItemState $state): Cardinality;
 
-    abstract public function validate(StringCollection $identifiers): StringCollection;
+    abstract public function validate(ItemState $itemState): StringCollection;
 
     public function evaluateBoolean(ItemState $state): bool
     {

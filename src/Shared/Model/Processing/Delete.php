@@ -55,8 +55,8 @@ class Delete extends AbstractQtiExpression
         return $this->container->getCardinality($state);
     }
 
-    public function validate(StringCollection $identifiers): StringCollection
+    public function validate(ItemState $itemState): StringCollection
     {
-        return $this->valueToRemove->validate($identifiers)->mergeWith($this->container->validate($identifiers));
+        return $this->valueToRemove->validate($itemState)->mergeWith($this->container->validate($itemState));
     }
 }
