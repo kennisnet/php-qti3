@@ -23,6 +23,5 @@ class QtiPackageValidationErrorTest extends TestCase
 
         $this->assertEquals('validation_errors', $validationError->errorCode());
         $this->assertEquals(ErrorType::VALIDATION, $validationError->errorType());
-        ;
     }
 }
