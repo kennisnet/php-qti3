@@ -38,6 +38,16 @@ class ResponseProcessing extends QtiElement
         );
     }
 
+    /**
+     * Template for response processing equal to https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response_point.xml
+     */
+    public static function mapResponsePoint(): self
+    {
+        return new self(
+            [ResponseCondition::mapResponsePoint()]
+        );
+    }
+
     public function children(): array
     {
         return $this->elements;

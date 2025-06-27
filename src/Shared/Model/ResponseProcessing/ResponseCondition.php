@@ -57,6 +57,19 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         );
     }
 
+    public static function mapResponsePoint(): self
+    {
+        return new ResponseCondition(
+            if: new ResponseIf(
+                new IsNull(new Variable('RESPONSE')),
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))]
+            ),
+            else: new ResponseElse(
+                [new SetOutcomeValue('SCORE', new MapResponsePoint('RESPONSE'))]
+            )
+        );
+    }
+
     public static function feedbackCorrect(AbstractQtiExpression $correctCondition): self
     {
         return new ResponseCondition(

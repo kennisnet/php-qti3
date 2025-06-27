@@ -18,6 +18,18 @@ class ResponseProcessingParser extends AbstractParser
     {
         $this->validateTag($element, ResponseProcessing::qtiTagName());
 
+        if ($element->hasAttribute('template')) {
+            if ($element->getAttribute('template') === 'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/match_correct.xml') {
+                return ResponseProcessing::matchCorrect();
+            }
+            if ($element->getAttribute('template') === 'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response.xml') {
+                return ResponseProcessing::mapResponse();
+            }
+            if ($element->getAttribute('template') === 'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response_point.xml') {
+                return ResponseProcessing::mapResponsePoint();
+            }
+        }
+
         return new ResponseProcessing(
             array_map(
                 fn($child): IProcessingElement => $this->processingElementParser->parse($child),

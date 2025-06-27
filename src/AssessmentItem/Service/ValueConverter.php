@@ -50,7 +50,7 @@ class ValueConverter
         if ($baseType === BaseType::INTEGER) {
             return (int) $value;
         }
-        if ($baseType === BaseType::STRING || $baseType === BaseType::IDENTIFIER) {
+        if ($baseType === BaseType::STRING || $baseType === BaseType::IDENTIFIER || $baseType === BaseType::DIRECTED_PAIR) {
             return (string) $value;
         }
         throw new InvalidArgumentException('Unknown base type: ' . $baseType->value);
