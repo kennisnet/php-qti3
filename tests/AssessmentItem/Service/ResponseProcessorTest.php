@@ -399,6 +399,54 @@ class ResponseProcessorTest extends TestCase
         );
     }
 
+    #[Test]
+    public function processResponsesWithMatchCorrectTemplate(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/match-correct-template.xml',
+            [
+                'RESPONSE' => 'Test',
+            ],
+            [
+                'completionStatus' => 'completed',
+                'SCORE' => 1.0,
+                'MAXSCORE' => 1.0,
+            ]
+        );
+    }
+
+    #[Test]
+    public function processResponsesWithMapResponseTemplate(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/map-response-template.xml',
+            [
+                'RESPONSE' => ['A1 B1', 'A2 B2'],
+            ],
+            [
+                'completionStatus' => 'completed',
+                'SCORE' => 2.0,
+                'MAXSCORE' => 2.0,
+            ]
+        );
+    }
+
+    #[Test]
+    public function processResponsesWithMapResponsePointTemplate(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/map-response-point-template.xml',
+            [
+                'RESPONSE' => ['476 255', '397 433', '143 197'],
+            ],
+            [
+                'completionStatus' => 'completed',
+                'SCORE' => 3.0,
+                'MAXSCORE' => 3.0,
+            ]
+        );
+    }
+
     public function getResponseProcessor(): ResponseProcessor
     {
         $responseDeclarationParser = new ResponseDeclarationParser();
