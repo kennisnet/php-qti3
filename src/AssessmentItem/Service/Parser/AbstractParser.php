@@ -35,4 +35,13 @@ abstract class AbstractParser
 
         return $children;
     }
+
+    protected function parseFloat(string $attributeValue): ?float
+    {
+        if ($attributeValue === '') {
+            return null;
+        }
+
+        return (float) $attributeValue;
+    }
 }

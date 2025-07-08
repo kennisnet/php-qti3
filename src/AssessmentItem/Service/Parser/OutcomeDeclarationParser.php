@@ -50,13 +50,4 @@ class OutcomeDeclarationParser extends AbstractParser
         return new DefaultValue(new Value($value));
     }
 
-    private function parseFloat(string $attributeValue): ?float
-    {
-        if ($attributeValue === '') {
-            return null;
-        }
-
-        return (float) $attributeValue;
-    }
-
 }
