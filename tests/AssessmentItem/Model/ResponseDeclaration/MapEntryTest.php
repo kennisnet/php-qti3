@@ -30,10 +30,23 @@ class MapEntryTest extends TestCase
     }
 
     #[Test]
-    public function evaluateSingularValue(): void
+    public function evaluateValue(): void
     {
-        $this->assertEquals(1, $this->mapEntry->evaluate(
+        $this->assertTrue($this->mapEntry->evaluate(
             'key'
         ));
+    }
+
+    #[Test]
+    public function evaluateCaseInsensitiveValue(): void
+    {
+        $this->assertTrue($this->mapEntry->evaluate('KEY'));
+    }
+
+    #[Test]
+    public function evaluateCaseSensitiveValue(): void
+    {
+        $mapEntry = new MapEntry('key', 1, true);
+        $this->assertFalse($mapEntry->evaluate('KEY'));
     }
 }

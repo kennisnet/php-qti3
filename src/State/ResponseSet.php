@@ -55,7 +55,7 @@ class ResponseSet
      */
     public function getResponseValue(string $identifier): string|int|float|bool|array|null
     {
-        $responseDeclaration = $this->responseDeclarations->getByIdentifier($identifier);
+        $this->responseDeclarations->getByIdentifier($identifier);
 
         return $this->responses[$identifier] ?? null;
     }
@@ -71,11 +71,6 @@ class ResponseSet
 
         $response = $this->getResponseValue($identifier);
 
-        $result = 0;
-        foreach ($mapping->entries as $entry) {
-            $result += $entry->evaluate($response);
-        }
-
-        return $result;
+        return $mapping->evaluate($response);
     }
 }
