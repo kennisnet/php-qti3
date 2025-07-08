@@ -46,7 +46,7 @@ class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcome
         $errors = new StringCollection();
 
         if (!$itemState->getIdentifiers()->has($this->identifier)) {
-            $errors->add('Identifier ' . $this->identifier . ' not found');
+            $errors->add('Identifier ' . $this->identifier . ' not found for `qti-set-outcome-value`');
         }
 
         $errors = $errors->mergeWith($this->value->validate($itemState));

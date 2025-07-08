@@ -44,7 +44,7 @@ class OutcomeDeclarationParser extends AbstractParser
         $value = $defaultValueChildren[0]->nodeValue;
 
         if ($value === null || $value === '') {
-            throw new ParseError('Empty default value'); // @codeCoverageIgnore
+            throw new ParseError('Empty default value for `qti-outcome-declaration`'); // @codeCoverageIgnore
         }
 
         return new DefaultValue(new Value($value));

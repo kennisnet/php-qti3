@@ -123,7 +123,7 @@ class MapResponsePoint extends AbstractQtiExpression
         $errors = new StringCollection();
 
         if (!$itemState->responseSet->responseDeclarations->getIdentifiers()->has($this->identifier)) {
-            $errors->add('Identifier ' . $this->identifier . ' not found');
+            $errors->add('Identifier ' . $this->identifier . ' not found for `qti-map-response-point`');
         }
 
         return $errors;

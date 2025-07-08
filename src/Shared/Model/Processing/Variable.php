@@ -42,7 +42,7 @@ class Variable extends AbstractQtiExpression
         $errors = new StringCollection();
 
         if (!$itemState->getIdentifiers()->has($this->identifier)) {
-            $errors->add('Identifier ' . $this->identifier . ' not found');
+            $errors->add('Identifier ' . $this->identifier . ' not found for `qti-variable`');
         }
 
         return $errors;

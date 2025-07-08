@@ -1,0 +1,91 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Validator;
+
+use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
+use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
+use App\SharedKernel\Domain\Qti\Package\Validator\ResponseProcessingValidator;
+use App\SharedKernel\Domain\StringCollection;
+use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\QtiPackageMock;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
+
+class ResponseProcessingValidatorTest extends TestCase
+{
+    private MockObject $responseProcessor;
+    private ResponseProcessingValidator $validator;
+
+    protected function setUp(): void
+    {
+        $this->responseProcessor = $this->createMock(ResponseProcessor::class);
+        $this->validator = new ResponseProcessingValidator($this->responseProcessor);
+    }
+
+    #[Test]
+    public function validateReturnsNoErrorsWhenItemProcessingSucceeds(): void
+    {
+        $xmlContent = $this->createMock(XmlFileContent::class);
+        $xmlContent
+            ->method('__toString')
+            ->willReturn('<item></item>');
+
+        $qtiPackage = new QtiPackageMock();
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertCount(0, $errors);
+    }
+
+    #[Test]
+    public function validateReturnsValidationErrorsFromQtiPackageValidationError(): void
+    {
+        $xmlContent = $this->createMock(XmlFileContent::class);
+        $xmlContent->method('__toString')->willReturn('<invalid></invalid>');
+
+        $qtiPackage = new QtiPackageMock();
+
+        $exception = new QtiPackageValidationError(new StringCollection(['Invalid responseProcessing']));
+
+        $this->responseProcessor
+            ->method('initItemState')
+            ->willThrowException($exception);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertEquals([
+            'test-item1.xml: Invalid responseProcessing',
+            'test-item2.xml: Invalid responseProcessing',
+            'test-item3.xml: Invalid responseProcessing',
+            'test-item4.xml: Invalid responseProcessing',
+            'test-item5.xml: Invalid responseProcessing',
+        ], iterator_to_array($errors));
+    }
+
+    #[Test]
+    public function validateReturnsGenericExceptionMessage(): void
+    {
+        $xmlContent = $this->createMock(XmlFileContent::class);
+        $xmlContent->method('__toString')->willReturn('<item></item>');
+
+        $qtiPackage = new QtiPackageMock();
+
+        $this->responseProcessor
+            ->method('initItemState')
+            ->willThrowException(new RuntimeException('Unexpected error'));
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertEquals([
+            'test-item1.xml: Unexpected error',
+            'test-item2.xml: Unexpected error',
+            'test-item3.xml: Unexpected error',
+            'test-item4.xml: Unexpected error',
+            'test-item5.xml: Unexpected error',
+        ], iterator_to_array($errors));
+    }
+}

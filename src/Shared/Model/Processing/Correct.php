@@ -43,7 +43,7 @@ class Correct extends AbstractQtiExpression
         $errors = new StringCollection();
 
         if (!$itemState->responseSet->responseDeclarations->getIdentifiers()->has($this->identifier)) {
-            $errors->add('Identifier ' . $this->identifier . ' not found');
+            $errors->add('Identifier ' . $this->identifier . ' not found for `qti-correct`');
         } else {
             try {
                 $itemState->responseSet->getCorrectResponse($this->identifier);

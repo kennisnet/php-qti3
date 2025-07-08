@@ -11,6 +11,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 use App\SharedKernel\Domain\StringCollection;
+use Exception;
 
 readonly class ResponseProcessingValidator implements IQtiPackageValidator
 {
@@ -39,6 +40,8 @@ readonly class ResponseProcessingValidator implements IQtiPackageValidator
                 foreach ($error->validationErrors() as $validationError) {
                     $errors->add($itemFile->getFilepath() . ': ' . $validationError);
                 }
+            } catch (Exception $exception) {
+                $errors->add($itemFile->getFilepath() . ': ' . $exception->getMessage());
             }
         }
 
