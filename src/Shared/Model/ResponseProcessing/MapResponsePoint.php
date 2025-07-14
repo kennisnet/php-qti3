@@ -6,6 +6,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing;
 
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Circle;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Coordinate;
+use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\DefaultShape;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\IShapeWithCoords;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Polygon;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Rectangle;
@@ -98,7 +99,10 @@ class MapResponsePoint extends AbstractQtiExpression
                 }
             }
             return $inside;
+        }
 
+        if ($shape instanceof DefaultShape) {
+            return true; // Always true
         }
 
         throw new Exception(sprintf('Shape %s not implemented', $shape::class)); // @codeCoverageIgnore

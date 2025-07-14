@@ -10,6 +10,7 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\Respons
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Circle;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Coordinate;
+use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\DefaultShape;
 use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
 use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
@@ -118,5 +119,35 @@ class MapResponsePointTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Response point is not a string');
         $this->mapResponsePoint->evaluate($itemState);
+    }
+
+    #[Test]
+    public function testEvaluateWithDefaultShape(): void
+    {
+        // Arrange
+        $defaultShape = new DefaultShape();
+        $areaMapEntry = new AreaMapEntry($defaultShape, 2.5);
+        $areaMapping = new AreaMapping([$areaMapEntry], '0');
+        $responseDeclaration = new ResponseDeclaration(
+            BaseType::STRING,
+            Cardinality::SINGLE,
+            'identifier',
+            null,
+            null,
+            $areaMapping
+        );
+        $responseDeclarations = new ResponseDeclarationCollection([$responseDeclaration]);
+        $responseSet = new ResponseSet($responseDeclarations);
+        $responseSet->responses['identifier'] = ['12 34'];
+        $outcomeSet = new OutcomeSet(
+            new OutcomeDeclarationCollection([])
+        );
+        $itemState = new ItemState($responseSet, $outcomeSet, new ResponseProcessing([]));
+
+        // Act
+        $result = $this->mapResponsePoint->evaluate($itemState);
+
+        // Assert
+        $this->assertEquals(2.5, $result);
     }
 }
