@@ -20,13 +20,13 @@ use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollectio
 use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
 
-readonly class QtiPackageReader implements IQtiPackageFactory
+class QtiPackageReader implements IQtiPackageFactory
 {
     public function __construct(
-        private IManifestFactory $manifestFactory,
-        private IXmlReader $xmlReader,
-        private IZipPackageFactory $zipPackageFactory,
-        private IFilesystemPackageFactory $filesystemPackageFactory,
+        private readonly IManifestFactory $manifestFactory,
+        private readonly IXmlReader $xmlReader,
+        private readonly IZipPackageFactory $zipPackageFactory,
+        private readonly IFilesystemPackageFactory $filesystemPackageFactory,
     ) {}
 
     public function fromFilesystem(string $folder): QtiPackage
