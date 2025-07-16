@@ -7,11 +7,11 @@ namespace App\SharedKernel\Domain\Qti\Package\Validator;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\StringCollection;
 
-class QtiPackageValidator
+readonly class QtiPackageValidator
 {
     public function __construct(
-        private readonly IImsQtiPackageValidator $imsValidator,
-        private readonly ResponseProcessingValidator $responseProcessingValidator,
+        private IImsQtiPackageValidator $imsValidator,
+        private ResponseProcessingValidator $responseProcessingValidator,
     ) {}
 
     public function validate(QtiPackage $qtiPackage): StringCollection
