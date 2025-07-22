@@ -15,7 +15,7 @@ class FileSystemUtils
         return tempnam(sys_get_temp_dir(), 'qti_');
     }
 
-    public function removeFile(string $filename): void
+    public static function removeFile(string $filename): void
     {
         if (is_file($filename)) {
             unlink($filename);
