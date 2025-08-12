@@ -45,7 +45,7 @@ class ValueConverter
             return $value === 'true' || $value === true;
         }
         if ($baseType === BaseType::FLOAT) {
-            return (float) $value;
+            return round((float) $value, 2);
         }
         if ($baseType === BaseType::INTEGER) {
             return (int) $value;
