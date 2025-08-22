@@ -25,7 +25,6 @@ use App\SharedKernel\Domain\Qti\Shared\Model\IQtiResourceProvider;
 use App\SharedKernel\Domain\Qti\Shared\Model\IXmlElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
 use App\SharedKernel\Domain\StringCollection;
-use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
 use Exception;
 
 class QtiPackageBuilder

@@ -13,7 +13,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Infrastructure\Serializer\XmlReader;
+use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
 
 readonly class TestResourceBuilder
 {
@@ -21,7 +21,7 @@ readonly class TestResourceBuilder
 
     public function __construct(
         private IXmlBuilder $xmlBuilder,
-        private XmlReader $xmlReader,
+        private IXmlReader $xmlReader,
     ) {}
 
     public function build(

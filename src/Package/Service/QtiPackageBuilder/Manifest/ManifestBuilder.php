@@ -9,7 +9,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IXmlBuilder;
-use App\SharedKernel\Infrastructure\Serializer\XmlReader;
+use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
 use DOMDocument;
 use DOMElement;
 
@@ -20,7 +20,7 @@ readonly class ManifestBuilder
         private MetadataBuilder $metadataBuilder,
         private OrganizationsBuilder $organizationsBuilder,
         private ResourcesBuilder $resourcesBuilder,
-        private XmlReader $xmlReader,
+        private IXmlReader $xmlReader,
     ) {}
 
     public function buildForResources(ResourceCollection $resources): Manifest

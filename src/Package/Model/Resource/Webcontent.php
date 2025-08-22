@@ -9,7 +9,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\FileContent\LocalFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
+use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
 
 class Webcontent extends Resource
 {

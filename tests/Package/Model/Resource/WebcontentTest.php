@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Resource;
 
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Webcontent;
-use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
+use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
 use App\Tests\Unit\SharedKernel\Infrastructure\FilesystemTestCase;
 use PHPUnit\Framework\Attributes\Test;
 

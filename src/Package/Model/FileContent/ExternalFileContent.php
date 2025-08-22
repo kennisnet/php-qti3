@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Package\Model\FileContent;
 
-use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
+use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
 
 readonly class ExternalFileContent implements IFileContent
 {
