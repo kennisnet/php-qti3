@@ -6,20 +6,22 @@ namespace App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
 
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTest;
 use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependency;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 
 readonly class TestResourceBuilder
 {
     public const ASSESSMENT_TEST_FILE_NAME = 'AssessmentTest.xml';
 
     public function __construct(
-        private IXmlBuilder $xmlBuilder
+        private IXmlBuilder $xmlBuilder,
+        private XmlReader $xmlReader,
     ) {}
 
     public function build(
@@ -27,12 +29,19 @@ readonly class TestResourceBuilder
         ManifestResourceDependencyCollection $resourceDependencies,
         string $identifier = 'TEST',
     ): Resource {
+        /** @var string $xml */
+        $xml = $this->xmlBuilder->generateXmlFromObject($assessmentTest)->saveXML();
+
         return new Resource(
             $identifier,
             ResourceType::ASSESSMENT_TEST,
             self::ASSESSMENT_TEST_FILE_NAME,
-            new ResourceFileCollection([
-                new ResourceFile(self::ASSESSMENT_TEST_FILE_NAME, new XmlFileContent($this->xmlBuilder->generateXmlFromObject($assessmentTest))),
+            new PackageFileCollection([
+                new XmlFile(
+                    self::ASSESSMENT_TEST_FILE_NAME,
+                    new MemoryFileContent($xml),
+                    $this->xmlReader,
+                ),
             ]),
             new ManifestResourceDependencyCollection([
                 ...array_map(

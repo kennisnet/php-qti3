@@ -10,6 +10,7 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\QtiExpressionParse
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -447,7 +448,48 @@ class ResponseProcessorTest extends TestCase
         );
     }
 
-    public function getResponseProcessor(): ResponseProcessor
+    /**
+     * @return array[]
+     */
+    public static function selectMultipleProvider(): array
+    {
+        return [
+            ['simple-multiple-choice-processing1.xml', 2.0],
+            ['simple-multiple-choice-processing2.xml', 1.0],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('selectMultipleProvider')]
+    public function testProcessResponsesHandlerSelectMultiple(string $filename, float $score): void
+    {
+        // Arrange
+
+        $responseProcessor = $this->getResponseProcessor();
+        $responses = [
+            'RESPONSE' => ['CHOICE1', 'CHOICE2', 'CHOICE3'],
+        ];
+        $itemState = $responseProcessor->initItemState(file_get_contents(__DIR__ . '/resources/' . $filename));
+
+        // Act
+
+        $responseProcessor->processResponses(
+            $itemState,
+            $responses
+        );
+        $outcomes = $itemState->outcomeSet->outcomes;
+
+        // Assert
+
+        $this->assertEquals([
+            'FEEDBACK' => null,
+            'completionStatus' => 'completed',
+            'SCORE' => $score,
+            'MAXSCORE' => $score,
+        ], $outcomes);
+    }
+
+    private function getResponseProcessor(): ResponseProcessor
     {
         $responseDeclarationParser = new ResponseDeclarationParser();
         $outcomeDeclarationParser = new OutcomeDeclarationParser();

@@ -6,9 +6,8 @@ namespace App\SharedKernel\Domain\Qti\Package\Model\Resource;
 
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use InvalidArgumentException;
 
 class Resource
@@ -17,21 +16,21 @@ class Resource
         public readonly string $identifier,
         public readonly ResourceType $type,
         public readonly ?string $href,
-        public readonly ResourceFileCollection $files,
+        public readonly PackageFileCollection $files,
         public readonly ManifestResourceDependencyCollection $resourceDependencies,
         public ?Metadata $metadata = null,
     ) {
         $this->validateHref();
     }
 
-    public function getMainFile(): ?ResourceFile
+    public function getMainFile(): ?PackageFile
     {
         if (!$this->href) {
             return null;
         }
 
         foreach ($this->files as $file) {
-            if ($file->href === $this->href) {
+            if ($file->getFilepath() === $this->href) {
                 return $file;
             }
         }
@@ -45,9 +44,9 @@ class Resource
             return;
         }
 
-        /** @var ResourceFile $file */
+        /** @var PackageFile $file */
         foreach ($this->files->all() as $file) {
-            if ($file->href === $this->href) {
+            if ($file->getFilepath() === $this->href) {
                 return;
             }
         }

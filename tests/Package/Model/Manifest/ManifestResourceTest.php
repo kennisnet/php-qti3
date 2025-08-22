@@ -8,10 +8,10 @@ use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFileCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -25,13 +25,13 @@ class ManifestResourceTest extends TestCase
             'id',
             ResourceType::WEBCONTENT,
             'file.txt',
-            new ResourceFileCollection([
-                new ResourceFile('file.txt', new MemoryFileContent('content')),
+            new PackageFileCollection([
+                new PackageFile('file.txt', new MemoryFileContent('content')),
             ]),
             new ManifestResourceDependencyCollection(),
         );
 
-        $manifestResource = ManifestResource::fromResourceFile($resourceFile);
+        $manifestResource = ManifestResource::fromResource($resourceFile);
 
         $this->assertEquals($resourceFile->identifier, $manifestResource->identifier);
     }

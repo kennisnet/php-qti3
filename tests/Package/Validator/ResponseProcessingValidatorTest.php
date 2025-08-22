@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Validator;
 
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
 use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
 use App\SharedKernel\Domain\Qti\Package\Validator\ResponseProcessingValidator;
 use App\SharedKernel\Domain\StringCollection;
@@ -29,11 +28,6 @@ class ResponseProcessingValidatorTest extends TestCase
     #[Test]
     public function validateReturnsNoErrorsWhenItemProcessingSucceeds(): void
     {
-        $xmlContent = $this->createMock(XmlFileContent::class);
-        $xmlContent
-            ->method('__toString')
-            ->willReturn('<item></item>');
-
         $qtiPackage = new QtiPackageMock();
 
         $errors = $this->validator->validate($qtiPackage);
@@ -44,9 +38,6 @@ class ResponseProcessingValidatorTest extends TestCase
     #[Test]
     public function validateReturnsValidationErrorsFromQtiPackageValidationError(): void
     {
-        $xmlContent = $this->createMock(XmlFileContent::class);
-        $xmlContent->method('__toString')->willReturn('<invalid></invalid>');
-
         $qtiPackage = new QtiPackageMock();
 
         $exception = new QtiPackageValidationError(new StringCollection(['Invalid responseProcessing']));
@@ -69,9 +60,6 @@ class ResponseProcessingValidatorTest extends TestCase
     #[Test]
     public function validateReturnsGenericExceptionMessage(): void
     {
-        $xmlContent = $this->createMock(XmlFileContent::class);
-        $xmlContent->method('__toString')->willReturn('<item></item>');
-
         $qtiPackage = new QtiPackageMock();
 
         $this->responseProcessor

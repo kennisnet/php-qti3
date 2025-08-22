@@ -4,9 +4,26 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Package\Model\FileContent;
 
-class ExternalFileContent implements IFileContent
+use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
+
+readonly class ExternalFileContent implements IFileContent
 {
     public function __construct(
-        public readonly string $url
+        public string $url,
+        private IResourceDownloader $resourceDownloader,
     ) {}
+
+    public function getContent(): string
+    {
+        $content = '';
+        foreach ($this->getStream() as $chunk) {
+            $content .= $chunk;
+        }
+        return $content;
+    }
+
+    public function getStream(): iterable
+    {
+        return $this->resourceDownloader->downloadFileToStream($this->url);
+    }
 }

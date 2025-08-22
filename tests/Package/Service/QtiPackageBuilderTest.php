@@ -8,16 +8,17 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Repository\IAssessmentItemReposit
 use App\SharedKernel\Domain\Qti\AssessmentTest\Repository\IAssessmentTestRepository;
 use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IResourceValidator;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
+use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
 use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemStub;
 use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestStub;
 use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestMock;
@@ -52,7 +53,8 @@ class QtiPackageBuilderTest extends TestCase
             $this->assessmentItemBuilder,
             $this->assessmentTestRepository,
             $this->assessmentItemRepository,
-            $this->resourceValidator
+            $this->resourceValidator,
+            $this->createMock(IResourceDownloader::class)
         );
     }
 
@@ -68,8 +70,8 @@ class QtiPackageBuilderTest extends TestCase
 
         $assessmentTestBuilder = $this->createMock(TestResourceBuilder::class);
         $assessmentTestBuilder->method('build')->willReturn(
-            new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new ResourceFileCollection([
-                new ResourceFile('test.xml', new MemoryFileContent('content')),
+            new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new PackageFileCollection([
+                new PackageFile('test.xml', new MemoryFileContent('content')),
             ]), new ManifestResourceDependencyCollection())
         );
 
@@ -104,13 +106,13 @@ class QtiPackageBuilderTest extends TestCase
         $this->resourceValidator->method('validate')->willThrowException(new Exception('Test exception'));
 
         $this->assessmentTestBuilder->method('build')->willReturn(
-            new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new ResourceFileCollection([
-                new ResourceFile('test.xml', new MemoryFileContent('content')),
+            new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new PackageFileCollection([
+                new PackageFile('test.xml', new MemoryFileContent('content')),
             ]), new ManifestResourceDependencyCollection())
         );
         $this->assessmentItemBuilder->method('build')->willReturn(
-            new Resource('id', ResourceType::ASSESSMENT_ITEM, 'item.xml', new ResourceFileCollection([
-                new ResourceFile('item.xml', new MemoryFileContent('content')),
+            new Resource('id', ResourceType::ASSESSMENT_ITEM, 'item.xml', new PackageFileCollection([
+                new PackageFile('item.xml', new MemoryFileContent('content')),
             ]), new ManifestResourceDependencyCollection())
         );
 

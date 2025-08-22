@@ -8,13 +8,12 @@ use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -42,8 +41,8 @@ class QtiPackageTest extends TestCase
             'file',
             ResourceType::WEBCONTENT,
             'file',
-            new ResourceFileCollection([
-                new ResourceFile('file', new MemoryFileContent('test')),
+            new PackageFileCollection([
+                new PackageFile('file', new MemoryFileContent('test')),
             ]),
             new ManifestResourceDependencyCollection(),
         );
@@ -67,8 +66,8 @@ class QtiPackageTest extends TestCase
             'file',
             ResourceType::WEBCONTENT,
             'file',
-            new ResourceFileCollection([
-                new ResourceFile('file', new MemoryFileContent('test')),
+            new PackageFileCollection([
+                new PackageFile('file', new MemoryFileContent('test')),
             ]),
             new ManifestResourceDependencyCollection(),
         );
@@ -123,12 +122,21 @@ class QtiPackageTest extends TestCase
     {
         $qtiPackageMock = new QtiPackageMock(
             resources: new ResourceCollection([
-                new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new ResourceFileCollection([
-                    new ResourceFile('test.xml', new MemoryFileContent('content')),
+                new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new PackageFileCollection([
+                    new PackageFile('test.xml', new MemoryFileContent('content')),
                 ]), new ManifestResourceDependencyCollection()),
             ]),
         );
 
         $this->assertEquals('id', $qtiPackageMock->getAssessmentTestIdentifier());
+    }
+
+    #[Test]
+    public function hasFileReturnsIfPackageHasFile(): void
+    {
+        $qtiPackageMock = new QtiPackageMock();
+
+        $this->assertTrue($qtiPackageMock->hasFile('test.xml'));
+        $this->assertFalse($qtiPackageMock->hasFile('non-existing.xml'));
     }
 }

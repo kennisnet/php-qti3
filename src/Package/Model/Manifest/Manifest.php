@@ -4,38 +4,35 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Package\Model\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
-use DOMDocument;
 use DOMElement;
 use DOMXPath;
 use RuntimeException;
 
-class Manifest extends PackageFile
+class Manifest extends XmlFile
 {
     public const string MANIFEST_FILE_NAME = 'imsmanifest.xml';
     private readonly DOMXPath $xpath;
 
     private function __construct(
-        XmlFileContent $fileContent,
+        IFileContent $fileContent,
+        private readonly IXmlReader $xmlReader
     ) {
-        parent::__construct(self::MANIFEST_FILE_NAME, $fileContent);
+        parent::__construct(self::MANIFEST_FILE_NAME, $fileContent, $this->xmlReader);
 
         $this->xpath = new DOMXPath($this->getXml());
         $this->xpath->registerNamespace('lom', 'http://ltsc.ieee.org/xsd/LOM');
     }
 
-    public static function fromDomDocument(DOMDocument $document): self
-    {
-        return new self(new XmlFileContent($document));
-    }
-
     public static function fromString(string $content, IXmlReader $xmlReader): self
     {
         return new self(
-            XmlFileContent::fromString($content, $xmlReader),
+            new MemoryFileContent($content),
+            $xmlReader,
         );
     }
 
@@ -109,23 +106,5 @@ class Manifest extends PackageFile
             $dependencies->add(new ManifestResourceDependency($dependencyNode->getAttribute('identifierref')));
         }
         return $dependencies;
-    }
-
-    private function getXml(): DOMDocument
-    {
-        if (!$this->content instanceof XmlFileContent) {
-            throw new RuntimeException('Invalid content type'); // @codeCoverageIgnore
-        }
-        return $this->content->xmlDocument;
-    }
-
-    private function getDocumentElement(): DOMElement
-    {
-        $documentElement = $this->getXml()->documentElement;
-        if (!$documentElement) {
-            throw new RuntimeException('Invalid XML document'); // @codeCoverageIgnore
-        }
-
-        return $documentElement;
     }
 }

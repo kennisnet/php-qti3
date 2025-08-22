@@ -15,6 +15,9 @@ readonly class XmlReader implements IXmlReader
         libxml_clear_errors();
         $dom = new DOMDocument();
         $dom->validateOnParse = true;
+        $dom->preserveWhiteSpace = true;
+        $dom->formatOutput = true;
+
         if (!$dom->loadXML($content, LIBXML_NONET | LIBXML_COMPACT)) {
             throw new XmlParsingException(implode("\n", static::getXmlErrors($internalErrors)));
         }

@@ -7,14 +7,15 @@ namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service;
 use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageEnhancer;
 use App\SharedKernel\Infrastructure\Serializer\XmlBuilder;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\QtiPackageMock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ class QtiPackageEnhancerTest extends TestCase
     {
         $package = new QtiPackageMock();
 
-        $assessmentTestBuilder = new TestResourceBuilder(new XmlBuilder());
+        $assessmentTestBuilder = new TestResourceBuilder(new XmlBuilder(), new XmlReader());
         $enhancer = new QtiPackageEnhancer($assessmentTestBuilder);
 
         // Act
@@ -43,8 +44,8 @@ class QtiPackageEnhancerTest extends TestCase
         // Arrange
         $package = new QtiPackageMock(
             resources: new ResourceCollection([
-                new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new ResourceFileCollection([
-                    new ResourceFile('test.xml', new MemoryFileContent('content')),
+                new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new PackageFileCollection([
+                    new PackageFile('test.xml', new MemoryFileContent('content')),
                 ]), new ManifestResourceDependencyCollection(), ),
             ]),
         );
@@ -71,7 +72,7 @@ class QtiPackageEnhancerTest extends TestCase
             manifest: $manifest,
         );
 
-        $assessmentTestBuilder = new TestResourceBuilder(new XmlBuilder());
+        $assessmentTestBuilder = new TestResourceBuilder(new XmlBuilder(), new XmlReader());
         $enhancer = new QtiPackageEnhancer($assessmentTestBuilder);
 
         // Act

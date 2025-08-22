@@ -10,7 +10,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependenc
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
 use App\SharedKernel\Infrastructure\Serializer\XmlParsingException;
 use App\SharedKernel\Infrastructure\Serializer\XmlReader;

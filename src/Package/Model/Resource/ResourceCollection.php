@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Package\Model\Resource;
 
 use App\SharedKernel\Domain\AbstractCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
 
 /**
  * @template-extends AbstractCollection<Resource>

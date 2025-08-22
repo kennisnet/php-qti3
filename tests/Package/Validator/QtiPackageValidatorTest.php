@@ -10,26 +10,27 @@ use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\QtiExpressionParse
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\Qti\Package\Validator\IImsQtiPackageValidator;
 use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidator;
 use App\SharedKernel\Domain\Qti\Package\Validator\ResponseProcessingValidator;
 use App\SharedKernel\Domain\StringCollection;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestMock;
 use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\QtiPackageMock;
-use DOMDocument;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class QtiPackageValidatorTest extends TestCase
 {
     private QtiPackageValidator $validator;
+    private XmlReader $xmlReader;
 
     public function setUp(): void
     {
@@ -51,6 +52,7 @@ class QtiPackageValidatorTest extends TestCase
                 )
             )
         );
+        $this->xmlReader = new XmlReader();
     }
 
     #[Test]
@@ -63,15 +65,16 @@ class QtiPackageValidatorTest extends TestCase
             ManifestMock::create()
         );
 
-        $xml = new DOMDocument();
-        $xml->loadXML(file_get_contents(__DIR__ . '/resources/item001.xml'));
-
         $qtiPackage->addResource(new Resource(
             'item001',
             ResourceType::ASSESSMENT_ITEM,
             'item001.xml',
-            new ResourceFileCollection([
-                new ResourceFile('item001.xml', new XmlFileContent($xml)),
+            new PackageFileCollection([
+                new XmlFile(
+                    'item001.xml',
+                    new MemoryFileContent(file_get_contents(__DIR__ . '/resources/item001.xml')),
+                    $this->xmlReader
+                ),
             ]),
             new ManifestResourceDependencyCollection(),
         ));

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Package\Model\Manifest;
 
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use InvalidArgumentException;
 
 readonly class ManifestResource
@@ -22,13 +23,13 @@ readonly class ManifestResource
         }
     }
 
-    public static function fromResourceFile(Resource $resource): self
+    public static function fromResource(Resource $resource): self
     {
         return new self(
             $resource->identifier,
             $resource->type,
             new ManifestResourceFileCollection(array_map(
-                fn($file): ManifestResourceFile => new ManifestResourceFile($file->href, ),
+                fn(PackageFile $file): ManifestResourceFile => new ManifestResourceFile($file->getFilepath()),
                 $resource->files->all()
             )),
             $resource->resourceDependencies,

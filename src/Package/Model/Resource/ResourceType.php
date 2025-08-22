@@ -4,7 +4,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Model\ResourceFile;
+namespace App\SharedKernel\Domain\Qti\Package\Model\Resource;
 
 enum ResourceType: string
 {

@@ -9,7 +9,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
 
 interface IFilesystemPackageFactory
 {
-    public function getReader(string $folder): IPackageReader;
+    public function getReader(string $folder, bool $lazyLoading = true): IPackageReader;
 
     public function getWriter(string $folder): IPackageWriter;
 }

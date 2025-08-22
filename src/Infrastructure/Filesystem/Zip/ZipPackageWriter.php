@@ -61,7 +61,7 @@ readonly class ZipPackageWriter implements IPackageWriter
             $zipArchive->addFile($content->filepath, $file->getFilepath());
         } elseif ($content instanceof ExternalFileContent) {
             $zipArchive->addFile(
-                $this->resourceDownloader->downloadFile($content->url, md5($content->url)),
+                $this->resourceDownloader->downloadFileToFilesystem($content->url, md5($content->url)),
                 $file->getFilepath()
             );
         } else {

@@ -8,6 +8,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependenc
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use App\SharedKernel\Infrastructure\Serializer\XmlBuilder;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemStub;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +20,7 @@ class ItemResourceBuilderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->assessmentItemBuilder = new ItemResourceBuilder(new XmlBuilder());
+        $this->assessmentItemBuilder = new ItemResourceBuilder(new XmlBuilder(), new XmlReader());
     }
 
     #[Test]

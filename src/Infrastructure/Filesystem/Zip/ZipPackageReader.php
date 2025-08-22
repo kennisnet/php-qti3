@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Infrastructure\Filesystem\Zip;
 
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 use DateTimeImmutable;
@@ -25,14 +27,14 @@ readonly class ZipPackageReader implements IPackageReader
         }
     }
 
-    public function readFile(string $filepath): string
+    public function getFileContent(string $filepath): IFileContent
     {
         $content = $this->zip->getFromName($filepath);
         if ($content === false) {
             throw new BadRequestException(sprintf('File %s not found in ZIP', $filepath));
         }
 
-        return $content;
+        return new MemoryFileContent($content);
     }
 
     public function getLastModified(): ?DateTimeImmutable

@@ -14,4 +14,14 @@ readonly class MemoryFileContent implements IMemoryFileContent
     {
         return $this->content;
     }
+
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    public function getStream(): iterable
+    {
+        return [$this->content];
+    }
 }

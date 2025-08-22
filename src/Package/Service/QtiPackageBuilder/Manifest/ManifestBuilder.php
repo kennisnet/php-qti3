@@ -9,6 +9,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IXmlBuilder;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use DOMDocument;
 use DOMElement;
 
@@ -18,19 +19,23 @@ readonly class ManifestBuilder
         private IXmlBuilder $xmlBuilder,
         private MetadataBuilder $metadataBuilder,
         private OrganizationsBuilder $organizationsBuilder,
-        private ResourcesBuilder $resourcesBuilder
+        private ResourcesBuilder $resourcesBuilder,
+        private XmlReader $xmlReader,
     ) {}
 
     public function buildForResources(ResourceCollection $resources): Manifest
     {
         $manifestResources = new ManifestResourceCollection();
         foreach ($resources as $file) {
-            $manifestResources->add(ManifestResource::fromResourceFile($file));
+            $manifestResources->add(ManifestResource::fromResource($file));
         }
         $xmlDocument = $this->xmlBuilder->createDomDocument();
         $this->generateXml($xmlDocument, $manifestResources);
 
-        return Manifest::fromDomDocument($xmlDocument);
+        /** @var string $xml */
+        $xml = $xmlDocument->saveXML();
+
+        return Manifest::fromString($xml, $this->xmlReader);
     }
 
     private function generateXml(DOMDocument $xmlDocument, ManifestResourceCollection $resources): void

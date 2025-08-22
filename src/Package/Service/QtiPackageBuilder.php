@@ -25,6 +25,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\IQtiResourceProvider;
 use App\SharedKernel\Domain\Qti\Shared\Model\IXmlElement;
 use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
 use App\SharedKernel\Domain\StringCollection;
+use App\SharedKernel\Infrastructure\Filesystem\IResourceDownloader;
 use Exception;
 
 class QtiPackageBuilder
@@ -35,7 +36,8 @@ class QtiPackageBuilder
         private readonly ItemResourceBuilder $itemResourceBuilder,
         private readonly IAssessmentTestRepository $assessmentTestRepository,
         private readonly IAssessmentItemRepository $assessmentItemRepository,
-        private readonly IResourceValidator $resourceValidator
+        private readonly IResourceValidator $resourceValidator,
+        private readonly IResourceDownloader $resourceDownloader,
     ) {}
 
     public function buildFromAssessmentId(
@@ -132,6 +134,7 @@ class QtiPackageBuilder
                     $qtiResource->originalPath,
                     sprintf('RESOURCE%03d', $webcontent->count() + 1),
                     $qtiResource->relativePath . $qtiResource->filename,
+                    $this->resourceDownloader,
                     $qtiResource->isBinary
                 );
                 $webcontent->add($webcontentFile);

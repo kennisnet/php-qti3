@@ -10,7 +10,8 @@ class PackageFile implements IPackageFile
 {
     public function __construct(
         private readonly string $filepath,
-        protected readonly IFileContent $content
+        protected readonly IFileContent $content,
+        private readonly bool $isBinary = false,
     ) {}
 
     public function getFilepath(): string
@@ -25,6 +26,6 @@ class PackageFile implements IPackageFile
 
     public function isBinary(): bool
     {
-        return false;
+        return $this->isBinary;
     }
 }

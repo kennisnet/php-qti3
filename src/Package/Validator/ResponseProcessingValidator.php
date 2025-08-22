@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Package\Validator;
 
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\XmlFileContent;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\StringCollection;
 use Exception;
 
@@ -27,14 +26,11 @@ readonly class ResponseProcessingValidator implements IQtiPackageValidator
 
         /** @var Resource $itemResource */
         foreach ($itemResources as $itemResource) {
-            /** @var ResourceFile $itemFile */
+            /** @var XmlFile $itemFile */
             $itemFile = $itemResource->getMainFile();
 
-            /** @var XmlFileContent $xmlFileContent */
-            $xmlFileContent = $itemFile->getContent();
-
             try {
-                $this->responseProcessor->initItemState((string) $xmlFileContent);
+                $this->responseProcessor->initItemState((string) $itemFile);
             } catch (QtiPackageValidationError $error) {
                 /** @var string $validationError */
                 foreach ($error->validationErrors() as $validationError) {

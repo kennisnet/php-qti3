@@ -11,6 +11,7 @@ class ManifestMock extends Manifest
 {
     public static function create(): Manifest
     {
-        return Manifest::fromString('<manifest />', new XmlReader());
+        $xmlReader = new XmlReader();
+        return Manifest::fromString($xmlReader->read('<manifest />')->saveXML(), $xmlReader);
     }
 }

@@ -8,12 +8,12 @@ use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use DOMDocument;
 
@@ -22,27 +22,31 @@ class QtiPackageMock extends QtiPackage
     public function __construct(
         ?ResourceCollection $resources = null,
         ?Manifest $manifest = null,
+        ?Metadata $metadata = null,
     ) {
-        $metadataLom = new DOMDocument();
-        $metadataLom->loadXML(file_get_contents(__DIR__ . '/resources/metadata.xml'));
+        $xmlReader = new XmlReader();
+
+        if (is_null($metadata)) {
+            $metadata = Metadata::fromString(file_get_contents(__DIR__ . '/resources/metadata.xml'), $xmlReader);
+        }
 
         $resources ??= new ResourceCollection([
             new Resource(
                 'test-id',
                 ResourceType::ASSESSMENT_TEST,
                 'test.xml',
-                new ResourceFileCollection([
-                    new ResourceFile('test.xml', new MemoryFileContent('content')),
+                new PackageFileCollection([
+                    new XmlFile('test.xml', new MemoryFileContent('<qti-assessment-test></qti-assessment-test>'), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
-                new Metadata($metadataLom)
+                $metadata
             ),
             new Resource(
                 'test-item-id1',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item1.xml',
-                new ResourceFileCollection([
-                    new ResourceFile('test-item1.xml', new MemoryFileContent('content')),
+                new PackageFileCollection([
+                    new XmlFile('test-item1.xml', new MemoryFileContent(file_get_contents(__DIR__ . '/resources/item.xml')), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
             ),
@@ -50,8 +54,8 @@ class QtiPackageMock extends QtiPackage
                 'test-item-id2',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item2.xml',
-                new ResourceFileCollection([
-                    new ResourceFile('test-item2.xml', new MemoryFileContent('content')),
+                new PackageFileCollection([
+                    new XmlFile('test-item2.xml', new MemoryFileContent('<qti-assessment-item></qti-assessment-item>'), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
             ),
@@ -59,8 +63,8 @@ class QtiPackageMock extends QtiPackage
                 'test-item-id3',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item3.xml',
-                new ResourceFileCollection([
-                    new ResourceFile('test-item3.xml', new MemoryFileContent('content')),
+                new PackageFileCollection([
+                    new XmlFile('test-item3.xml', new MemoryFileContent('<qti-assessment-item></qti-assessment-item>'), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
             ),
@@ -68,8 +72,8 @@ class QtiPackageMock extends QtiPackage
                 'test-item-id4',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item4.xml',
-                new ResourceFileCollection([
-                    new ResourceFile('test-item4.xml', new MemoryFileContent('content')),
+                new PackageFileCollection([
+                    new XmlFile('test-item4.xml', new MemoryFileContent('<qti-assessment-item></qti-assessment-item>'), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
             ),
@@ -77,8 +81,8 @@ class QtiPackageMock extends QtiPackage
                 'test-item-id5',
                 ResourceType::ASSESSMENT_ITEM,
                 'test-item5.xml',
-                new ResourceFileCollection([
-                    new ResourceFile('test-item5.xml', new MemoryFileContent('content')),
+                new PackageFileCollection([
+                    new XmlFile('test-item5.xml', new MemoryFileContent('<qti-assessment-item></qti-assessment-item>'), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
             ),

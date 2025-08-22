@@ -7,16 +7,17 @@ namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuild
 use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
 use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
+use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
 use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\ResourceFile\ResourceType;
+use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\OrganizationsBuilder;
 use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
 use App\SharedKernel\Infrastructure\Serializer\XmlBuilder;
+use App\SharedKernel\Infrastructure\Serializer\XmlReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -43,6 +44,7 @@ class ManifestBuilderTest extends TestCase
             $this->metadataBuilder,
             $this->organizationsBuilder,
             $this->resourcesBuilder,
+            new XmlReader()
         );
     }
 
@@ -50,8 +52,8 @@ class ManifestBuilderTest extends TestCase
     public function aManifestCanBeCreatedForResources(): void
     {
         $manifest = $this->manifestBuilder->buildForResources(new ResourceCollection([
-            new Resource('id', ResourceType::WEBCONTENT, 'file.txt', new ResourceFileCollection([
-                new ResourceFile('file.txt', new MemoryFileContent('content')),
+            new Resource('id', ResourceType::WEBCONTENT, 'file.txt', new PackageFileCollection([
+                new PackageFile('file.txt', new MemoryFileContent('content')),
             ]), new ManifestResourceDependencyCollection()),
         ]));
         $this->assertInstanceOf(Manifest::class, $manifest);
