@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\Package\Model\FileContent;
 
 use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
+use RuntimeException;
 
 readonly class ExternalFileContent implements IFileContent
 {
+    public const MAX_MEMORY_USAGE = 8388608; // 8MB
+
     public function __construct(
         public string $url,
         private IResourceDownloader $resourceDownloader,
@@ -17,6 +20,9 @@ readonly class ExternalFileContent implements IFileContent
     {
         $content = '';
         foreach ($this->getStream() as $chunk) {
+            if (strlen($content) + strlen($chunk) > self::MAX_MEMORY_USAGE) {
+                throw new RuntimeException(sprintf('File content exceeds maximum memory usage of %d bytes', self::MAX_MEMORY_USAGE));
+            }
             $content .= $chunk;
         }
         return $content;

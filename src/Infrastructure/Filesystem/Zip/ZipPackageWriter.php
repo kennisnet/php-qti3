@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Infrastructure\Filesystem\Zip;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\ExternalFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IMemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\LocalFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\IPackageFile;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Infrastructure\Filesystem\ResourceDownloader;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Exception\ZipArchiveOpenFileException;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
-use InvalidArgumentException;
+use RuntimeException;
 use ZipArchive;
 
-readonly class ZipPackageWriter implements IPackageWriter
+class ZipPackageWriter implements IPackageWriter
 {
+    /** @var array<int,string> */
+    private array $tmpFiles = [];
+
     public function __construct(
-        private string $zipFilepath,
-        private ResourceDownloader $resourceDownloader,
-        private ZipArchiveFactory $zipArchiveFactory,
+        private readonly string $zipFilepath,
+        private readonly ZipArchiveFactory $zipArchiveFactory,
     ) {}
 
     public function write(QtiPackage $qtiPackage): void
@@ -32,7 +31,11 @@ readonly class ZipPackageWriter implements IPackageWriter
             $this->addFile($file, $zipArchive);
         }
 
-        $zipArchive->close();
+        $success = $zipArchive->close();
+        $this->cleanup();
+        if ($success === false) {
+            throw new RuntimeException(sprintf('Unable to close zip: %s', $zipArchive->getStatusString())); // @codeCoverageIgnore
+        }
     }
 
     public function getPublicUrl(): string
@@ -56,16 +59,36 @@ readonly class ZipPackageWriter implements IPackageWriter
     {
         $content = $file->getContent();
         if ($content instanceof IMemoryFileContent) {
-            $zipArchive->addFromString($file->getFilepath(), (string) $content);
-        } elseif ($content instanceof LocalFileContent) {
-            $zipArchive->addFile($content->filepath, $file->getFilepath());
-        } elseif ($content instanceof ExternalFileContent) {
-            $zipArchive->addFile(
-                $this->resourceDownloader->downloadFileToFilesystem($content->url, md5($content->url)),
-                $file->getFilepath()
-            );
-        } else {
-            throw new InvalidArgumentException(sprintf('Unsupported content type: %s', $content::class));
+            $success = $zipArchive->addFromString($file->getFilepath(), $content->getContent());
+            if ($success === false) {
+                throw new RuntimeException(sprintf('Unable to add file %s to zip: %s', $file->getFilepath(), $zipArchive->getStatusString())); // @codeCoverageIgnore
+            }
+            return;
         }
+        $localTmpFile = tempnam(sys_get_temp_dir(), 'qti_package_');
+        if (!$localTmpFile) {
+            throw new RuntimeException('Unable to create temporary file'); // @codeCoverageIgnore
+        }
+        $f = fopen($localTmpFile, 'w');
+        if ($f === false) {
+            throw new RuntimeException('Unable to open file: ' . $localTmpFile); // @codeCoverageIgnore
+        }
+        $this->tmpFiles[] = $localTmpFile;
+        foreach ($content->getStream() as $chunk) {
+            fwrite($f, $chunk);
+        }
+        fclose($f);
+        $success = $zipArchive->addFile($localTmpFile, $file->getFilepath());
+        if ($success === false) {
+            throw new RuntimeException(sprintf('Unable to add file %s to zip: %s', $file->getFilepath(), $zipArchive->getStatusString())); // @codeCoverageIgnore
+        }
+    }
+
+    private function cleanup(): void
+    {
+        foreach ($this->tmpFiles as $tmpFile) {
+            unlink($tmpFile);
+        }
+        $this->tmpFiles = [];
     }
 }

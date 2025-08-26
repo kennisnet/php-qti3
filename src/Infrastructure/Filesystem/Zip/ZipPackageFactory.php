@@ -7,13 +7,11 @@ namespace App\SharedKernel\Infrastructure\Filesystem\Zip;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
 use App\SharedKernel\Domain\Qti\Package\Service\IZipPackageFactory;
-use App\SharedKernel\Infrastructure\Filesystem\ResourceDownloader;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 
 class ZipPackageFactory implements IZipPackageFactory
 {
     public function __construct(
-        private readonly ResourceDownloader $resourceDownloader,
         private readonly ZipArchiveFactory $zipArchiveFactory,
     ) {}
 
@@ -24,6 +22,6 @@ class ZipPackageFactory implements IZipPackageFactory
 
     public function getWriter(string $zipfilePath): IPackageWriter
     {
-        return new ZipPackageWriter($zipfilePath, $this->resourceDownloader, $this->zipArchiveFactory);
+        return new ZipPackageWriter($zipfilePath, $this->zipArchiveFactory);
     }
 }

@@ -34,6 +34,7 @@ readonly class FilesystemPackageWriter implements IPackageWriter
 
     private function writeStream(IFileContent $fileContent, string $filename): void
     {
+        // Opens a temporary file in memory or on disk when larger than 8MB
         $stream = fopen('php://temp/maxmemory=8388608', 'w+');
 
         try {

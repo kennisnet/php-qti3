@@ -26,13 +26,12 @@ readonly class FilesystemPackageReader implements IPackageReader
     public function getFileContent(string $filepath): IFileContent
     {
         if ($this->lazyLoading) {
-            return new FlysystemLocalFileContent(
+            return new FlysystemFileContent(
                 $this->dataStorage,
                 $this->folderName . '/' . $filepath,
             );
-        } else {
-            return new MemoryFileContent($this->dataStorage->read($this->folderName . '/' . $filepath));
         }
+        return new MemoryFileContent($this->dataStorage->read($this->folderName . '/' . $filepath));
     }
 
     public function getLastModified(): ?DateTimeImmutable
