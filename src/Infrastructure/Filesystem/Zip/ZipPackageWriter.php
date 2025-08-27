@@ -8,6 +8,7 @@ use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IMemoryFileContent;
 use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
 use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\IPackageFile;
 use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
+use App\SharedKernel\Infrastructure\Filesystem\FileSystemUtils;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Exception\ZipArchiveOpenFileException;
 use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 use RuntimeException;
@@ -21,6 +22,7 @@ class ZipPackageWriter implements IPackageWriter
     public function __construct(
         private readonly string $zipFilepath,
         private readonly ZipArchiveFactory $zipArchiveFactory,
+        private readonly FileSystemUtils $fileSystemUtils,
     ) {}
 
     public function write(QtiPackage $qtiPackage): void
@@ -46,6 +48,8 @@ class ZipPackageWriter implements IPackageWriter
     private function getZipArchive(string $archiveFilePath): ZipArchive
     {
         $zipArchive = $this->zipArchiveFactory->create();
+
+        $this->fileSystemUtils->ensureDirectory(dirname($archiveFilePath));
 
         $openResult = $zipArchive->open($archiveFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($openResult !== true) {
