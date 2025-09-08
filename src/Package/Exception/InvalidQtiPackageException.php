@@ -24,7 +24,7 @@ final class InvalidQtiPackageException extends DomainError implements HasValidat
 
     public function errorType(): ErrorType
     {
-        return ErrorType::INTERNAL;
+        return ErrorType::VALIDATION;
     }
 
     protected function errorMessage(): string
