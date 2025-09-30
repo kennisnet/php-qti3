@@ -40,7 +40,7 @@ class OutcomeDeclarationParser extends AbstractParser
         }
 
         $defaultValueChildren = $this->getChildren($defaultValue);
-        $this->validateTag($defaultValueChildren[0], Value::qtiTagName());
+        $this->validateTag($defaultValueChildren[0] ?? null, Value::qtiTagName());
         $value = $defaultValueChildren[0]->nodeValue;
 
         if ($value === null || $value === '') {

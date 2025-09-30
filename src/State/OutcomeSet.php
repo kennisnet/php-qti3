@@ -38,7 +38,7 @@ class OutcomeSet
     {
         $outcomeDeclaration = $this->outcomeDeclarations->getByIdentifier($identifier);
 
-        return ValueConverter::convert($this->outcomes[$identifier], $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
+        return ValueConverter::convert($this->outcomes[$identifier] ?? null, $outcomeDeclaration->cardinality, $outcomeDeclaration->baseType);
     }
 
     /**
