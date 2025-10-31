@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service;
+namespace Qti3\AssessmentItem\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
+use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
 use DOMDocument;
 
 class AssessmentItemDeterminator
@@ -33,7 +33,7 @@ class AssessmentItemDeterminator
     {
         $root = $itemXml->documentElement;
         if (!$root) {
-            return ''; // @codeCoverageIgnore
+            return '';
         }
         return $root->getAttribute('title');
     }
