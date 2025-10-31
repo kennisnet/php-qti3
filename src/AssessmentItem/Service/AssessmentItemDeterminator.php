@@ -28,4 +28,13 @@ class AssessmentItemDeterminator
 
         return $hasExtendedTextInteraction;
     }
+
+    public function determineTitle(DOMDocument $itemXml): string
+    {
+        $root = $itemXml->documentElement;
+        if (!$root) {
+            return '';
+        }
+        return $root->getAttribute('title');
+    }
 }
