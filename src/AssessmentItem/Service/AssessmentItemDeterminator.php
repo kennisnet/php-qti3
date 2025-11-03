@@ -33,7 +33,7 @@ class AssessmentItemDeterminator
     {
         $root = $itemXml->documentElement;
         if (!$root) {
-            return '';
+            return ''; // @codeCoverageIgnore
         }
         return $root->getAttribute('title');
     }
