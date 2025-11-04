@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Qti\State;
 
 use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
+use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
+use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
 use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
 use App\SharedKernel\Domain\StringCollection;
 use InvalidArgumentException;
@@ -26,6 +28,24 @@ class ItemState
             return $this->responseSet->getResponseValue($identifier);
         } catch (InvalidArgumentException) {
             return $this->outcomeSet->getOutcomeValue($identifier);
+        }
+    }
+
+    public function getBaseType(string $identifier): BaseType
+    {
+        try {
+            return $this->responseSet->responseDeclarations->getByIdentifier($identifier)->baseType;
+        } catch (InvalidArgumentException) {
+            return $this->outcomeSet->outcomeDeclarations->getByIdentifier($identifier)->baseType;
+        }
+    }
+
+    public function getCardinality(string $identifier): Cardinality
+    {
+        try {
+            return $this->responseSet->responseDeclarations->getByIdentifier($identifier)->cardinality;
+        } catch (InvalidArgumentException) {
+            return $this->outcomeSet->outcomeDeclarations->getByIdentifier($identifier)->cardinality;
         }
     }
 

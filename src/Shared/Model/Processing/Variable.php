@@ -29,12 +29,12 @@ class Variable extends AbstractQtiExpression
 
     public function getBaseType(ItemState $state): BaseType
     {
-        return $state->responseSet->responseDeclarations->getByIdentifier($this->identifier)->baseType;
+        return $state->getBaseType($this->identifier);
     }
 
     public function getCardinality(ItemState $state): Cardinality
     {
-        return $state->responseSet->responseDeclarations->getByIdentifier($this->identifier)->cardinality;
+        return $state->getCardinality($this->identifier);
     }
 
     public function validate(ItemState $itemState): StringCollection
