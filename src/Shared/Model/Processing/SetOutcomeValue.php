@@ -47,6 +47,13 @@ class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcome
 
         if (!$itemState->getIdentifiers()->has($this->identifier)) {
             $errors->add('Identifier ' . $this->identifier . ' not found for `qti-set-outcome-value`');
+        } else {
+            if ($itemState->getBaseType($this->identifier) !== $this->value->getBaseType($itemState)) {
+                $errors->add('Base type mismatch for identifier ' . $this->identifier);
+            }
+            if ($itemState->getCardinality($this->identifier) !== $this->value->getCardinality($itemState)) {
+                $errors->add('Cardinality mismatch for identifier ' . $this->identifier);
+            }
         }
 
         $errors = $errors->mergeWith($this->value->validate($itemState));
