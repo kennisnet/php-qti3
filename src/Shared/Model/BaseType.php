@@ -17,4 +17,22 @@ enum BaseType: string
     case FILE = 'file';
     case IDENTIFIER = 'identifier';
     case URI = 'uri';
+
+    public function fits(BaseType $type): bool
+    {
+        if ($this->value === $type->value) {
+            return true;
+        }
+        if ($this->value === BaseType::FLOAT->value) {
+            return $type->value === BaseType::INTEGER->value || $type->value === BaseType::FLOAT->value;
+        }
+        if ($this->value === BaseType::STRING->value) {
+            return $type->value === BaseType::STRING->value ||
+                $type->value === BaseType::IDENTIFIER->value ||
+                $type->value === BaseType::INTEGER->value ||
+                $type->value === BaseType::FLOAT->value;
+        }
+
+        return false;
+    }
 }
