@@ -41,7 +41,7 @@ class SelectPointInteractionTest extends TestCase
                 'max-choices' => '1',
                 'response-identifier' => 'RESPONSE',
             ],
-            $this->interaction->attributes()
+            $this->interaction->attributes(),
         );
 
         $this->assertEquals(
@@ -49,7 +49,7 @@ class SelectPointInteractionTest extends TestCase
                 $this->prompt,
                 $this->image,
             ],
-            $this->interaction->children()
+            $this->interaction->children(),
         );
     }
 }

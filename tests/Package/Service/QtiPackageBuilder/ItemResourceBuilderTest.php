@@ -29,13 +29,13 @@ class ItemResourceBuilderTest extends TestCase
         $assessmentItemResource = $this->assessmentItemBuilder->build(
             'ITEM001',
             AssessmentItemStub::assessmentItem(),
-            new ManifestResourceDependencyCollection()
+            new ManifestResourceDependencyCollection(),
         );
 
         $this->assertInstanceOf(Resource::class, $assessmentItemResource);
         $this->assertStringContainsString(
             '<qti-assessment-item',
-            (string) $assessmentItemResource->files->first()->getContent()
+            (string) $assessmentItemResource->files->first()->getContent(),
         );
         $this->assertEquals('ITEM001.xml', $assessmentItemResource->href);
     }

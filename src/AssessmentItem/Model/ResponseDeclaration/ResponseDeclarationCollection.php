@@ -35,7 +35,7 @@ class ResponseDeclarationCollection extends AbstractCollection
     {
         return new StringCollection(array_map(
             fn(ResponseDeclaration $responseDeclaration): string => $responseDeclaration->identifier,
-            $this->all()
+            $this->all(),
         ));
     }
 }

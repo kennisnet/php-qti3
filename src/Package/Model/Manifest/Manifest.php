@@ -20,7 +20,7 @@ class Manifest extends XmlFile
 
     private function __construct(
         IFileContent $fileContent,
-        private readonly IXmlReader $xmlReader
+        private readonly IXmlReader $xmlReader,
     ) {
         parent::__construct(self::MANIFEST_FILE_NAME, $fileContent, $this->xmlReader);
 

@@ -24,7 +24,7 @@ class MapResponseTest extends TestCase
             [
                 'identifier' => 'identifier',
             ],
-            $this->mapResponse->attributes()
+            $this->mapResponse->attributes(),
         );
     }
 }

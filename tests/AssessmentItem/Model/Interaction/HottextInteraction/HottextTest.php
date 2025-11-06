@@ -17,7 +17,7 @@ class HottextTest extends TestCase
     {
         $this->hottext = new Hottext(
             content: new TextNode('Example'),
-            identifier: 'A'
+            identifier: 'A',
         );
     }
 

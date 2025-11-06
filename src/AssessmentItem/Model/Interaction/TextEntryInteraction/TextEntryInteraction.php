@@ -12,7 +12,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 class TextEntryInteraction extends QtiElement
 {
     public function __construct(
-        public string $responseIdentifier = 'RESPONSE'
+        public string $responseIdentifier = 'RESPONSE',
     ) {}
 
     public function attributes(): array

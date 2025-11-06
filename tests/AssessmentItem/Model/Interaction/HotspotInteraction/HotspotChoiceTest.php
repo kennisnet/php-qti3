@@ -17,7 +17,7 @@ class HotspotChoiceTest extends TestCase
     {
         $this->hotspotChoice = new HotspotChoice(
             shape: Circle::fromString('418,29,40'),
-            identifier: 'I'
+            identifier: 'I',
         );
     }
 

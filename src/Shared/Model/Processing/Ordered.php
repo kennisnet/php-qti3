@@ -15,7 +15,7 @@ class Ordered extends AbstractQtiExpression
      * @param array<int,AbstractQtiExpression> $elements
      */
     public function __construct(
-        public readonly array $elements
+        public readonly array $elements,
     ) {}
 
     public function children(): array

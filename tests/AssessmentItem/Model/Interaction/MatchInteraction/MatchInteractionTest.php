@@ -31,7 +31,7 @@ class MatchInteractionTest extends TestCase
             prompt: new Prompt(new ContentNodeCollection([new TextNode('Prompt')])),
             responseIdentifier: 'RESPONSE',
             shuffle: true,
-            maxAssociations: 5
+            maxAssociations: 5,
         );
     }
 

@@ -84,7 +84,7 @@ readonly class QtiPackageReader implements IQtiPackageFactory
             $metadataResources = $manifest->getResources()->filter(
                 fn(ManifestResource $manifestResource): bool =>
                     $manifestResource->identifier === $dependency->identifierref &&
-                    $manifestResource->type === ResourceType::RESOURCE_METADATA
+                    $manifestResource->type === ResourceType::RESOURCE_METADATA,
             );
 
             if ($metadataResources->count() === 0) {

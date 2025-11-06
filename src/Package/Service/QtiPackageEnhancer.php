@@ -24,7 +24,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarati
 class QtiPackageEnhancer
 {
     public function __construct(
-        private readonly TestResourceBuilder $testResourceBuilder
+        private readonly TestResourceBuilder $testResourceBuilder,
     ) {}
 
     public function enhancePackage(QtiPackage $package): void
@@ -40,7 +40,7 @@ class QtiPackageEnhancer
     {
         $package->addResource($this->testResourceBuilder->build(
             $this->generateTest($package),
-            new ManifestResourceDependencyCollection()
+            new ManifestResourceDependencyCollection(),
         ));
     }
 
@@ -54,8 +54,8 @@ class QtiPackageEnhancer
                     $resource->identifier,
                     $resource->href ?? '',
                 ),
-                $itemFiles->all()
-            )
+                $itemFiles->all(),
+            ),
         );
     }
 
@@ -75,9 +75,9 @@ class QtiPackageEnhancer
                             'Section',
                             $this->getAssessmentItemRefs($package),
                         ),
-                    ])
+                    ]),
                 ),
-            ])
+            ]),
         );
     }
 }

@@ -50,7 +50,7 @@ class XmlFileTest extends TestCase
 
         $this->assertStringContainsString(
             'x &lt; y &amp; y &gt; z &amp; "z &#x2265; w" &amp; \' w &#x2264; x \'',
-            (string) $xmlFile
+            (string) $xmlFile,
         );
     }
 }

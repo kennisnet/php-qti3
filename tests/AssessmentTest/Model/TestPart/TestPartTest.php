@@ -21,7 +21,7 @@ class TestPartTest extends TestCase
             'id',
             NavigationMode::LINEAR,
             SubmissionMode::INDIVIDUAL,
-            new AssessmentSectionCollection()
+            new AssessmentSectionCollection(),
         );
     }
 

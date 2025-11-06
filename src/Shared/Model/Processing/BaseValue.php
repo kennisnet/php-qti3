@@ -15,7 +15,7 @@ class BaseValue extends AbstractQtiExpression
 {
     public function __construct(
         public readonly BaseType $baseType,
-        public readonly string|int|float|bool $value
+        public readonly string|int|float|bool $value,
     ) {}
 
     public function attributes(): array
@@ -31,7 +31,7 @@ class BaseValue extends AbstractQtiExpression
             new TextNode(
                 is_bool($this->value) ?
                     ($this->value ? 'true' : 'false')
-                    : (string) $this->value
+                    : (string) $this->value,
             ),
         ];
     }

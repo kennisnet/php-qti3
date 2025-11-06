@@ -10,14 +10,14 @@ use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 final class GapText extends QtiElement
 {
     public function __construct(
-        readonly public string $identifier,
-        readonly public int $matchMax,
-        readonly public ContentNodeCollection $content,
-        readonly public int $matchMin = 0,
-        readonly public ?string $matchGroup = null,
+        public readonly string $identifier,
+        public readonly int $matchMax,
+        public readonly ContentNodeCollection $content,
+        public readonly int $matchMin = 0,
+        public readonly ?string $matchGroup = null,
         //	Identifier of a template variable used to control the visibility of the qti-gap-text
-        readonly public ?string $templateIdentifier = null,
-        readonly public string $showHide = 'show',
+        public readonly ?string $templateIdentifier = null,
+        public readonly string $showHide = 'show',
     ) {}
 
     public function attributes(): array

@@ -30,7 +30,7 @@ class ResourceTest extends TestCase
             new PackageFileCollection([
                 new PackageFile('test.xml', new MemoryFileContent('content')),
             ]),
-            new ManifestResourceDependencyCollection()
+            new ManifestResourceDependencyCollection(),
         );
     }
 
@@ -46,7 +46,7 @@ class ResourceTest extends TestCase
             new PackageFileCollection([
                 new PackageFile('test.xml', new MemoryFileContent('content')),
             ]),
-            new ManifestResourceDependencyCollection()
+            new ManifestResourceDependencyCollection(),
         );
 
         // Act
@@ -69,7 +69,7 @@ class ResourceTest extends TestCase
             ResourceType::ASSESSMENT_ITEM,
             null,
             new PackageFileCollection(),
-            new ManifestResourceDependencyCollection()
+            new ManifestResourceDependencyCollection(),
         );
 
         // Act

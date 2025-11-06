@@ -12,7 +12,7 @@ class OutcomeProcessing extends QtiElement
      * @param array<int,IOutcomeProcessingElement> $elements
      */
     public function __construct(
-        public readonly array $elements
+        public readonly array $elements,
     ) {}
 
     public function children(): array

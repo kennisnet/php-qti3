@@ -21,7 +21,7 @@ class RectangleTest extends TestCase
             new Coordinate('418'),
             new Coordinate('29'),
             new Coordinate('40'),
-            new Coordinate('50')
+            new Coordinate('50'),
         );
     }
 

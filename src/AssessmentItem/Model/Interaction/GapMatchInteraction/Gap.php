@@ -9,7 +9,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 final class Gap extends QtiElement
 {
     public function __construct(
-        readonly public string $identifier,
+        public readonly string $identifier,
     ) {}
 
     public function attributes(): array

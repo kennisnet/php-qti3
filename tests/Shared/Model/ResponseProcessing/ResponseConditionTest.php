@@ -25,17 +25,17 @@ class ResponseConditionTest extends TestCase
         $this->responseCondition = new ResponseCondition(
             if: new ResponseIf(
                 new IsNull(new Variable('variable')),
-                [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))]
+                [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))],
             ),
             elseIfs: [
                 new ResponseElseIf(
                     new IsNull(new Variable('variable')),
-                    [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))]
+                    [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))],
                 ),
             ],
             else: new ResponseElse(
-                [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))]
-            )
+                [new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))],
+            ),
         );
     }
 

@@ -28,7 +28,7 @@ class BaseValueTest extends TestCase
             [
                 'base-type' => 'string',
             ],
-            $this->baseValueString->attributes()
+            $this->baseValueString->attributes(),
         );
         $this->assertInstanceOf(TextNode::class, $this->baseValueString->children()[0]);
     }
@@ -40,7 +40,7 @@ class BaseValueTest extends TestCase
             [
                 'base-type' => 'boolean',
             ],
-            $this->baseValueBool->attributes()
+            $this->baseValueBool->attributes(),
         );
         $this->assertInstanceOf(TextNode::class, $this->baseValueBool->children()[0]);
         $this->assertEquals('true', $this->baseValueBool->children()[0]->content);

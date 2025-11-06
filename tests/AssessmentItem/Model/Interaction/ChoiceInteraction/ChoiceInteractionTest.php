@@ -23,7 +23,7 @@ class ChoiceInteractionTest extends TestCase
             [
                 new SimpleChoice('A', new ContentNodeCollection([new TextNode('Antwoord 1')])),
                 new SimpleChoice('B', new ContentNodeCollection([new TextNode('Antwoord 2')])),
-            ]
+            ],
         );
     }
 

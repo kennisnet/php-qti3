@@ -12,7 +12,7 @@ class Polygon implements IShapeWithCoords
      * @param array<array{x: Coordinate, y: Coordinate}> $xyPairs
      */
     public function __construct(
-        public array $xyPairs
+        public array $xyPairs,
     ) {
         if (count($xyPairs) < 4) {
             throw new InvalidArgumentException('Polygon needs at least 4 pairs of coordinates');
@@ -38,8 +38,8 @@ class Polygon implements IShapeWithCoords
                     'x' => new Coordinate($parts[$i]),
                     'y' => new Coordinate($parts[$i + 1]),
                 ],
-                range(0, count($parts) - 1, 2)
-            )
+                range(0, count($parts) - 1, 2),
+            ),
         );
     }
 
@@ -52,7 +52,7 @@ class Polygon implements IShapeWithCoords
     {
         return implode(',', array_map(
             fn($pair): string => "{$pair['x']},{$pair['y']}",
-            $this->xyPairs
+            $this->xyPairs,
         ));
     }
 

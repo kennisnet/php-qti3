@@ -14,7 +14,7 @@ class RoundTo extends AbstractQtiExpression
     public function __construct(
         private readonly AbstractQtiExpression $expression,
         private readonly AbstractQtiExpression $decimals,
-        private readonly string $roundingMode = 'nearest'
+        private readonly string $roundingMode = 'nearest',
     ) {}
 
     public function children(): array

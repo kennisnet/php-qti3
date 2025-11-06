@@ -14,7 +14,7 @@ class WebcontentCollection extends AbstractCollection
     public function findByOriginalPath(string $originalPath): ?Webcontent
     {
         return $this->filter(
-            fn(Webcontent $webcontent): bool => $webcontent->originalPath === $originalPath
+            fn(Webcontent $webcontent): bool => $webcontent->originalPath === $originalPath,
         )->first();
     }
 

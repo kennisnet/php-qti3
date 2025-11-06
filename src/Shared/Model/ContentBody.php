@@ -17,7 +17,7 @@ final class ContentBody extends QtiElement
     ];
 
     public function __construct(
-        public ContentNodeCollection $content
+        public ContentNodeCollection $content,
     ) {}
 
     /**

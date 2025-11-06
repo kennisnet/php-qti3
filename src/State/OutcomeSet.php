@@ -26,7 +26,7 @@ class OutcomeSet
                 BaseType::IDENTIFIER,
                 Cardinality::SINGLE,
                 new DefaultValue(new Value('not_attempted')),
-            )
+            ),
         );
 
         foreach ($this->outcomeDeclarations as $outcomeDeclaration) {

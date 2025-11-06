@@ -13,7 +13,7 @@ class Index extends AbstractQtiExpression
 {
     public function __construct(
         private readonly AbstractQtiExpression $container,
-        private readonly IndexExpression $n
+        private readonly IndexExpression $n,
     ) {}
 
     public function children(): array

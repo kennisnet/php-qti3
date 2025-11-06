@@ -46,7 +46,7 @@ class QtiPackageReaderTest extends TestCase
             $this->manifestFactory,
             $this->xmlReader,
             $this->zipPackageFactory,
-            $this->filesystemPackageFactory
+            $this->filesystemPackageFactory,
         );
     }
 
@@ -121,7 +121,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('file1.xml'),
             ]),
             new ManifestResourceDependencyCollection([new ManifestResourceDependency('resource4')]),
-            'file1.xml'
+            'file1.xml',
         );
 
         $resource2 = new ManifestResource(
@@ -132,7 +132,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('image.jpeg'),
             ]),
             new ManifestResourceDependencyCollection(),
-            'file2.xml'
+            'file2.xml',
         );
 
         $resource3 = new ManifestResource(
@@ -142,7 +142,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('file3.css'),
             ]),
             new ManifestResourceDependencyCollection(),
-            'file3.css'
+            'file3.css',
         );
 
         $resource4 = new ManifestResource(
@@ -152,7 +152,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('file4.xml'),
             ]),
             new ManifestResourceDependencyCollection(),
-            'file4.xml'
+            'file4.xml',
         );
 
         $filePath = '/path/to/qti-package.zip';
@@ -189,7 +189,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('file1.xml'),
             ]),
             new ManifestResourceDependencyCollection([new ManifestResourceDependency('resource4')]),
-            'file1.xml'
+            'file1.xml',
         );
 
         $resource2 = new ManifestResource(
@@ -200,7 +200,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('image.jpeg'),
             ]),
             new ManifestResourceDependencyCollection(),
-            'file2.xml'
+            'file2.xml',
         );
 
         $resource3 = new ManifestResource(
@@ -210,7 +210,7 @@ class QtiPackageReaderTest extends TestCase
                 new ManifestResourceFile('file3.css'),
             ]),
             new ManifestResourceDependencyCollection(),
-            'file3.css'
+            'file3.css',
         );
 
         $filePath = '/path/to/qti-package.zip';

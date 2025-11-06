@@ -7,7 +7,7 @@ namespace App\SharedKernel\Domain\Qti\Shared\Model;
 final class DefaultValue extends QtiElement
 {
     public function __construct(
-        public readonly Value $value
+        public readonly Value $value,
     ) {}
 
     /**

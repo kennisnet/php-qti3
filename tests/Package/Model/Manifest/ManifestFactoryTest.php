@@ -16,7 +16,7 @@ class ManifestFactoryTest extends TestCase
     public function createReturnsManifest(): void
     {
         $manifestFactory = new ManifestFactory(
-            new XmlReader()
+            new XmlReader(),
         );
 
         $manifest = $manifestFactory->createFromXmlString('<manifest />');

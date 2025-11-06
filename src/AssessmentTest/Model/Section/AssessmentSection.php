@@ -16,7 +16,7 @@ class AssessmentSection extends QtiElement
         public readonly AssessmentItemRefCollection $assessmentItemRefs,
         public readonly ?Selection $selection = null,
         public readonly ?Ordering $ordering = null,
-        public readonly bool $visible = true
+        public readonly bool $visible = true,
     ) {}
 
     /**

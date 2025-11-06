@@ -13,7 +13,7 @@ class RubricBlock extends QtiElement
         public readonly qtiUse $use,
         public readonly View $view,
         public readonly ContentBody $contentBody,
-        public readonly ?string $class = null
+        public readonly ?string $class = null,
     ) {}
 
     public function attributes(): array

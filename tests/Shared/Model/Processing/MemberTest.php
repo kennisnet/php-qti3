@@ -30,7 +30,7 @@ class MemberTest extends TestCase
                 new Variable('variable'),
                 new Correct('set'),
             ],
-            $this->member->children()
+            $this->member->children(),
         );
     }
 }

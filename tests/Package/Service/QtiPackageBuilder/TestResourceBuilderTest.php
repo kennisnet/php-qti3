@@ -28,13 +28,13 @@ class TestResourceBuilderTest extends TestCase
     {
         $assessmentTestResource = $this->assessmentTestBuilder->build(
             AssessmentTestStub::assessmentTest(),
-            new ManifestResourceDependencyCollection()
+            new ManifestResourceDependencyCollection(),
         );
 
         $this->assertInstanceOf(Resource::class, $assessmentTestResource);
         $this->assertStringContainsString(
             '<qti-assessment-test',
-            (string) $assessmentTestResource->files->first()->getContent()
+            (string) $assessmentTestResource->files->first()->getContent(),
         );
     }
 }

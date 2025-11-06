@@ -23,12 +23,12 @@ final class GapMatchInteraction extends QtiElement
     private array $allowedContentTags = ['qti-gap-text', 'qti-gap-img', 'qti-gap'];
 
     public function __construct(
-        readonly public ContentNodeCollection $content,
-        readonly public string $responseIdentifier = 'RESPONSE',
-        readonly public ?Prompt $prompt = null,
-        readonly public bool $shuffle = false,
-        readonly public ?int $maxAssociations = 0,
-        readonly public ?int $minAssociations = null,
+        public readonly ContentNodeCollection $content,
+        public readonly string $responseIdentifier = 'RESPONSE',
+        public readonly ?Prompt $prompt = null,
+        public readonly bool $shuffle = false,
+        public readonly ?int $maxAssociations = 0,
+        public readonly ?int $minAssociations = null,
     ) {
         if (count($content) === 0) {
             throw new InvalidArgumentException('GapMatch must have some content');

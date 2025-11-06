@@ -40,8 +40,8 @@ class Webcontent extends Resource
                 [new PackageFile(
                     $filepath,
                     $content,
-                    $isBinary
-                )]
+                    $isBinary,
+                )],
             ),
             new ManifestResourceDependencyCollection(),
         );

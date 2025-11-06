@@ -39,7 +39,7 @@ class QtiPackageMock extends QtiPackage
                     new XmlFile('test.xml', new MemoryFileContent('<qti-assessment-test></qti-assessment-test>'), $xmlReader),
                 ]),
                 new ManifestResourceDependencyCollection(),
-                $metadata
+                $metadata,
             ),
             new Resource(
                 'test-item-id1',
@@ -92,7 +92,7 @@ class QtiPackageMock extends QtiPackage
             $resources,
             $manifest ?? Manifest::fromString(
                 '<manifest xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd https://purl.imsglobal.org/spec/md/v1p3/schema/xsd/imsmd_loose_v1p3p2.xsd http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqtiv3p0_imscpv1p2_v1p0.xsd" identifier="MANIFEST_QTI"></manifest>',
-                new XmlReader()
+                new XmlReader(),
             ),
         );
     }

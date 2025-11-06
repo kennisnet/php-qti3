@@ -13,7 +13,7 @@ class ResponseElse extends QtiElement
 {
     public function __construct(
         /** @var array<int, IProcessingElement> */
-        public readonly array $processingElements
+        public readonly array $processingElements,
     ) {}
 
     public function children(): array

@@ -13,7 +13,7 @@ class Member extends AbstractQtiExpression
 {
     public function __construct(
         public readonly AbstractQtiExpression $needle,
-        public readonly AbstractQtiExpression $haystack
+        public readonly AbstractQtiExpression $haystack,
     ) {}
 
     public function children(): array
@@ -30,7 +30,7 @@ class Member extends AbstractQtiExpression
 
         return in_array(
             $this->needle->evaluate($state),
-            $haystackValue
+            $haystackValue,
         );
     }
 

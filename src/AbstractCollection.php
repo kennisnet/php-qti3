@@ -99,7 +99,7 @@ abstract class AbstractCollection implements ArrayAccess, IteratorAggregate, Cou
     {
         if (!($item instanceof $this->type)) {
             throw new InvalidArgumentException(
-                sprintf("Only instances of %s are allowed in this collection.", $this->type)
+                sprintf("Only instances of %s are allowed in this collection.", $this->type),
             );
         }
     }

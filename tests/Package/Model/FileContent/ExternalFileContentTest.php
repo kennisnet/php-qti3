@@ -30,7 +30,7 @@ class ExternalFileContentTest extends TestCase
 
         $externalFileContent = new ExternalFileContent(
             'https://example.com/file.txt',
-            $resourceDownloader
+            $resourceDownloader,
         );
 
         // Assert

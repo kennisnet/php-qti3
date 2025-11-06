@@ -11,7 +11,7 @@ class FlysystemFileContent implements IFileContent
 {
     public function __construct(
         private readonly FilesystemOperator $dataStorage,
-        private readonly string $filepath
+        private readonly string $filepath,
     ) {}
 
     public function getContent(): string

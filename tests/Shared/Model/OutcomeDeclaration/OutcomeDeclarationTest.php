@@ -25,7 +25,7 @@ class OutcomeDeclarationTest extends TestCase
             BaseType::FLOAT,
             Cardinality::SINGLE,
             $this->defaultValue,
-            1.0
+            1.0,
         );
     }
 

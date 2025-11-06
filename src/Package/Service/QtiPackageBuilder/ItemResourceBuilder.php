@@ -23,7 +23,7 @@ readonly class ItemResourceBuilder
     public function build(
         string $itemRefIdentifier,
         AssessmentItem $assessmentItem,
-        ManifestResourceDependencyCollection $resourceDependencies
+        ManifestResourceDependencyCollection $resourceDependencies,
     ): Resource {
         /** @var string $xml */
         $xml = $this->xmlBuilder->generateXmlFromObject($assessmentItem)->saveXML();
@@ -36,7 +36,7 @@ readonly class ItemResourceBuilder
                 [new XmlFile(
                     $itemRefIdentifier . '.xml',
                     new MemoryFileContent($xml),
-                    $this->xmlReader
+                    $this->xmlReader,
                 )],
             ),
             $resourceDependencies,

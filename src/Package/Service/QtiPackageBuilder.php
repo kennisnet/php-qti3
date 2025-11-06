@@ -40,14 +40,14 @@ class QtiPackageBuilder
     ) {}
 
     public function buildFromAssessmentId(
-        AssessmentTestId $assessmentTestId
+        AssessmentTestId $assessmentTestId,
     ): QtiPackage {
         $assessmentTest = $this->assessmentTestRepository->getById($assessmentTestId);
 
         /** @var array<int,AssessmentItemId> $itemIds */
         $itemIds = array_filter(array_map(
             fn($itemRef): ?AssessmentItemId => $itemRef->itemId,
-            $assessmentTest->getItemRefs()
+            $assessmentTest->getItemRefs(),
         ), fn($value): bool => $value !== null);
 
         $assessmentItems = $this->assessmentItemRepository->getByIds($itemIds);
@@ -60,7 +60,7 @@ class QtiPackageBuilder
      */
     public function buildForTest(
         AssessmentTest $assessmentTest,
-        array $assessmentItems
+        array $assessmentItems,
     ): QtiPackage {
         $assessmentTest->validateItems($assessmentItems);
 
@@ -79,7 +79,7 @@ class QtiPackageBuilder
             $resources->add($this->itemResourceBuilder->build(
                 $itemRef->identifier,
                 $assessmentItem,
-                $dependencies
+                $dependencies,
             ));
         }
         foreach ($webcontent as $webcontentFile) {
@@ -91,7 +91,7 @@ class QtiPackageBuilder
 
         return new QtiPackage(
             $resources,
-            $this->manifestBuilder->buildForResources($resources)
+            $this->manifestBuilder->buildForResources($resources),
         );
     }
 
@@ -121,7 +121,7 @@ class QtiPackageBuilder
     private function processWebcontent(
         WebcontentCollection $webcontent,
         IXmlElement $element,
-        StringCollection $warnings
+        StringCollection $warnings,
     ): ManifestResourceDependencyCollection {
         $qtiResources = $this->getQtiResources($element, $warnings);
 
@@ -134,7 +134,7 @@ class QtiPackageBuilder
                     sprintf('RESOURCE%03d', $webcontent->count() + 1),
                     $qtiResource->relativePath . $qtiResource->filename,
                     $this->resourceDownloader,
-                    $qtiResource->isBinary
+                    $qtiResource->isBinary,
                 );
                 $webcontent->add($webcontentFile);
             }
@@ -158,7 +158,7 @@ class QtiPackageBuilder
             originalPath: $source,
             relativePath: 'resources/',
             filename: $filename,
-            isBinary: $resourceProvider->isBinary()
+            isBinary: $resourceProvider->isBinary(),
         );
         try {
             $this->resourceValidator->validate($resource);

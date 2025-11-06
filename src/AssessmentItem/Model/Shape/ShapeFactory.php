@@ -15,7 +15,7 @@ class ShapeFactory
             ShapeName::RECTANGLE->value => Rectangle::fromString($coords),
             ShapeName::POLYGON->value => Polygon::fromString($coords),
             ShapeName::DEFAULT->value => new DefaultShape(),
-            default => throw new InvalidArgumentException('Invalid shape name: ' . $name)
+            default => throw new InvalidArgumentException('Invalid shape name: ' . $name),
         };
     }
 }

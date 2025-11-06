@@ -23,7 +23,7 @@ class PolygonTest extends TestCase
                 ['x' => new Coordinate('40'), 'y' => new Coordinate('50')],
                 ['x' => new Coordinate('60'), 'y' => new Coordinate('70')],
                 ['x' => new Coordinate('418'), 'y' => new Coordinate('29')],
-            ]
+            ],
         );
     }
 
@@ -45,7 +45,7 @@ class PolygonTest extends TestCase
                 ['x' => new Coordinate('418'), 'y' => new Coordinate('29')],
                 ['x' => new Coordinate('40'), 'y' => new Coordinate('50')],
                 ['x' => new Coordinate('418'), 'y' => new Coordinate('29')],
-            ]
+            ],
         );
     }
 
@@ -61,7 +61,7 @@ class PolygonTest extends TestCase
                 ['x' => new Coordinate('40'), 'y' => new Coordinate('50')],
                 ['x' => new Coordinate('60'), 'y' => new Coordinate('70')],
                 ['x' => new Coordinate('80'), 'y' => new Coordinate('90')],
-            ]
+            ],
         );
     }
 

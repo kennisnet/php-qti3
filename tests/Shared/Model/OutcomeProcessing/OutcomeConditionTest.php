@@ -25,17 +25,17 @@ class OutcomeConditionTest extends TestCase
         $this->outcomeCondition = new OutcomeCondition(
             if: new OutcomeIf(
                 new IsNull(new Variable('variable')),
-                new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))
+                new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value')),
             ),
             elseIfs: [
                 new OutcomeElseIf(
                     new IsNull(new Variable('variable')),
-                    new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))
+                    new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value')),
                 ),
             ],
             else: new OutcomeElse(
-                new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))
-            )
+                new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value')),
+            ),
         );
     }
 

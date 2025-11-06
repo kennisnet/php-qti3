@@ -44,7 +44,7 @@ class ResponseSet
         $result = ValueConverter::convert(
             array_map(fn(Value $value): string|int|float|bool => $value->value, $correctResponse->values),
             $responseDeclaration->cardinality,
-            $responseDeclaration->baseType
+            $responseDeclaration->baseType,
         );
 
         return $result;

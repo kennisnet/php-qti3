@@ -12,7 +12,7 @@ class Rectangle implements IShapeWithCoords
         public Coordinate $x1,
         public Coordinate $y1,
         public Coordinate $x2,
-        public Coordinate $y2
+        public Coordinate $y2,
     ) {}
 
     public static function fromString(string $coords): self
@@ -27,7 +27,7 @@ class Rectangle implements IShapeWithCoords
             new Coordinate($parts[0]),
             new Coordinate($parts[1]),
             new Coordinate($parts[2]),
-            new Coordinate($parts[3])
+            new Coordinate($parts[3]),
         );
     }
 

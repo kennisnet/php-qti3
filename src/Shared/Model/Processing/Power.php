@@ -13,7 +13,7 @@ class Power extends AbstractQtiExpression
 {
     public function __construct(
         private readonly AbstractQtiExpression $base,
-        private readonly AbstractQtiExpression $exponent
+        private readonly AbstractQtiExpression $exponent,
     ) {}
 
     public function children(): array

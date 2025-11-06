@@ -13,7 +13,7 @@ class Stylesheet extends QtiElement implements IQtiResourceProvider
     protected ?QtiResource $resource = null;
 
     public function __construct(
-        public readonly string $filePath
+        public readonly string $filePath,
     ) {}
 
     public function getSource(): ?string

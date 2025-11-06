@@ -73,7 +73,7 @@ class ManifestTest extends TestCase
             ResourceType::WEBCONTENT,
             $files,
             $dependencies,
-            'resource-001.html'
+            'resource-001.html',
         );
 
         // Act

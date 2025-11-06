@@ -16,7 +16,7 @@ readonly class ManifestResource
         public ResourceType $type,
         public ManifestResourceFileCollection $files,
         public ManifestResourceDependencyCollection $dependencies,
-        public ?string $href = null
+        public ?string $href = null,
     ) {
         if ($type->requiresHref() && empty($href)) {
             throw new InvalidArgumentException(sprintf('Resource type %s requires href', $type->value));
@@ -30,10 +30,10 @@ readonly class ManifestResource
             $resource->type,
             new ManifestResourceFileCollection(array_map(
                 fn(PackageFile $file): ManifestResourceFile => new ManifestResourceFile($file->getFilepath()),
-                $resource->files->all()
+                $resource->files->all(),
             )),
             $resource->resourceDependencies,
-            $resource->href
+            $resource->href,
         );
     }
 }

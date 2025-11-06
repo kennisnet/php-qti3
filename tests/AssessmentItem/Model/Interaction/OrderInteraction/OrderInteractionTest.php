@@ -35,7 +35,7 @@ class OrderInteractionTest extends TestCase
             responseIdentifier: 'RESPONSE',
             orientation: Orientation::HORIZONTAL,
             shuffle: true,
-            prompt: $this->prompt
+            prompt: $this->prompt,
         );
     }
 

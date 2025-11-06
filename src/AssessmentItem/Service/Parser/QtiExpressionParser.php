@@ -56,49 +56,49 @@ class QtiExpressionParser extends AbstractParser
         if ($tagName === Lte::qtiTagName()) {
             return new Lte(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === Lt::qtiTagName()) {
             return new Lt(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === Gte::qtiTagName()) {
             return new Gte(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === Gt::qtiTagName()) {
             return new Gt(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === qtiMatch::qtiTagName()) {
             return new qtiMatch(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === Equal::qtiTagName()) {
             return new Equal(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === Divide::qtiTagName()) {
             return new Divide(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
@@ -115,7 +115,7 @@ class QtiExpressionParser extends AbstractParser
 
             return new BaseValue(
                 BaseType::from($element->getAttribute('base-type')),
-                $value
+                $value,
             );
         }
 
@@ -133,8 +133,8 @@ class QtiExpressionParser extends AbstractParser
             return new Sum(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
@@ -142,8 +142,8 @@ class QtiExpressionParser extends AbstractParser
             return new Product(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
@@ -151,8 +151,8 @@ class QtiExpressionParser extends AbstractParser
             return new Multiple(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
@@ -160,8 +160,8 @@ class QtiExpressionParser extends AbstractParser
             return new qtiAnd(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
@@ -169,8 +169,8 @@ class QtiExpressionParser extends AbstractParser
             return new qtiOr(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
@@ -192,7 +192,7 @@ class QtiExpressionParser extends AbstractParser
         if ($tagName === Contains::qtiTagName()) {
             return new Contains(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
@@ -207,14 +207,14 @@ class QtiExpressionParser extends AbstractParser
         if ($tagName === Subtract::qtiTagName()) {
             return new Subtract(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === Power::qtiTagName()) {
             return new Power(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
@@ -222,7 +222,7 @@ class QtiExpressionParser extends AbstractParser
             $roundingMode = $element->getAttribute('rounding-mode') ?: 'nearest';
             return new Round(
                 $this->parse($children[0]),
-                $roundingMode
+                $roundingMode,
             );
         }
 
@@ -231,21 +231,21 @@ class QtiExpressionParser extends AbstractParser
             return new RoundTo(
                 $this->parse($children[0]),
                 $this->parse($children[1]),
-                $roundingMode
+                $roundingMode,
             );
         }
 
         if ($tagName === IntegerDivide::qtiTagName()) {
             return new IntegerDivide(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
         if ($tagName === IntegerModulus::qtiTagName()) {
             return new IntegerModulus(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
@@ -253,8 +253,8 @@ class QtiExpressionParser extends AbstractParser
             return new Min(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
@@ -262,22 +262,22 @@ class QtiExpressionParser extends AbstractParser
             return new Max(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 
         if ($tagName === Index::qtiTagName()) {
             return new Index(
                 $this->parse($children[0]),
-                new IndexExpression($element->getAttribute('n'))
+                new IndexExpression($element->getAttribute('n')),
             );
         }
 
         if ($tagName === Delete::qtiTagName()) {
             return new Delete(
                 $this->parse($children[0]),
-                $this->parse($children[1])
+                $this->parse($children[1]),
             );
         }
 
@@ -285,8 +285,8 @@ class QtiExpressionParser extends AbstractParser
             return new Ordered(
                 array_map(
                     fn($child): AbstractQtiExpression => $this->parse($child),
-                    $children
-                )
+                    $children,
+                ),
             );
         }
 

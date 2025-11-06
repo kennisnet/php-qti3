@@ -12,7 +12,7 @@ use App\SharedKernel\Domain\StringCollection;
 class Variable extends AbstractQtiExpression
 {
     public function __construct(
-        public readonly string $identifier
+        public readonly string $identifier,
     ) {}
 
     public function attributes(): array

@@ -35,7 +35,7 @@ class ResponseSetTest extends TestCase
             BaseType::STRING,
             Cardinality::SINGLE,
             'test',
-            $correctResponse
+            $correctResponse,
         );
         $this->responseDeclarations->add($responseDeclaration);
 
@@ -53,7 +53,7 @@ class ResponseSetTest extends TestCase
         $responseDeclaration = new ResponseDeclaration(
             BaseType::STRING,
             Cardinality::SINGLE,
-            'test'
+            'test',
         );
         $this->responseDeclarations->add($responseDeclaration);
 

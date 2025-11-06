@@ -44,7 +44,7 @@ class ManifestBuilderTest extends TestCase
             $this->metadataBuilder,
             $this->organizationsBuilder,
             $this->resourcesBuilder,
-            new XmlReader()
+            new XmlReader(),
         );
     }
 

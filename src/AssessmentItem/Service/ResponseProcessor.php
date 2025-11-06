@@ -62,10 +62,10 @@ class ResponseProcessor
                 $responseDeclarations,
             ),
             new OutcomeSet(
-                $outcomeDeclarations
+                $outcomeDeclarations,
             ),
             $responseProcessing,
-            $adaptive
+            $adaptive,
         );
     }
 
@@ -78,7 +78,7 @@ class ResponseProcessor
         $itemState->responseSet->setResponses($responses);
 
         $itemState->responseProcessing->processResponses(
-            $itemState
+            $itemState,
         );
 
         if ($itemState->adaptive) {

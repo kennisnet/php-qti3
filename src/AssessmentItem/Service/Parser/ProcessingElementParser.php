@@ -43,7 +43,7 @@ class ProcessingElementParser extends AbstractParser
 
         return new SetOutcomeValue(
             $element->getAttribute('identifier'),
-            $this->qtiExpressionParser->parse($children[0])
+            $this->qtiExpressionParser->parse($children[0]),
         );
     }
 
@@ -57,8 +57,8 @@ class ProcessingElementParser extends AbstractParser
             $this->qtiExpressionParser->parse($ifChildren[0]),
             array_map(
                 fn($child): IProcessingElement => $this->parse($child),
-                array_slice($ifChildren, 1)
-            )
+                array_slice($ifChildren, 1),
+            ),
         );
         $responseElseIfs = [];
         $responseElse = null;
@@ -70,8 +70,8 @@ class ProcessingElementParser extends AbstractParser
                 $responseElse = new ResponseElse(
                     array_map(
                         fn($child): IProcessingElement => $this->parse($child),
-                        $responseElseChildren
-                    )
+                        $responseElseChildren,
+                    ),
                 );
                 continue;
             }
@@ -84,15 +84,15 @@ class ProcessingElementParser extends AbstractParser
                 $this->qtiExpressionParser->parse($elseIfChildren[0]),
                 array_map(
                     fn($child): IProcessingElement => $this->parse($child),
-                    array_slice($elseIfChildren, 1)
-                )
+                    array_slice($elseIfChildren, 1),
+                ),
             );
         }
 
         return new ResponseCondition(
             $responseIf,
             $responseElseIfs,
-            $responseElse
+            $responseElse,
         );
     }
 }

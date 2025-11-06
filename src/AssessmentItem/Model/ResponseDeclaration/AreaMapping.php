@@ -13,7 +13,7 @@ class AreaMapping extends QtiElement
      */
     public function __construct(
         public readonly array $entries,
-        public readonly ?string $defaultValue = null
+        public readonly ?string $defaultValue = null,
     ) {}
 
     public function attributes(): array

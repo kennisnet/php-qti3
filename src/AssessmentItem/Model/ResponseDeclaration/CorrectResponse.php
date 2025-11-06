@@ -14,7 +14,7 @@ class CorrectResponse extends QtiElement
      * @param array<int,Value> $values
      */
     public function __construct(
-        public readonly array $values
+        public readonly array $values,
     ) {
         if (count($values) === 0) {
             throw new InvalidArgumentException('CorrectResponse must have at least one value');

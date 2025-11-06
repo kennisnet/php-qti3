@@ -10,7 +10,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 class OutcomeElse extends QtiElement
 {
     public function __construct(
-        public readonly SetOutcomeValue $setOutcomeValue
+        public readonly SetOutcomeValue $setOutcomeValue,
     ) {}
 
     public function children(): array

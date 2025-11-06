@@ -20,7 +20,7 @@ class FeedbackInlineTest extends TestCase
 
         $this->feedbackInline = new FeedbackInline(
             identifier: 'OK',
-            content: new ContentNodeCollection([new TextNode('Hierbij onze feedback')])
+            content: new ContentNodeCollection([new TextNode('Hierbij onze feedback')]),
         );
     }
 

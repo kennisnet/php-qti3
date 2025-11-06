@@ -21,7 +21,7 @@ class FeedbackBlockTest extends TestCase
 
         $this->feedbackBlock = new FeedbackBlock(
             identifier: 'OK',
-            contentBody: new ContentBody(new ContentNodeCollection([new TextNode('Hierbij onze feedback')]))
+            contentBody: new ContentBody(new ContentNodeCollection([new TextNode('Hierbij onze feedback')])),
         );
     }
 

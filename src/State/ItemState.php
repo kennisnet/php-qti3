@@ -52,7 +52,7 @@ class ItemState
     public function getIdentifiers(): StringCollection
     {
         return $this->responseSet->responseDeclarations->getIdentifiers()->mergeWith(
-            $this->outcomeSet->outcomeDeclarations->getIdentifiers()
+            $this->outcomeSet->outcomeDeclarations->getIdentifiers(),
         );
     }
 

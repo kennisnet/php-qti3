@@ -46,11 +46,11 @@ class QtiPackageValidatorTest extends TestCase
                     new OutcomeDeclarationParser(),
                     new ResponseProcessingParser(
                         new ProcessingElementParser(
-                            new QtiExpressionParser()
-                        )
+                            new QtiExpressionParser(),
+                        ),
                     ),
-                )
-            )
+                ),
+            ),
         );
         $this->xmlReader = new XmlReader();
     }
@@ -62,7 +62,7 @@ class QtiPackageValidatorTest extends TestCase
 
         $qtiPackage = new QtiPackageMock(
             new ResourceCollection(),
-            ManifestMock::create()
+            ManifestMock::create(),
         );
 
         $qtiPackage->addResource(new Resource(
@@ -73,7 +73,7 @@ class QtiPackageValidatorTest extends TestCase
                 new XmlFile(
                     'item001.xml',
                     new MemoryFileContent(file_get_contents(__DIR__ . '/resources/item001.xml')),
-                    $this->xmlReader
+                    $this->xmlReader,
                 ),
             ]),
             new ManifestResourceDependencyCollection(),

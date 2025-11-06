@@ -24,7 +24,7 @@ class OutcomeDeclarationCollectionTest extends TestCase
     {
         $this->assertEquals(
             OutcomeDeclaration::class,
-            $this->collection->getType()
+            $this->collection->getType(),
         );
     }
 

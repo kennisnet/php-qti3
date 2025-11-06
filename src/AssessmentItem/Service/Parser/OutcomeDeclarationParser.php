@@ -33,7 +33,7 @@ class OutcomeDeclarationParser extends AbstractParser
     {
         $defaultValue = array_find(
             $this->getChildren($element),
-            fn($child): bool => $child->nodeName === DefaultValue::qtiTagName()
+            fn($child): bool => $child->nodeName === DefaultValue::qtiTagName(),
         );
         if (!$defaultValue) {
             return null;

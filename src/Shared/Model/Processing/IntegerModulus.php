@@ -13,7 +13,7 @@ class IntegerModulus extends AbstractQtiExpression
 {
     public function __construct(
         private readonly AbstractQtiExpression $numerator,
-        private readonly AbstractQtiExpression $denominator
+        private readonly AbstractQtiExpression $denominator,
     ) {}
 
     public function children(): array

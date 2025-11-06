@@ -16,7 +16,7 @@ class AssessmentTestMock extends Resource
 {
     public function __construct(
         string $identifier,
-        ?Metadata $metadata = null
+        ?Metadata $metadata = null,
     ) {
         parent::__construct(
             $identifier,
@@ -26,7 +26,7 @@ class AssessmentTestMock extends Resource
                 new PackageFile($identifier . '.xml', new MemoryFileContent('content')),
             ]),
             new ManifestResourceDependencyCollection(),
-            $metadata
+            $metadata,
         );
     }
 }

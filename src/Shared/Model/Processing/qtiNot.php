@@ -12,7 +12,7 @@ use App\SharedKernel\Domain\StringCollection;
 class qtiNot extends AbstractQtiExpression
 {
     public function __construct(
-        private readonly AbstractQtiExpression $expression
+        private readonly AbstractQtiExpression $expression,
     ) {}
 
     public static function qtiTagName(): string

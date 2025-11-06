@@ -22,7 +22,7 @@ class TestFeedbackTest extends TestCase
             'outcomeIdentifier',
             new ContentBody(new ContentNodeCollection([
                 new TextNode('test'),
-            ]))
+            ])),
         );
     }
 

@@ -13,7 +13,7 @@ class Delete extends AbstractQtiExpression
 {
     public function __construct(
         private readonly AbstractQtiExpression $valueToRemove,
-        private readonly AbstractQtiExpression $container
+        private readonly AbstractQtiExpression $container,
     ) {}
 
     public function children(): array

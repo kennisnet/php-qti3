@@ -25,7 +25,7 @@ class RubricBlockTest extends TestCase
             use: qtiUse::INSTRUCTIONS,
             view: View::TUTOR,
             contentBody: new ContentBody(new ContentNodeCollection([new TextNode('contentBody')])),
-            class: 'test'
+            class: 'test',
         );
     }
 

@@ -15,7 +15,7 @@ class Sum extends AbstractQtiExpression
      * @param array<int,AbstractQtiExpression> $elements
      */
     public function __construct(
-        public readonly array $elements
+        public readonly array $elements,
     ) {}
 
     public function children(): array
@@ -32,7 +32,7 @@ class Sum extends AbstractQtiExpression
 
                 return $carry + $value;
             },
-            0
+            0,
         );
     }
 

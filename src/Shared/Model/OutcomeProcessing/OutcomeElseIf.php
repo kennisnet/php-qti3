@@ -12,7 +12,7 @@ class OutcomeElseIf extends QtiElement
 {
     public function __construct(
         public readonly AbstractQtiExpression $condition,
-        public readonly SetOutcomeValue $setOutcomeValue
+        public readonly SetOutcomeValue $setOutcomeValue,
     ) {}
 
     public function children(): array

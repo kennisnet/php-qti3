@@ -12,7 +12,7 @@ use App\SharedKernel\Domain\StringCollection;
 class IsNull extends AbstractQtiExpression
 {
     public function __construct(
-        public readonly Variable $variable
+        public readonly Variable $variable,
     ) {}
 
     public function children(): array

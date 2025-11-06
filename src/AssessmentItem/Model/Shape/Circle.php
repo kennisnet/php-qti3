@@ -11,7 +11,7 @@ class Circle implements IShapeWithCoords
     public function __construct(
         public Coordinate $x,
         public Coordinate $y,
-        public Coordinate $r
+        public Coordinate $r,
     ) {}
 
     public static function fromString(string $coords): self
@@ -25,7 +25,7 @@ class Circle implements IShapeWithCoords
         return new self(
             new Coordinate($parts[0]),
             new Coordinate($parts[1]),
-            new Coordinate($parts[2])
+            new Coordinate($parts[2]),
         );
     }
 

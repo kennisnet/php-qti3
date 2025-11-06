@@ -30,7 +30,7 @@ class ResponseProcessorTest extends TestCase
                 'FEEDBACK' => 'correct',
                 'PROCESSED' => true,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -48,7 +48,7 @@ class ResponseProcessorTest extends TestCase
                 'FEEDBACK' => 'incorrect',
                 'PROCESSED' => true,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -65,7 +65,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'true',
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
 
     }
@@ -83,7 +83,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'true',
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -100,7 +100,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'correct',
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -117,7 +117,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 0.0,
                 'FEEDBACK' => 'incorrect',
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -127,7 +127,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/default-value-without-value.xml',
             ['RESPONSE' => 'A'],
-            'Expected tag "qti-value'
+            'Expected tag "qti-value',
         );
     }
 
@@ -137,7 +137,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/default-value-empty-value.xml',
             ['RESPONSE' => 'A'],
-            'Empty default value'
+            'Empty default value',
         );
     }
 
@@ -147,7 +147,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/default-value-wrong-tag.xml',
             ['RESPONSE' => 'A'],
-            'Expected tag "qti-value", got "qti-wrong-tag"'
+            'Expected tag "qti-value", got "qti-wrong-tag"',
         );
     }
 
@@ -157,7 +157,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/else-if-after-else.xml',
             ['RESPONSE' => 'A'],
-            'Unexpected else if'
+            'Unexpected else if',
         );
     }
 
@@ -167,7 +167,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/wrong-processing-element.xml',
             ['RESPONSE' => 'A'],
-            'Unknown processing element qti-wrong-element'
+            'Unknown processing element qti-wrong-element',
         );
     }
 
@@ -177,7 +177,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/wrong-expression-element.xml',
             ['RESPONSE' => 'A'],
-            'Unknown qti expression tag qti-wrong-element'
+            'Unknown qti expression tag qti-wrong-element',
         );
     }
 
@@ -187,7 +187,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/empty-correct-response-value.xml',
             ['RESPONSE' => 'A'],
-            'Empty correct response value'
+            'Empty correct response value',
         );
     }
 
@@ -197,7 +197,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/non-existing-outcome.xml',
             ['RESPONSE' => ['A1 B1', 'A2 B2']],
-            'Validation errors in response processing: Identifier NON-EXISTING not found'
+            'Validation errors in response processing: Identifier NON-EXISTING not found',
         );
     }
 
@@ -214,7 +214,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 0.5,
                 'FEEDBACK' => 'incorrect',
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -324,7 +324,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -339,7 +339,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 1.0,
                 'FEEDBACK' => 'incorrect',
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -353,7 +353,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 0.7,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -367,7 +367,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 0.0,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -381,7 +381,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 0.3,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -396,7 +396,7 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 0.0,
                 'MAXSCORE' => 1.0,
                 'FEEDBACK' => null,
-            ]
+            ],
         );
     }
 
@@ -412,7 +412,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 1.0,
                 'MAXSCORE' => 1.0,
-            ]
+            ],
         );
     }
 
@@ -428,7 +428,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 2.0,
                 'MAXSCORE' => 2.0,
-            ]
+            ],
         );
     }
 
@@ -444,7 +444,7 @@ class ResponseProcessorTest extends TestCase
                 'completionStatus' => 'completed',
                 'SCORE' => 3.0,
                 'MAXSCORE' => 3.0,
-            ]
+            ],
         );
     }
 
@@ -475,7 +475,7 @@ class ResponseProcessorTest extends TestCase
 
         $responseProcessor->processResponses(
             $itemState,
-            $responses
+            $responses,
         );
         $outcomes = $itemState->outcomeSet->outcomes;
 
@@ -495,14 +495,14 @@ class ResponseProcessorTest extends TestCase
         $outcomeDeclarationParser = new OutcomeDeclarationParser();
         $responseProcessingParser = new ResponseProcessingParser(
             new ProcessingElementParser(
-                new QtiExpressionParser()
-            )
+                new QtiExpressionParser(),
+            ),
         );
 
         $responseProcessor = new ResponseProcessor(
             $responseDeclarationParser,
             $outcomeDeclarationParser,
-            $responseProcessingParser
+            $responseProcessingParser,
         );
         return $responseProcessor;
     }

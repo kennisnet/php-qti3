@@ -13,7 +13,7 @@ class Subtract extends AbstractQtiExpression
 {
     public function __construct(
         private readonly AbstractQtiExpression $minuend,
-        private readonly AbstractQtiExpression $subtrahend
+        private readonly AbstractQtiExpression $subtrahend,
     ) {}
 
     public function children(): array

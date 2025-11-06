@@ -36,7 +36,7 @@ class ResponseDeclarationParser extends AbstractParser
     {
         $correctResponse = array_find(
             $this->getChildren($element),
-            fn($child): bool => $child->nodeName === CorrectResponse::qtiTagName()
+            fn($child): bool => $child->nodeName === CorrectResponse::qtiTagName(),
         );
         if (!$correctResponse) {
             return null;
@@ -51,7 +51,7 @@ class ResponseDeclarationParser extends AbstractParser
                 }
                 return new Value($value);
             },
-            $correctResponseChildren
+            $correctResponseChildren,
         ));
     }
 
@@ -59,7 +59,7 @@ class ResponseDeclarationParser extends AbstractParser
     {
         $mapping = array_find(
             $this->getChildren($element),
-            fn($child): bool => $child->nodeName === Mapping::qtiTagName()
+            fn($child): bool => $child->nodeName === Mapping::qtiTagName(),
         );
         if (!$mapping) {
             return null;
@@ -72,10 +72,10 @@ class ResponseDeclarationParser extends AbstractParser
                     return new MapEntry(
                         $mappingChild->getAttribute('map-key'),
                         (float) $mappingChild->getAttribute('mapped-value'),
-                        $mappingChild->getAttribute('case-sensitive') === 'true'
+                        $mappingChild->getAttribute('case-sensitive') === 'true',
                     );
                 },
-                $mappingChildren
+                $mappingChildren,
             ),
             $this->parseFloat($element->getAttribute('default-value')),
             $this->parseFloat($element->getAttribute('lower-bound')),
@@ -87,7 +87,7 @@ class ResponseDeclarationParser extends AbstractParser
     {
         $areaMapping = array_find(
             $this->getChildren($element),
-            fn($child): bool => $child->nodeName === AreaMapping::qtiTagName()
+            fn($child): bool => $child->nodeName === AreaMapping::qtiTagName(),
         );
         if (!$areaMapping) {
             return null;
@@ -100,12 +100,12 @@ class ResponseDeclarationParser extends AbstractParser
                     return new AreaMapEntry(
                         ShapeFactory::create(
                             $areaMappingChild->getAttribute('shape'),
-                            $areaMappingChild->getAttribute('coords')
+                            $areaMappingChild->getAttribute('coords'),
                         ),
                         (float) $areaMappingChild->getAttribute('mapped-value'),
                     );
                 },
-                $areaMappingChildren
+                $areaMappingChildren,
             ),
         );
     }

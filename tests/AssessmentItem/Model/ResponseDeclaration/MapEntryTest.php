@@ -33,7 +33,7 @@ class MapEntryTest extends TestCase
     public function evaluateValue(): void
     {
         $this->assertTrue($this->mapEntry->evaluate(
-            'key'
+            'key',
         ));
     }
 

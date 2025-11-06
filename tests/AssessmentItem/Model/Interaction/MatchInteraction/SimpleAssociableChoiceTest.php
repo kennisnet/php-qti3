@@ -23,7 +23,7 @@ class SimpleAssociableChoiceTest extends TestCase
         $this->simpleAssociableChoice = new SimpleAssociableChoice(
             'CHOICE_1',
             new ContentNodeCollection([$this->contentNode1, $this->contentNode2]),
-            3
+            3,
         );
     }
 

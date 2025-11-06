@@ -34,13 +34,13 @@ class ResponseCondition extends QtiElement implements IProcessingElement
             if: new ResponseIf(
                 new qtiMatch(
                     new Variable('RESPONSE'),
-                    new Correct('RESPONSE')
+                    new Correct('RESPONSE'),
                 ),
-                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreCorrect))]
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreCorrect))],
             ),
             else: new ResponseElse(
-                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreIncorrect))]
-            )
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, $scoreIncorrect))],
+            ),
         );
     }
 
@@ -49,11 +49,11 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         return new ResponseCondition(
             if: new ResponseIf(
                 new IsNull(new Variable('RESPONSE')),
-                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))]
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))],
             ),
             else: new ResponseElse(
-                [new SetOutcomeValue('SCORE', new MapResponse('RESPONSE'))]
-            )
+                [new SetOutcomeValue('SCORE', new MapResponse('RESPONSE'))],
+            ),
         );
     }
 
@@ -62,11 +62,11 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         return new ResponseCondition(
             if: new ResponseIf(
                 new IsNull(new Variable('RESPONSE')),
-                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))]
+                [new SetOutcomeValue('SCORE', new BaseValue(BaseType::FLOAT, 0.0))],
             ),
             else: new ResponseElse(
-                [new SetOutcomeValue('SCORE', new MapResponsePoint('RESPONSE'))]
-            )
+                [new SetOutcomeValue('SCORE', new MapResponsePoint('RESPONSE'))],
+            ),
         );
     }
 
@@ -75,10 +75,10 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         return new ResponseCondition(
             if: new ResponseIf(
                 $correctCondition,
-                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'correct'))]
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'correct'))],
             ),
             else: new ResponseElse(
-                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'incorrect'))]
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'incorrect'))],
             ),
         );
     }
@@ -88,10 +88,10 @@ class ResponseCondition extends QtiElement implements IProcessingElement
         return new ResponseCondition(
             if: new ResponseIf(
                 new IsNull(new Variable('SCORE')),
-                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'false'))]
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'false'))],
             ),
             else: new ResponseElse(
-                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'true'))]
+                [new SetOutcomeValue('FEEDBACK', new BaseValue(BaseType::IDENTIFIER, 'true'))],
             ),
         );
     }

@@ -141,7 +141,7 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
         /** @var array<string,string|null> */
         protected array $attributes = [],
         /** @var array<int,IContentNode> */
-        private readonly array $children = []
+        private readonly array $children = [],
     ) {
         if (!in_array($tagName, $this->getAllowedTags())) {
             throw new InvalidArgumentException(sprintf('Invalid HTML tag name: %s', $tagName));

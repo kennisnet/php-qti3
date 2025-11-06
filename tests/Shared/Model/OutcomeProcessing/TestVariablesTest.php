@@ -22,7 +22,7 @@ class TestVariablesTest extends TestCase
     {
         $this->assertEquals(
             ['variable-identifier' => 'SCORE', 'include-category' => 'category'],
-            $this->testVariables->attributes()
+            $this->testVariables->attributes(),
         );
     }
 }

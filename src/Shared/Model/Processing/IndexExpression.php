@@ -10,7 +10,7 @@ use RuntimeException;
 class IndexExpression
 {
     public function __construct(
-        public string $value
+        public string $value,
     ) {}
 
     public function evaluate(ItemState $state): int

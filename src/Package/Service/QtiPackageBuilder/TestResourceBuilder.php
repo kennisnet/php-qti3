@@ -46,7 +46,7 @@ readonly class TestResourceBuilder
             new ManifestResourceDependencyCollection([
                 ...array_map(
                     fn(AssessmentItemRef $itemRef): ManifestResourceDependency => new ManifestResourceDependency($itemRef->identifier),
-                    $assessmentTest->getItemRefs()
+                    $assessmentTest->getItemRefs(),
                 ),
                 ...$resourceDependencies->all(),
             ]),

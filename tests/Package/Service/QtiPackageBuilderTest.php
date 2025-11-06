@@ -54,7 +54,7 @@ class QtiPackageBuilderTest extends TestCase
             $this->assessmentTestRepository,
             $this->assessmentItemRepository,
             $this->resourceValidator,
-            $this->createMock(IResourceDownloader::class)
+            $this->createMock(IResourceDownloader::class),
         );
     }
 
@@ -72,7 +72,7 @@ class QtiPackageBuilderTest extends TestCase
         $assessmentTestBuilder->method('build')->willReturn(
             new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new PackageFileCollection([
                 new PackageFile('test.xml', new MemoryFileContent('content')),
-            ]), new ManifestResourceDependencyCollection())
+            ]), new ManifestResourceDependencyCollection()),
         );
 
         $qtiPackage = $this->qtiPackageBuilder->buildForTest($assessmentTest, [AssessmentItemStub::assessmentItemWithImage(), AssessmentItemStub::assessmentItemWithImage()]);
@@ -100,7 +100,7 @@ class QtiPackageBuilderTest extends TestCase
 
         $this->assessmentTestRepository->method('getById')->willReturn($assessmentTest);
         $this->assessmentItemRepository->method('getByIds')->willReturn(
-            [AssessmentItemStub::assessmentItem(), AssessmentItemStub::assessmentItem()]
+            [AssessmentItemStub::assessmentItem(), AssessmentItemStub::assessmentItem()],
         );
 
         $this->resourceValidator->method('validate')->willThrowException(new Exception('Test exception'));
@@ -108,12 +108,12 @@ class QtiPackageBuilderTest extends TestCase
         $this->assessmentTestBuilder->method('build')->willReturn(
             new Resource('id', ResourceType::ASSESSMENT_TEST, 'test.xml', new PackageFileCollection([
                 new PackageFile('test.xml', new MemoryFileContent('content')),
-            ]), new ManifestResourceDependencyCollection())
+            ]), new ManifestResourceDependencyCollection()),
         );
         $this->assessmentItemBuilder->method('build')->willReturn(
             new Resource('id', ResourceType::ASSESSMENT_ITEM, 'item.xml', new PackageFileCollection([
                 new PackageFile('item.xml', new MemoryFileContent('content')),
-            ]), new ManifestResourceDependencyCollection())
+            ]), new ManifestResourceDependencyCollection()),
         );
 
         $qtiPackage = $this->qtiPackageBuilder->buildFromAssessmentId($assessmentTest->identifier);

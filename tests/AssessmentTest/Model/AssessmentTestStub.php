@@ -39,9 +39,9 @@ class AssessmentTestStub
                                     'ITEM001.xml',
                                     AssessmentItemId::fromQuestionnaire(1, 0),
                                 ),
-                            ])
+                            ]),
                         ),
-                    ])
+                    ]),
                 ),
             ]),
             'title',
@@ -73,9 +73,9 @@ class AssessmentTestStub
                                     'ITEM002.xml',
                                     AssessmentItemId::fromQuestionnaire(1, 1),
                                 ),
-                            ])
+                            ]),
                         ),
-                    ])
+                    ]),
                 ),
             ]),
             'title',

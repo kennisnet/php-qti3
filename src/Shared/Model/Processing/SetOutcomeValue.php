@@ -13,7 +13,7 @@ class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcome
 {
     public function __construct(
         public readonly string $identifier,
-        public readonly AbstractQtiExpression $value
+        public readonly AbstractQtiExpression $value,
     ) {}
 
     public function attributes(): array
@@ -37,7 +37,7 @@ class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcome
 
         $state->outcomeSet->set(
             $this->identifier,
-            $value
+            $value,
         );
     }
 

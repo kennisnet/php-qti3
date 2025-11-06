@@ -45,7 +45,7 @@ class MapResponsePointTest extends TestCase
             [
                 'identifier' => 'identifier',
             ],
-            $this->mapResponsePoint->attributes()
+            $this->mapResponsePoint->attributes(),
         );
         $this->assertEquals(BaseType::FLOAT, $this->mapResponsePoint->getBaseType($itemState));
         $this->assertEquals(Cardinality::SINGLE, $this->mapResponsePoint->getCardinality($itemState));
@@ -79,7 +79,7 @@ class MapResponsePointTest extends TestCase
             'identifier',
             null,
             null,
-            $areaMapping
+            $areaMapping,
         );
         $responseDeclarations = new ResponseDeclarationCollection([$responseDeclaration]);
         $responseSet = new ResponseSet($responseDeclarations);
@@ -107,7 +107,7 @@ class MapResponsePointTest extends TestCase
             'identifier',
             null,
             null,
-            $areaMapping
+            $areaMapping,
         );
         $responseDeclarations = new ResponseDeclarationCollection([$responseDeclaration]);
         $responseSet = new ResponseSet($responseDeclarations);
@@ -134,13 +134,13 @@ class MapResponsePointTest extends TestCase
             'identifier',
             null,
             null,
-            $areaMapping
+            $areaMapping,
         );
         $responseDeclarations = new ResponseDeclarationCollection([$responseDeclaration]);
         $responseSet = new ResponseSet($responseDeclarations);
         $responseSet->responses['identifier'] = ['12 34'];
         $outcomeSet = new OutcomeSet(
-            new OutcomeDeclarationCollection([])
+            new OutcomeDeclarationCollection([]),
         );
         $itemState = new ItemState($responseSet, $outcomeSet, new ResponseProcessing([]));
 

@@ -13,7 +13,7 @@ class Divide extends AbstractQtiExpression
 {
     public function __construct(
         public readonly AbstractQtiExpression $element1,
-        public readonly AbstractQtiExpression $element2
+        public readonly AbstractQtiExpression $element2,
     ) {}
 
     public function children(): array

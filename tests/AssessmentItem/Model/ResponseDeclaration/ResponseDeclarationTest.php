@@ -21,7 +21,7 @@ class ResponseDeclarationTest extends TestCase
         $this->responseDeclaration = new ResponseDeclaration(
             baseType: BaseType::STRING,
             cardinality: Cardinality::SINGLE,
-            identifier: 'responseDeclaration'
+            identifier: 'responseDeclaration',
         );
     }
 

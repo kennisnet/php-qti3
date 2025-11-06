@@ -15,7 +15,7 @@ class Max extends AbstractQtiExpression
      * @param array<int,AbstractQtiExpression> $expressions
      */
     public function __construct(
-        private readonly array $expressions
+        private readonly array $expressions,
     ) {}
 
     public function children(): array
@@ -31,7 +31,7 @@ class Max extends AbstractQtiExpression
 
         $values = array_map(
             fn(AbstractQtiExpression $element): float|int => $element->evaluateNumber($state),
-            $this->expressions
+            $this->expressions,
         );
 
         return max($values);

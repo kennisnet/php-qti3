@@ -16,7 +16,7 @@ readonly class FilesystemPackageReader implements IPackageReader
     public function __construct(
         private string $folderName,
         private FilesystemOperator $dataStorage,
-        private bool $lazyLoading = true
+        private bool $lazyLoading = true,
     ) {
         if (!$this->dataStorage->directoryExists($this->folderName)) {
             throw new NotFoundException(sprintf('Folder `%s` not found', $this->folderName), 'folder_not_found');

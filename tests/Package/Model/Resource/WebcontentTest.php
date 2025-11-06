@@ -33,7 +33,7 @@ class WebcontentTest extends FilesystemTestCase
             'ID',
             $this->filename,
             $this->resourceDownloader,
-            $this->isBinary
+            $this->isBinary,
         );
 
         $this->assertEquals($this->filename, $webcontent->href);

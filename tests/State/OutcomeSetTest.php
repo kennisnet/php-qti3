@@ -34,8 +34,8 @@ class OutcomeSetTest extends TestCase
             new OutcomeDeclaration(
                 'test',
                 BaseType::STRING,
-                Cardinality::SINGLE
-            )
+                Cardinality::SINGLE,
+            ),
         );
 
         // Act
@@ -54,8 +54,8 @@ class OutcomeSetTest extends TestCase
                 'test',
                 BaseType::STRING,
                 Cardinality::SINGLE,
-                new DefaultValue(new Value('default'))
-            )
+                new DefaultValue(new Value('default')),
+            ),
         );
         $outcomeSet = new OutcomeSet($this->outcomeDeclarations);
 
@@ -74,8 +74,8 @@ class OutcomeSetTest extends TestCase
             new OutcomeDeclaration(
                 'test',
                 BaseType::STRING,
-                Cardinality::SINGLE
-            )
+                Cardinality::SINGLE,
+            ),
         );
 
         // Act

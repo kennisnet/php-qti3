@@ -14,7 +14,7 @@ readonly class FilesystemPackageWriter implements IPackageWriter
 {
     public function __construct(
         private string $folderName,
-        private FilesystemOperator $dataStorage
+        private FilesystemOperator $dataStorage,
     ) {}
 
     public function write(QtiPackage $qtiPackage): void

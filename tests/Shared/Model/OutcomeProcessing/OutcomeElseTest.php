@@ -18,7 +18,7 @@ class OutcomeElseTest extends TestCase
     protected function setUp(): void
     {
         $this->outcomeElse = new OutcomeElse(
-            new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value'))
+            new SetOutcomeValue('identifier', new BaseValue(BaseType::STRING, 'value')),
         );
     }
 

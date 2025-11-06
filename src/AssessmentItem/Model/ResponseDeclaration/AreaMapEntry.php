@@ -11,7 +11,7 @@ class AreaMapEntry extends QtiElement
 {
     public function __construct(
         public IShapeWithCoords $shape,
-        public readonly float $mappedValue
+        public readonly float $mappedValue,
     ) {}
 
     public function attributes(): array

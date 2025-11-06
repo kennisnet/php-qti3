@@ -24,7 +24,7 @@ class AssessmentSectionTest extends TestCase
             [new AssessmentItemRef(
                 identifier: 'ITEM001',
                 href: 'ITEM001.xml',
-            )]
+            )],
         );
         $selection = new Selection(1, false);
         $ordering = new Ordering(true);
@@ -34,7 +34,7 @@ class AssessmentSectionTest extends TestCase
             title: 'title',
             assessmentItemRefs: $itemRefs,
             selection: $selection,
-            ordering: $ordering
+            ordering: $ordering,
         );
     }
 
@@ -47,7 +47,7 @@ class AssessmentSectionTest extends TestCase
                 'title' => 'title',
                 'visible' => 'true',
             ],
-            $this->assessmentSection->attributes()
+            $this->assessmentSection->attributes(),
         );
 
         $this->assertSame(
@@ -56,7 +56,7 @@ class AssessmentSectionTest extends TestCase
                 $this->assessmentSection->ordering,
                 $this->assessmentSection->assessmentItemRefs[0],
             ],
-            $this->assessmentSection->children()
+            $this->assessmentSection->children(),
         );
     }
 }

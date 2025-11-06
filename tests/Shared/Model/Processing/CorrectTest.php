@@ -24,7 +24,7 @@ class CorrectTest extends TestCase
             [
                 'identifier' => 'correct',
             ],
-            $this->correct->attributes()
+            $this->correct->attributes(),
         );
     }
 }

@@ -13,7 +13,7 @@ class Contains extends AbstractQtiExpression
 {
     public function __construct(
         private readonly AbstractQtiExpression $container,
-        private readonly AbstractQtiExpression $contains
+        private readonly AbstractQtiExpression $contains,
     ) {}
 
     public function children(): array

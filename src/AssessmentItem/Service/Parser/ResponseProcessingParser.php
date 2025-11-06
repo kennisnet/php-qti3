@@ -33,8 +33,8 @@ class ResponseProcessingParser extends AbstractParser
         return new ResponseProcessing(
             array_map(
                 fn($child): IProcessingElement => $this->processingElementParser->parse($child),
-                $this->getChildren($element)
-            )
+                $this->getChildren($element),
+            ),
         );
     }
 }

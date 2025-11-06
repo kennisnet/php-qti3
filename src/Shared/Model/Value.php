@@ -9,7 +9,7 @@ use Stringable;
 final class Value extends QtiElement implements Stringable
 {
     public function __construct(
-        public string|int|float|bool $value
+        public string|int|float|bool $value,
     ) {}
 
     /**

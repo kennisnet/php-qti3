@@ -13,7 +13,7 @@ class QtiPackageValidationError extends DomainError implements HasValidationErro
 {
     public function __construct(
         public StringCollection $validationErrors,
-        public string $messagePrefix = 'Validation errors'
+        public string $messagePrefix = 'Validation errors',
     ) {
         parent::__construct($this->errorMessage());
     }

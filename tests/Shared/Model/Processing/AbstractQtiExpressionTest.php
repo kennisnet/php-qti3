@@ -58,12 +58,12 @@ class AbstractQtiExpressionTest extends TestCase
             new ResponseDeclaration(
                 BaseType::INTEGER,
                 Cardinality::SINGLE,
-                'RESPONSE'
+                'RESPONSE',
             ),
             new ResponseDeclaration(
                 BaseType::STRING,
                 Cardinality::SINGLE,
-                'RESPONSE2'
+                'RESPONSE2',
             ),
             new ResponseDeclaration(BaseType::STRING, Cardinality::SINGLE, 'identifier'),
         ]);
@@ -76,7 +76,7 @@ class AbstractQtiExpressionTest extends TestCase
             new ResponseSet($responseDeclarations),
             new OutcomeSet($outcomeDeclarations),
             $responseProcessing,
-            false
+            false,
         );
     }
 
@@ -144,7 +144,7 @@ class AbstractQtiExpressionTest extends TestCase
         // Test with matching strings
         $expression = new qtiMatch(
             new BaseValue(BaseType::STRING, 'apple'),
-            new BaseValue(BaseType::STRING, 'apple')
+            new BaseValue(BaseType::STRING, 'apple'),
         );
         $this->assertTrue($expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -154,14 +154,14 @@ class AbstractQtiExpressionTest extends TestCase
         // Test with non-matching strings
         $expression = new qtiMatch(
             new BaseValue(BaseType::STRING, 'apple'),
-            new BaseValue(BaseType::STRING, 'banana')
+            new BaseValue(BaseType::STRING, 'banana'),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
         // Test with different base types
         $expression = new qtiMatch(
             new BaseValue(BaseType::STRING, 'apple'),
-            new BaseValue(BaseType::INTEGER, 1)
+            new BaseValue(BaseType::INTEGER, 1),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
@@ -176,7 +176,7 @@ class AbstractQtiExpressionTest extends TestCase
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
                 new BaseValue(BaseType::STRING, 'cherry'),
-            ])
+            ]),
         );
         $this->assertTrue($expression->evaluate($this->itemState));
 
@@ -190,7 +190,7 @@ class AbstractQtiExpressionTest extends TestCase
             new Multiple([
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
-            ])
+            ]),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
@@ -205,7 +205,7 @@ class AbstractQtiExpressionTest extends TestCase
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
                 new BaseValue(BaseType::STRING, 'grape'),
-            ])
+            ]),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
@@ -220,7 +220,7 @@ class AbstractQtiExpressionTest extends TestCase
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
                 new BaseValue(BaseType::STRING, 'cherry'),
-            ])
+            ]),
         );
         $this->assertTrue($expression->evaluate($this->itemState));
 
@@ -235,7 +235,7 @@ class AbstractQtiExpressionTest extends TestCase
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
                 new BaseValue(BaseType::STRING, 'cherry'),
-            ])
+            ]),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
@@ -249,7 +249,7 @@ class AbstractQtiExpressionTest extends TestCase
             new Ordered([
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
-            ])
+            ]),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
@@ -264,7 +264,7 @@ class AbstractQtiExpressionTest extends TestCase
                 new BaseValue(BaseType::STRING, 'apple'),
                 new BaseValue(BaseType::STRING, 'banana'),
                 new BaseValue(BaseType::STRING, 'grape'),
-            ])
+            ]),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
@@ -505,7 +505,7 @@ class AbstractQtiExpressionTest extends TestCase
 
         $expression = new Member(
             new BaseValue(BaseType::STRING, 'banana'),
-            $multiple
+            $multiple,
         );
 
         $this->assertTrue($expression->evaluate($this->itemState));
@@ -516,7 +516,7 @@ class AbstractQtiExpressionTest extends TestCase
         // Test when element is not a member
         $expression = new Member(
             new BaseValue(BaseType::STRING, 'grape'),
-            $multiple
+            $multiple,
         );
 
         $this->assertFalse($expression->evaluate($this->itemState));
@@ -530,7 +530,7 @@ class AbstractQtiExpressionTest extends TestCase
 
         $expression = new Member(
             new BaseValue(BaseType::INTEGER, '2'),
-            $numericMultiple
+            $numericMultiple,
         );
 
         $this->assertTrue($expression->evaluate($this->itemState));
@@ -586,7 +586,7 @@ class AbstractQtiExpressionTest extends TestCase
     {
         $expression = new Substring(
             new BaseValue(BaseType::STRING, 'Hello World'),
-            new BaseValue(BaseType::STRING, 'World')
+            new BaseValue(BaseType::STRING, 'World'),
         );
         $this->assertTrue($expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -597,20 +597,20 @@ class AbstractQtiExpressionTest extends TestCase
         $expression = new Substring(
             new BaseValue(BaseType::STRING, 'Hello World'),
             new BaseValue(BaseType::STRING, 'WORLD'),
-            false
+            false,
         );
         $this->assertTrue($expression->evaluate($this->itemState));
 
         $expression = new Substring(
             new BaseValue(BaseType::STRING, 'Hello World'),
-            new BaseValue(BaseType::STRING, 'WORLD')
+            new BaseValue(BaseType::STRING, 'WORLD'),
         );
         $this->assertFalse($expression->evaluate($this->itemState));
 
         $this->expectExceptionMessage('Element is not a string');
         $expression = new Substring(
             new BaseValue(BaseType::INTEGER, 1),
-            new BaseValue(BaseType::STRING, 'WORLD')
+            new BaseValue(BaseType::STRING, 'WORLD'),
         );
         $expression->evaluate($this->itemState);
     }
@@ -620,7 +620,7 @@ class AbstractQtiExpressionTest extends TestCase
     {
         $expression = new Subtract(
             new BaseValue(BaseType::FLOAT, '10.5'),
-            new BaseValue(BaseType::FLOAT, '5.2')
+            new BaseValue(BaseType::FLOAT, '5.2'),
         );
         $this->assertEquals(5.3, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -630,28 +630,28 @@ class AbstractQtiExpressionTest extends TestCase
         // Test with integers
         $expression = new Subtract(
             new BaseValue(BaseType::INTEGER, '10'),
-            new BaseValue(BaseType::INTEGER, '5')
+            new BaseValue(BaseType::INTEGER, '5'),
         );
         $this->assertEquals(5, $expression->evaluate($this->itemState));
 
         // Test with mixed types
         $expression = new Subtract(
             new BaseValue(BaseType::INTEGER, '10'),
-            new BaseValue(BaseType::FLOAT, '3.5')
+            new BaseValue(BaseType::FLOAT, '3.5'),
         );
         $this->assertEquals(6.5, $expression->evaluate($this->itemState));
 
         // Test with negative result
         $expression = new Subtract(
             new BaseValue(BaseType::INTEGER, '5'),
-            new BaseValue(BaseType::INTEGER, '10')
+            new BaseValue(BaseType::INTEGER, '10'),
         );
         $this->assertEquals(-5, $expression->evaluate($this->itemState));
 
         // Test with zero
         $expression = new Subtract(
             new BaseValue(BaseType::INTEGER, '5'),
-            new BaseValue(BaseType::INTEGER, '0')
+            new BaseValue(BaseType::INTEGER, '0'),
         );
         $this->assertEquals(5, $expression->evaluate($this->itemState));
     }
@@ -661,7 +661,7 @@ class AbstractQtiExpressionTest extends TestCase
     {
         $expression = new Power(
             new BaseValue(BaseType::FLOAT, '2'),
-            new BaseValue(BaseType::FLOAT, '3')
+            new BaseValue(BaseType::FLOAT, '3'),
         );
         $this->assertEquals(8, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -671,21 +671,21 @@ class AbstractQtiExpressionTest extends TestCase
         // Test with fractional exponent (square root)
         $expression = new Power(
             new BaseValue(BaseType::FLOAT, '2'),
-            new BaseValue(BaseType::FLOAT, '0.5')
+            new BaseValue(BaseType::FLOAT, '0.5'),
         );
         $this->assertEquals(sqrt(2), $expression->evaluate($this->itemState));
 
         // Test with integer base and exponent
         $expression = new Power(
             new BaseValue(BaseType::INTEGER, '3'),
-            new BaseValue(BaseType::INTEGER, '2')
+            new BaseValue(BaseType::INTEGER, '2'),
         );
         $this->assertEquals(9, $expression->evaluate($this->itemState));
 
         // Test with negative exponent
         $expression = new Power(
             new BaseValue(BaseType::FLOAT, '2'),
-            new BaseValue(BaseType::FLOAT, '-1')
+            new BaseValue(BaseType::FLOAT, '-1'),
         );
         $this->assertEquals(0.5, $expression->evaluate($this->itemState));
     }
@@ -694,7 +694,7 @@ class AbstractQtiExpressionTest extends TestCase
     public function testRound(): void
     {
         $expression = new Round(
-            new BaseValue(BaseType::FLOAT, '3.7')
+            new BaseValue(BaseType::FLOAT, '3.7'),
         );
         $this->assertEquals(4, $expression->evaluate($this->itemState));
         $this->assertCount(1, $expression->children());
@@ -702,43 +702,43 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertEquals(BaseType::INTEGER, $expression->getBaseType($this->itemState));
 
         $expression = new Round(
-            new BaseValue(BaseType::FLOAT, '3.2')
+            new BaseValue(BaseType::FLOAT, '3.2'),
         );
         $this->assertEquals(3, $expression->evaluate($this->itemState));
 
         // Test floor rounding mode
         $expression = new Round(
             new BaseValue(BaseType::FLOAT, '3.7'),
-            'floor'
+            'floor',
         );
         $this->assertEquals(3, $expression->evaluate($this->itemState));
 
         // Test ceiling rounding mode
         $expression = new Round(
             new BaseValue(BaseType::FLOAT, '3.2'),
-            'ceiling'
+            'ceiling',
         );
         $this->assertEquals(4, $expression->evaluate($this->itemState));
 
         // Test with negative numbers
         $expression = new Round(
-            new BaseValue(BaseType::FLOAT, '-3.7')
+            new BaseValue(BaseType::FLOAT, '-3.7'),
         );
         $this->assertEquals(-4, $expression->evaluate($this->itemState));
 
         $expression = new Round(
-            new BaseValue(BaseType::FLOAT, '-3.2')
+            new BaseValue(BaseType::FLOAT, '-3.2'),
         );
         $this->assertEquals(-3, $expression->evaluate($this->itemState));
 
         // Test with edge cases
         $expression = new Round(
-            new BaseValue(BaseType::FLOAT, '3.5')
+            new BaseValue(BaseType::FLOAT, '3.5'),
         );
         $this->assertEquals(4, $expression->evaluate($this->itemState));
 
         $expression = new Round(
-            new BaseValue(BaseType::FLOAT, '-3.5')
+            new BaseValue(BaseType::FLOAT, '-3.5'),
         );
         $this->assertEquals(-4, $expression->evaluate($this->itemState));
     }
@@ -749,7 +749,7 @@ class AbstractQtiExpressionTest extends TestCase
         // Test rounding to 2 decimal places
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.14159'),
-            new BaseValue(BaseType::INTEGER, '2')
+            new BaseValue(BaseType::INTEGER, '2'),
         );
         $this->assertEquals(3.14, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -759,7 +759,7 @@ class AbstractQtiExpressionTest extends TestCase
         // Test rounding up to 1 decimal place
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.85'),
-            new BaseValue(BaseType::INTEGER, '1')
+            new BaseValue(BaseType::INTEGER, '1'),
         );
         $this->assertEquals(3.9, $expression->evaluate($this->itemState));
 
@@ -767,7 +767,7 @@ class AbstractQtiExpressionTest extends TestCase
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.99'),
             new BaseValue(BaseType::INTEGER, '1'),
-            'floor'
+            'floor',
         );
         $this->assertEquals(3.9, $expression->evaluate($this->itemState));
 
@@ -775,35 +775,35 @@ class AbstractQtiExpressionTest extends TestCase
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.01'),
             new BaseValue(BaseType::INTEGER, '1'),
-            'ceiling'
+            'ceiling',
         );
         $this->assertEquals(3.1, $expression->evaluate($this->itemState));
 
         // Test rounding to 0 decimal places (should be same as regular round)
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.7'),
-            new BaseValue(BaseType::INTEGER, '0')
+            new BaseValue(BaseType::INTEGER, '0'),
         );
         $this->assertEquals(4.0, $expression->evaluate($this->itemState));
 
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.7'),
             new BaseValue(BaseType::INTEGER, '0'),
-            'floor'
+            'floor',
         );
         $this->assertEquals(3.0, $expression->evaluate($this->itemState));
 
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '3.7'),
             new BaseValue(BaseType::INTEGER, '0'),
-            'ceiling'
+            'ceiling',
         );
         $this->assertEquals(4.0, $expression->evaluate($this->itemState));
 
         // Test with negative numbers
         $expression = new RoundTo(
             new BaseValue(BaseType::FLOAT, '-3.14159'),
-            new BaseValue(BaseType::INTEGER, '2')
+            new BaseValue(BaseType::INTEGER, '2'),
         );
         $this->assertEquals(-3.14, $expression->evaluate($this->itemState));
     }
@@ -812,13 +812,13 @@ class AbstractQtiExpressionTest extends TestCase
     {
         $expression = new IntegerDivide(
             new BaseValue(BaseType::INTEGER, '10'),
-            new BaseValue(BaseType::INTEGER, '3')
+            new BaseValue(BaseType::INTEGER, '3'),
         );
         $this->assertEquals(3, $expression->evaluate($this->itemState));
 
         $expression = new IntegerDivide(
             new BaseValue(BaseType::INTEGER, '10'),
-            new BaseValue(BaseType::INTEGER, '0')
+            new BaseValue(BaseType::INTEGER, '0'),
         );
         $this->assertEquals(0, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -830,7 +830,7 @@ class AbstractQtiExpressionTest extends TestCase
     {
         $expression = new IntegerModulus(
             new BaseValue(BaseType::INTEGER, '10'),
-            new BaseValue(BaseType::INTEGER, '3')
+            new BaseValue(BaseType::INTEGER, '3'),
         );
         $this->assertEquals(1, $expression->evaluate($this->itemState));
         $this->assertCount(2, $expression->children());
@@ -839,7 +839,7 @@ class AbstractQtiExpressionTest extends TestCase
 
         $expression = new IntegerModulus(
             new BaseValue(BaseType::INTEGER, '10'),
-            new BaseValue(BaseType::INTEGER, '0')
+            new BaseValue(BaseType::INTEGER, '0'),
         );
         $this->assertEquals(0, $expression->evaluate($this->itemState));
     }

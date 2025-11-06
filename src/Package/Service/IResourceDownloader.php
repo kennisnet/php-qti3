@@ -8,13 +8,13 @@ interface IResourceDownloader
 {
     public function downloadFileToFilesystem(
         string $sourceUrl,
-        string $targetFilePath
+        string $targetFilePath,
     ): string;
 
     /**
      * @return iterable<string>
      */
     public function downloadFileToStream(
-        string $sourceUrl
+        string $sourceUrl,
     ): iterable;
 }

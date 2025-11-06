@@ -35,7 +35,7 @@ class OutcomeDeclarationCollection extends AbstractCollection
     {
         return new StringCollection(array_map(
             fn(OutcomeDeclaration $outcomeDeclaration): string => $outcomeDeclaration->identifier,
-            $this->all()
+            $this->all(),
         ));
     }
 

@@ -41,7 +41,7 @@ class ResourcesBuilder
     private function addDependenciesNode(
         DOMDocument $document,
         DOMElement $resourceNode,
-        ManifestResource $resource
+        ManifestResource $resource,
     ): void {
         foreach ($resource->dependencies as $dependency) {
             $dependencyNode = $document->createElement('dependency');

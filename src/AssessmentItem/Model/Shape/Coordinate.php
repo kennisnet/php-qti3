@@ -10,7 +10,7 @@ use Stringable;
 readonly class Coordinate implements Stringable
 {
     public function __construct(
-        private string $value
+        private string $value,
     ) {
         if (!preg_match('/^\d+%?$/', $value)) {
             throw new InvalidArgumentException(sprintf('Invalid coordinate value: %s', $value));

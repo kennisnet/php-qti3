@@ -20,7 +20,7 @@ class ItemBody extends QtiElement
     ];
 
     public function __construct(
-        public readonly ContentNodeCollection $content
+        public readonly ContentNodeCollection $content,
     ) {
         if (count($content) === 0) {
             throw new InvalidArgumentException('ItemBody must have at least one child element');

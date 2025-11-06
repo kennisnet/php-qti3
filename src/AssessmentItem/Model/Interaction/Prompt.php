@@ -10,7 +10,7 @@ use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
 class Prompt extends QtiElement
 {
     public function __construct(
-        public ContentNodeCollection $content
+        public ContentNodeCollection $content,
     ) {}
 
     public function children(): array

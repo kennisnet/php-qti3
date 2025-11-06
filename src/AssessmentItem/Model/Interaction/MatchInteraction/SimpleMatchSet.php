@@ -10,7 +10,7 @@ class SimpleMatchSet extends QtiElement
 {
     public function __construct(
         /** @var array<int,SimpleAssociableChoice> */
-        public array $choices
+        public array $choices,
     ) {}
 
     public function children(): array

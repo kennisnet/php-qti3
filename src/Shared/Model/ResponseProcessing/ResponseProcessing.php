@@ -15,7 +15,7 @@ class ResponseProcessing extends QtiElement
      * @param array<int,IProcessingElement> $elements
      */
     public function __construct(
-        public readonly array $elements
+        public readonly array $elements,
     ) {}
 
     /**
@@ -34,7 +34,7 @@ class ResponseProcessing extends QtiElement
     public static function mapResponse(): self
     {
         return new self(
-            [ResponseCondition::mapResponse()]
+            [ResponseCondition::mapResponse()],
         );
     }
 
@@ -44,7 +44,7 @@ class ResponseProcessing extends QtiElement
     public static function mapResponsePoint(): self
     {
         return new self(
-            [ResponseCondition::mapResponsePoint()]
+            [ResponseCondition::mapResponsePoint()],
         );
     }
 
