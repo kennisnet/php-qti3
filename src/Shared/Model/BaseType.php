@@ -18,21 +18,25 @@ enum BaseType: string
     case IDENTIFIER = 'identifier';
     case URI = 'uri';
 
+    /**
+     * Determines whether values of the given base type can be represented by this base type.
+     *
+     * Rules:
+     * - FLOAT fits INTEGER and FLOAT (a float can represent integral values).
+     * - STRING fits STRING, IDENTIFIER, INTEGER and FLOAT (string can carry textual and numeric identifiers).
+     * - For all other types, only an exact type match fits.
+     *
+     * This is used to verify type compatibility where widening conversions are allowed.
+     */
     public function fits(BaseType $type): bool
     {
-        if ($this->value === $type->value) {
-            return true;
+        if ($this === BaseType::FLOAT) {
+            return in_array($type, [BaseType::INTEGER, BaseType::FLOAT]);
         }
-        if ($this->value === BaseType::FLOAT->value) {
-            return $type->value === BaseType::INTEGER->value || $type->value === BaseType::FLOAT->value;
-        }
-        if ($this->value === BaseType::STRING->value) {
-            return $type->value === BaseType::STRING->value ||
-                $type->value === BaseType::IDENTIFIER->value ||
-                $type->value === BaseType::INTEGER->value ||
-                $type->value === BaseType::FLOAT->value;
+        if ($this === BaseType::STRING) {
+            return in_array($type, [BaseType::STRING, BaseType::IDENTIFIER, BaseType::INTEGER, BaseType::FLOAT]);
         }
 
-        return false;
+        return $this === $type;
     }
 }
