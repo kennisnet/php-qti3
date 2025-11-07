@@ -31,10 +31,6 @@ class AssessmentItemDeterminator
 
     public function determineTitle(DOMDocument $itemXml): string
     {
-        $root = $itemXml->documentElement;
-        if (!$root) {
-            return '';
-        }
-        return $root->getAttribute('title');
+        return $itemXml->documentElement?->getAttribute('title') ?? '';
     }
 }
