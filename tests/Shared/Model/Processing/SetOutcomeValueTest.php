@@ -48,7 +48,7 @@ class SetOutcomeValueTest extends TestCase
                 new ResponseDeclaration(BaseType::STRING, Cardinality::SINGLE, 'identifier2'),
             ])),
             new OutcomeSet(new OutcomeDeclarationCollection([])),
-            new ResponseProcessing([])
+            new ResponseProcessing([]),
         );
 
         $errors = $this->setOutcomeValue->validate($itemState);
@@ -64,7 +64,7 @@ class SetOutcomeValueTest extends TestCase
                 new ResponseDeclaration(BaseType::INTEGER, Cardinality::SINGLE, 'identifier'),
             ])),
             new OutcomeSet(new OutcomeDeclarationCollection([])),
-            new ResponseProcessing([])
+            new ResponseProcessing([]),
         );
 
         $errors = $this->setOutcomeValue->validate($itemState);
@@ -80,7 +80,7 @@ class SetOutcomeValueTest extends TestCase
                 new ResponseDeclaration(BaseType::STRING, Cardinality::MULTIPLE, 'identifier'),
             ])),
             new OutcomeSet(new OutcomeDeclarationCollection([])),
-            new ResponseProcessing([])
+            new ResponseProcessing([]),
         );
 
         $errors = $this->setOutcomeValue->validate($itemState);
