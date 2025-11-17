@@ -132,6 +132,54 @@ class ResponseProcessorTest extends TestCase
     }
 
     #[Test]
+    public function MissingOutcomeDeclarationMaxScoreThrowsException(): void
+    {
+        $this->assertExceptionThrown(
+            __DIR__ . '/resources/missing-outcome-declaration-maxscore.xml',
+            ['RESPONSE' => 'A'],
+            'Outcome declaration with identifier MAXSCORE not found',
+        );
+    }
+
+    #[Test]
+    public function OutcomeDeclarationWithoutDefaultThrowsException(): void
+    {
+        $this->assertExceptionThrown(
+            __DIR__ . '/resources/outcome-declaration-without-default.xml',
+            ['RESPONSE' => 'A'],
+            'Missing default value for MAXSCORE outcome declaration',
+        );
+    }
+
+    #[Test]
+    public function ExtendedTextInteractionWithoutMaxScoreNoException(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/extended-text-outcome-declaration-without-default.xml',
+            ['RESPONSE' => 'A'],
+            [
+                'SCORE' => 0.0,
+                'FEEDBACK' => 'true',
+                'completionStatus' => 'completed',
+            ],
+        );
+    }
+
+    #[Test]
+    public function NoInteractionMissingMaxScoreNoException(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/no-interaction-missing-maxscore.xml',
+            ['RESPONSE' => 'A'],
+            [
+                'SCORE' => 0.0,
+                'FEEDBACK' => 'true',
+                'completionStatus' => 'completed',
+            ],
+        );
+    }
+
+    #[Test]
     public function defaultValueWithEmptyValueTagThrowsException(): void
     {
         $this->assertExceptionThrown(
@@ -244,6 +292,7 @@ class ResponseProcessorTest extends TestCase
             'BODY' => ['part2', 'option2'],
             'SCORE' => 0.0,
             'FEEDBACK' => null,
+            'MAXSCORE' => 10.0,
         ], $itemState->outcomeSet->outcomes);
 
         // Step 2
@@ -259,7 +308,8 @@ class ResponseProcessorTest extends TestCase
         ]);
         $this->assertEquals([
             'completionStatus' => 'completed',
-            'SCORE' => 10,
+            'SCORE' => 10.0,
+            'MAXSCORE' => 10.0,
             'FEEDBACK' => 'CORRECT',
             'BODY' => ['part2', 'option2'],
         ], $itemState->outcomeSet->outcomes);
@@ -291,6 +341,7 @@ class ResponseProcessorTest extends TestCase
             'completionStatus' => 'incomplete',
             'BODY' => ['part2', 'option2'],
             'SCORE' => 0.0,
+            'MAXSCORE' => 10.0,
             'FEEDBACK' => null,
         ], $itemState->outcomeSet->outcomes);
 
@@ -307,7 +358,8 @@ class ResponseProcessorTest extends TestCase
         ]);
         $this->assertEquals([
             'completionStatus' => 'completed',
-            'SCORE' => 5,
+            'SCORE' => 5.0,
+            'MAXSCORE' => 10.0,
             'FEEDBACK' => 'PARTIAL',
             'BODY' => ['part2', 'option2'],
         ], $itemState->outcomeSet->outcomes);
@@ -333,7 +385,7 @@ class ResponseProcessorTest extends TestCase
     {
         $this->assertOutcomes(
             __DIR__ . '/resources/various-expressions.xml',
-            ['RESPONSE' =>  ['AA']],
+            ['RESPONSE' => ['AA']],
             [
                 'completionStatus' => 'completed',
                 'SCORE' => 1.0,

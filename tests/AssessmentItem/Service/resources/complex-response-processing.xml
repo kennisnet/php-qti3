@@ -49,7 +49,12 @@ https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0p1_v1p0.xsd"
             <qti-value>0.0</qti-value>
         </qti-default-value>
     </qti-outcome-declaration>
-    <qti-outcome-declaration base-type="identifier" cardinality="single" identifier="FEEDBACK" />
+    <qti-outcome-declaration identifier="MAXSCORE" base-type="float" cardinality="single">
+        <qti-default-value>
+            <qti-value>10</qti-value>
+        </qti-default-value>
+    </qti-outcome-declaration>
+    <qti-outcome-declaration base-type="identifier" cardinality="single" identifier="FEEDBACK"/>
 
     <!--￼Define a feedback variable; its cardinality is "multiple" so that it can contain the
     identifiers of several feedback elements, and in this case it is initialised to the identifier,

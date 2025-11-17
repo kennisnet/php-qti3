@@ -14,10 +14,6 @@ http://www.imsglobal.org/xsd/imsqtiasi_v3p0 ">
             <qti-value>0</qti-value>
         </qti-default-value>
     </qti-outcome-declaration>
-    <qti-outcome-declaration identifier="MAXSCORE" base-type="float" cardinality="single">
-        <qti-default-value>
-        </qti-default-value>
-    </qti-outcome-declaration>
     <qti-outcome-declaration identifier="FEEDBACK" base-type="identifier" cardinality="single"/>
     <qti-stylesheet href="resources/438b8916f099176a03e12d8943267cb3.css" type="text/css"/>
     <qti-item-body>

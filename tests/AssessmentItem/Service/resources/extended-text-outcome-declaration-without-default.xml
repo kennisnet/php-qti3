@@ -14,18 +14,12 @@ http://www.imsglobal.org/xsd/imsqtiasi_v3p0 ">
             <qti-value>0</qti-value>
         </qti-default-value>
     </qti-outcome-declaration>
-    <qti-outcome-declaration identifier="MAXSCORE" base-type="float" cardinality="single">
-        <qti-default-value>
-        </qti-default-value>
-    </qti-outcome-declaration>
     <qti-outcome-declaration identifier="FEEDBACK" base-type="identifier" cardinality="single"/>
     <qti-stylesheet href="resources/438b8916f099176a03e12d8943267cb3.css" type="text/css"/>
     <qti-item-body>
-        <qti-choice-interaction response-identifier="RESPONSE" shuffle="false" max-choices="1">
-            <qti-prompt>Is dit een meerkeuze vraag?</qti-prompt>
-            <qti-simple-choice identifier="CHOICE1">Ja</qti-simple-choice>
-            <qti-simple-choice identifier="CHOICE2">Nee</qti-simple-choice>
-        </qti-choice-interaction>
+        <qti-extended-text-interaction response-identifier="RESPONSE">
+            <qti-prompt>Hoe kan technologie het onderwijs in de komende tien jaar veranderen? Beschrijf drie specifieke innovaties of ontwikkelingen en leg uit hoe deze het leerproces van leerlingen zullen verbeteren.</qti-prompt>
+        </qti-extended-text-interaction>
     </qti-item-body>
     <qti-response-processing>
         <qti-response-condition>

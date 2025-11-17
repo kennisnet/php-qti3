@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\Shared\Model;
 
+// phpcs:disable PHPCompatibility.Variables.ForbiddenThisUseContexts.OutsideObjectContext
 enum BaseType: string
 {
     case INTEGER = 'integer';
