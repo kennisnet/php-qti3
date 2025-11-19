@@ -27,6 +27,7 @@ class ResponseProcessor
         private readonly ResponseDeclarationParser $responseDeclarationParser,
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
         private readonly ResponseProcessingParser $responseProcessingParser,
+        private readonly AssessmentItemDeterminator $assessmentItemDeterminator,
     ) {}
 
     public function initItemState(string $itemXml): ItemState
@@ -71,7 +72,7 @@ class ResponseProcessor
             $adaptive,
         );
 
-        $this->validateItemState($xmlDocument, $itemState);
+        $this->validateItem($xmlDocument, $itemState);
 
         return $itemState;
     }
@@ -97,12 +98,22 @@ class ResponseProcessor
         }
     }
 
-    private function validateItemState(DOMDocument $document, ItemState $itemState): void
+    private function validateItem(DOMDocument $document, ItemState $itemState): void
     {
-        if ($this->xpathExists($document, '//qti:qti-choice-interaction')) {
+        if (
+            $this->assessmentItemDeterminator->determineType($document) === 'question'
+            && !$this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction"]')
+        ) {
+            throw new ParseError('Missing a qti interaction in item-body');
+        }
+
+        if (
+            $this->assessmentItemDeterminator->determineType($document) === 'question'
+            && !$this->assessmentItemDeterminator->determineManualScoring($document)
+        ) {
             $maxScore = $itemState->outcomeSet->getOutcomeValue('MAXSCORE');
 
-            if (!$maxScore) {
+            if (!is_numeric($maxScore) || (float) $maxScore < 0) {
                 throw new ParseError('Missing default value for MAXSCORE outcome declaration');
             }
         }
@@ -115,7 +126,7 @@ class ResponseProcessor
         }
 
         $xpath = new DOMXPath($document);
-        $xpath->registerNamespace('qti', $document->documentElement->getAttribute('xmlns'));
+        $xpath->registerNamespace('ns', $document->documentElement->getAttribute('xmlns'));
         $result = $xpath->query($path);
 
         if (!$result instanceof DOMNodeList) {

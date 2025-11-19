@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Validator;
 
+use App\SharedKernel\Domain\Qti\AssessmentItem\Service\AssessmentItemDeterminator;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ProcessingElementParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\QtiExpressionParser;
@@ -49,6 +50,7 @@ class QtiPackageValidatorTest extends TestCase
                             new QtiExpressionParser(),
                         ),
                     ),
+                    new AssessmentItemDeterminator(),
                 ),
             ),
         );

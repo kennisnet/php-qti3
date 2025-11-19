@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Service;
 
+use App\SharedKernel\Domain\Qti\AssessmentItem\Service\AssessmentItemDeterminator;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ProcessingElementParser;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\QtiExpressionParser;
@@ -168,14 +169,10 @@ class ResponseProcessorTest extends TestCase
     #[Test]
     public function NoInteractionMissingMaxScoreNoException(): void
     {
-        $this->assertOutcomes(
+        $this->assertExceptionThrown(
             __DIR__ . '/resources/no-interaction-missing-maxscore.xml',
             ['RESPONSE' => 'A'],
-            [
-                'SCORE' => 0.0,
-                'FEEDBACK' => 'true',
-                'completionStatus' => 'completed',
-            ],
+            'Missing a qti interaction in item-body',
         );
     }
 
@@ -545,18 +542,19 @@ class ResponseProcessorTest extends TestCase
     {
         $responseDeclarationParser = new ResponseDeclarationParser();
         $outcomeDeclarationParser = new OutcomeDeclarationParser();
+        $assessmentItemDeterminator = new AssessmentItemDeterminator();
         $responseProcessingParser = new ResponseProcessingParser(
             new ProcessingElementParser(
                 new QtiExpressionParser(),
             ),
         );
 
-        $responseProcessor = new ResponseProcessor(
+        return new ResponseProcessor(
             $responseDeclarationParser,
             $outcomeDeclarationParser,
             $responseProcessingParser,
+            $assessmentItemDeterminator,
         );
-        return $responseProcessor;
     }
 
     private function assertOutcomes(string $itemXmlFile, array $responses, array $expectedOutcomes): void
