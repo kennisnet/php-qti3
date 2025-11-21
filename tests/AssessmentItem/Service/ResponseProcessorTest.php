@@ -167,7 +167,7 @@ class ResponseProcessorTest extends TestCase
     }
 
     #[Test]
-    public function NoInteractionMissingMaxScoreNoException(): void
+    public function typeQuestionMissingInteractionThrowsException(): void
     {
         $this->assertExceptionThrown(
             __DIR__ . '/resources/no-interaction-missing-maxscore.xml',
