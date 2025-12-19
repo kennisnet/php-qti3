@@ -76,4 +76,21 @@
             </taxon>
         </taxonPath>
     </classification>
+    <classification>
+        <purpose>
+            <source>LOMv1.0</source>
+            <value>Educational Objective</value>
+        </purpose>
+        <taxonPath>
+            <source>
+                <string language="x-none">http://purl.edustandaard.nl/begrippenkader</string>
+            </source>
+            <taxon>
+                <id>d357271b-3cfd-40c4-881d-084b71ca05c8</id>
+                <entry>
+                    <string language="nl">VO Kerndoel 31: Processen in de natuur</string>
+                </entry>
+            </taxon>
+        </taxonPath>
+    </classification>
 </lom>
