@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service;
 
+use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
@@ -49,7 +50,7 @@ class ResponseProcessor
             $outcomeDeclarations->add($this->outcomeDeclarationParser->parse($outcomeDeclarationTag));
         }
 
-        $responseProcessingTag = $xmlDocument->getElementsByTagName('qti-response-processing')->item(0);
+        $responseProcessingTag = $xmlDocument->getElementsByTagName(ResponseProcessing::qtiTagName())->item(0);
 
         if ($responseProcessingTag) {
             $responseProcessing = $this->responseProcessingParser->parse($responseProcessingTag);
@@ -58,7 +59,7 @@ class ResponseProcessor
         }
 
         /** @var DOMElement $item */
-        $item = $xmlDocument->getElementsByTagName('qti-assessment-item')->item(0);
+        $item = $xmlDocument->getElementsByTagName(AssessmentItem::qtiTagName())->item(0);
         $adaptive = $item->getAttribute('adaptive') === 'true';
 
         $itemState = new ItemState(
@@ -100,15 +101,23 @@ class ResponseProcessor
 
     private function validateItem(DOMDocument $document, ItemState $itemState): void
     {
-        if (
-            $this->assessmentItemDeterminator->determineType($document) === 'question'
-            && !$this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction"]')
-        ) {
+        $isQuestion = $this->assessmentItemDeterminator->determineType($document) === 'question';
+        $hasInteraction = $this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction"]');
+
+        if ($isQuestion && !$hasInteraction) {
             throw new ParseError('Missing a qti interaction in item-body');
         }
 
+        $hasInteractionNotText = $this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction" and name() != "qti-extended-text-interaction"]');
+        $hasProcessingScore = $this->xpathExists($document, '//ns:qti-response-processing//ns:qti-set-outcome-value[@identifier="SCORE"]');
+        $processingTemplate = $this->xpathExists($document, '//ns:qti-response-processing[string-length(@template) > 2]');
+
+        if ($isQuestion && $hasInteractionNotText && !$hasProcessingScore && !$processingTemplate) {
+            throw new ParseError('Missing `set-outcome-value` with identifier `SCORE` in `response-processing`');
+        }
+
         if (
-            $this->assessmentItemDeterminator->determineType($document) === 'question'
+            $isQuestion
             && !$this->assessmentItemDeterminator->determineManualScoring($document)
         ) {
             $maxScore = $itemState->outcomeSet->getOutcomeValue('MAXSCORE');

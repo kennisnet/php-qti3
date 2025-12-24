@@ -247,6 +247,16 @@ class ResponseProcessorTest extends TestCase
     }
 
     #[Test]
+    public function missingResponseProcessingOutcomeScore(): void
+    {
+        $this->assertExceptionThrown(
+            __DIR__ . '/resources/gap-match-no-processing.xml',
+            ['RESPONSE' => ['A1 B1', 'A2 B2']],
+            'Missing `set-outcome-value` with identifier `SCORE` in `response-processing`',
+        );
+    }
+
+    #[Test]
     public function partialMatchTriggersElseIf(): void
     {
         $this->assertOutcomes(
