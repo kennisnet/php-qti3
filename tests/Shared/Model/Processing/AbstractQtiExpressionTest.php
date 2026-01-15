@@ -808,7 +808,8 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertEquals(-3.14, $expression->evaluate($this->itemState));
     }
 
-    public function testIntegerDivide(): void
+    #[Test]
+    public function integerDivide(): void
     {
         $expression = new IntegerDivide(
             new BaseValue(BaseType::INTEGER, '10'),
@@ -826,7 +827,8 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertEquals(BaseType::INTEGER, $expression->getBaseType($this->itemState));
     }
 
-    public function testIntegerModulus(): void
+    #[Test]
+    public function integerModulus(): void
     {
         $expression = new IntegerModulus(
             new BaseValue(BaseType::INTEGER, '10'),
@@ -896,7 +898,8 @@ class AbstractQtiExpressionTest extends TestCase
         $this->assertEquals(0, $expression->evaluate($this->itemState));
     }
 
-    public function testIndex(): void
+    #[Test]
+    public function index(): void
     {
         $multiple = new Multiple([
             new BaseValue(BaseType::STRING, 'apple'),

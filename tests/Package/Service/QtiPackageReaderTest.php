@@ -50,7 +50,8 @@ class QtiPackageReaderTest extends TestCase
         );
     }
 
-    public function testFromFilesystem(): void
+    #[Test]
+    public function fromFilesystem(): void
     {
         $filePath = '/path/to/qti-package.xml';
 
