@@ -32,6 +32,16 @@
             <source>LOMv1.0</source>
             <value>Draft</value>
         </status>
+        <contribute>
+            <role>
+                <source>http://download.edustandaard.nl/vdex/vdex_lifecycle_contribute_role_lomv1p0_20060628.xml</source>
+                <value>publisher</value>
+            </role>
+            <entity>BEGIN:VCARD FN:Wikiwijs END:VCARD</entity>
+            <date>
+                <dateTime>2024-01-01</dateTime>
+            </date>
+        </contribute>
     </lifeCycle>
     <metaMetadata>
         <metadataschema>LOMv1.0</metadataschema>
