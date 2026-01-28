@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service;
+namespace Qti3\AssessmentItem\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ParseError;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseDeclarationParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
-use App\SharedKernel\Domain\Qti\State\ItemState;
-use App\SharedKernel\Domain\Qti\State\OutcomeSet;
-use App\SharedKernel\Domain\Qti\State\ResponseSet;
+use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
+use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\ParseError;
+use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\State\ItemState;
+use Qti3\State\OutcomeSet;
+use Qti3\State\ResponseSet;
 use DOMDocument;
 use DOMElement;
 use DOMNodeList;

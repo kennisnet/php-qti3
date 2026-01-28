@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Stylesheet;
+namespace Qti3\AssessmentItem\Model\Stylesheet;
 
-use App\SharedKernel\Domain\AbstractCollection;
+use Qti3\AbstractCollection;
 
 /**
  * @template-extends AbstractCollection<Stylesheet>

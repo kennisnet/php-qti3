@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
+namespace Qti3\Tests\Package\Service\QtiPackageBuilder;
 
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use App\SharedKernel\Infrastructure\Serializer\XmlBuilder;
-use App\SharedKernel\Infrastructure\Serializer\XmlReader;
-use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestStub;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
+use Qti3\Infrastructure\Serializer\XmlBuilder;
+use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Tests\AssessmentTest\Model\AssessmentTestStub;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

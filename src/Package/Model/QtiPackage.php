@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Model;
+namespace Qti3\Package\Model;
 
-use App\SharedKernel\Domain\Exception\ResourceNotFoundException;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
-use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
+use Qti3\Exception\ResourceNotFoundException;
+use Qti3\Package\Model\Manifest\Manifest;
+use Qti3\Package\Model\Manifest\ManifestResource;
+use Qti3\Package\Model\Metadata\Metadata;
+use Qti3\Package\Model\PackageFile\PackageFile;
+use Qti3\Package\Model\PackageFile\PackageFileCollection;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceCollection;
+use Qti3\Package\Model\Resource\ResourceType;
 
 class QtiPackage
 {

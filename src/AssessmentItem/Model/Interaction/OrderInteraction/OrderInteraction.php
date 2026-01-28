@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\OrderInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\OrderInteraction;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\ChoiceInteraction\SimpleChoice;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\Prompt;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\SimpleChoice;
+use Qti3\AssessmentItem\Model\Interaction\Prompt;
+use Qti3\Shared\Model\QtiElement;
 
 /**
  * The text entry interaction allows a candidate to supply a text string for a response.

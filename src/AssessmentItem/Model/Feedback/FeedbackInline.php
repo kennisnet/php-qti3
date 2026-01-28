@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Feedback;
+namespace Qti3\AssessmentItem\Model\Feedback;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\QtiElement;
 
 class FeedbackInline extends QtiElement
 {

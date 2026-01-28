@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Validator;
+namespace Qti3\Tests\Package\Validator;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\AssessmentItemDeterminator;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ProcessingElementParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\QtiExpressionParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseDeclarationParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\Qti\Package\Validator\IImsQtiPackageValidator;
-use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidator;
-use App\SharedKernel\Domain\Qti\Package\Validator\ResponseProcessingValidator;
-use App\SharedKernel\Domain\StringCollection;
-use App\SharedKernel\Infrastructure\Serializer\XmlReader;
-use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestMock;
-use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\QtiPackageMock;
+use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
+use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
+use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
+use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
+use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\PackageFile\PackageFileCollection;
+use Qti3\Package\Model\PackageFile\XmlFile;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceCollection;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Validator\IImsQtiPackageValidator;
+use Qti3\Package\Validator\QtiPackageValidator;
+use Qti3\Package\Validator\ResponseProcessingValidator;
+use Qti3\StringCollection;
+use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Tests\Package\Model\Manifest\ManifestMock;
+use Qti3\Tests\Package\Model\QtiPackageMock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

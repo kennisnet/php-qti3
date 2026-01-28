@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\HotspotInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\HotspotInteraction;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\HTMLTag;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\HTMLTag;
+use Qti3\Shared\Model\QtiElement;
 
 /**
  * The hotspot interaction allows a candidate to supply hotspots on an image for a response.

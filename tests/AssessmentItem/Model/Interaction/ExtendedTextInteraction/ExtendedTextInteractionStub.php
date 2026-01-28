@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\ExtendedTextInteraction;
+namespace Qti3\Tests\AssessmentItem\Model\Interaction\ExtendedTextInteraction;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
 
 class ExtendedTextInteractionStub extends ExtendedTextInteraction {}

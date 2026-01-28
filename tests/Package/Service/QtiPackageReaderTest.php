@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service;
+namespace Qti3\Tests\Package\Service;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestFactory;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependency;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFile;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\Qti\Package\Service\IFilesystemPackageFactory;
-use App\SharedKernel\Domain\Qti\Package\Service\IZipPackageFactory;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageReader;
-use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\IPackageReader;
+use Qti3\Package\Model\Manifest\Manifest;
+use Qti3\Package\Model\Manifest\ManifestFactory;
+use Qti3\Package\Model\Manifest\ManifestResource;
+use Qti3\Package\Model\Manifest\ManifestResourceCollection;
+use Qti3\Package\Model\Manifest\ManifestResourceDependency;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\Manifest\ManifestResourceFile;
+use Qti3\Package\Model\Manifest\ManifestResourceFileCollection;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Service\IFilesystemPackageFactory;
+use Qti3\Package\Service\IZipPackageFactory;
+use Qti3\Package\Service\QtiPackageReader;
+use Qti3\Shared\Xml\Reader\IXmlReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

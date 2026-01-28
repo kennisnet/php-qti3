@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\Section;
+namespace Qti3\Tests\AssessmentTest\Model\Section;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\Ordering;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\Selection;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
+use Qti3\AssessmentTest\Model\Section\AssessmentSection;
+use Qti3\AssessmentTest\Model\Section\Ordering;
+use Qti3\AssessmentTest\Model\Section\Selection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

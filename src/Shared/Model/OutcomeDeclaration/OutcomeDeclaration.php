@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration;
+namespace Qti3\Shared\Model\OutcomeDeclaration;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\DefaultValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\IContentNode;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\DefaultValue;
+use Qti3\Shared\Model\IContentNode;
+use Qti3\Shared\Model\QtiElement;
+use Qti3\Shared\Model\Value;
 
 final class OutcomeDeclaration extends QtiElement
 {

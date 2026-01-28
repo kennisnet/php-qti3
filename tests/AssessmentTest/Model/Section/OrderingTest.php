@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\Section;
+namespace Qti3\Tests\AssessmentTest\Model\Section;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\Ordering;
+use Qti3\AssessmentTest\Model\Section\Ordering;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

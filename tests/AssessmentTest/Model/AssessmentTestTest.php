@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model;
+namespace Qti3\Tests\AssessmentTest\Model;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemStub;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\Tests\AssessmentItem\Model\AssessmentItemStub;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

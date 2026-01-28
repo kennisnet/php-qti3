@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model;
+namespace Qti3\Tests\Shared\Model;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiTagName;
-use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteractionStub;
+use Qti3\Shared\Model\QtiTagName;
+use Qti3\Tests\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteractionStub;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

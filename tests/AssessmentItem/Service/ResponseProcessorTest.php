@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Service;
+namespace Qti3\Tests\AssessmentItem\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\AssessmentItemDeterminator;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ProcessingElementParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\QtiExpressionParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseDeclarationParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser\ResponseProcessingParser;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
+use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
+use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
+use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
+use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
+use Qti3\AssessmentItem\Service\ResponseProcessor;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

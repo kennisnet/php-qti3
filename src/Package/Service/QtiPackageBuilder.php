@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service;
+namespace Qti3\Package\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Repository\IAssessmentItemRepository;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTest;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestId;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Repository\IAssessmentTestRepository;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependency;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Warnings;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Webcontent;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\WebcontentCollection;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IResourceValidator;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use App\SharedKernel\Domain\Qti\Shared\Model\IQtiResourceProvider;
-use App\SharedKernel\Domain\Qti\Shared\Model\IXmlElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Repository\IAssessmentItemRepository;
+use Qti3\AssessmentTest\Model\AssessmentTest;
+use Qti3\AssessmentTest\Model\AssessmentTestId;
+use Qti3\AssessmentTest\Repository\IAssessmentTestRepository;
+use Qti3\Package\Model\Manifest\ManifestResourceDependency;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\ResourceCollection;
+use Qti3\Package\Model\Resource\Warnings;
+use Qti3\Package\Model\Resource\Webcontent;
+use Qti3\Package\Model\Resource\WebcontentCollection;
+use Qti3\Package\Service\QtiPackageBuilder\IResourceValidator;
+use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
+use Qti3\Shared\Model\IQtiResourceProvider;
+use Qti3\Shared\Model\IXmlElement;
+use Qti3\Shared\Model\QtiResource;
+use Qti3\StringCollection;
 use Exception;
 
 class QtiPackageBuilder

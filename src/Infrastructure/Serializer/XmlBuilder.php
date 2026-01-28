@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Serializer;
+namespace Qti3\Infrastructure\Serializer;
 
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IXmlBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
 use DOMDocument;
 
 readonly class XmlBuilder implements IXmlBuilder

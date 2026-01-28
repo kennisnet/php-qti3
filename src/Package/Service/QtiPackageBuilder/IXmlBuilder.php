@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
+namespace Qti3\Package\Service\QtiPackageBuilder;
 
 use DOMDocument;
 

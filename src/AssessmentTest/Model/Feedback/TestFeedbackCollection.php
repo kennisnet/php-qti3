@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\Feedback;
+namespace Qti3\AssessmentTest\Model\Feedback;
 
-use App\SharedKernel\Domain\AbstractCollection;
+use Qti3\AbstractCollection;
 
 /**
  * @template-extends AbstractCollection<TestFeedback>

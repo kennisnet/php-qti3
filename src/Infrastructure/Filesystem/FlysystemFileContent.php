@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem;
+namespace Qti3\Infrastructure\Filesystem;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\FileContent\IFileContent;
 use League\Flysystem\FilesystemOperator;
 
 class FlysystemFileContent implements IFileContent

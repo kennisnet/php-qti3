@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\HotspotInteraction;
+namespace Qti3\Tests\AssessmentItem\Model\Interaction\HotspotInteraction;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotChoice;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Circle;
+use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotChoice;
+use Qti3\AssessmentItem\Model\Shape\Circle;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

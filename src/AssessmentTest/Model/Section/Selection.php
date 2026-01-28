@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section;
+namespace Qti3\AssessmentTest\Model\Section;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\QtiElement;
 
 class Selection extends QtiElement
 {

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Validator;
+namespace Qti3\Package\Validator;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\Package\Model\PackageFile\XmlFile;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\StringCollection;
 use Exception;
 
 readonly class ResponseProcessingValidator implements IQtiPackageValidator

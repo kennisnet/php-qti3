@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model;
+namespace Qti3\AssessmentItem\Model;
 
 use InvalidArgumentException;
 use Stringable;

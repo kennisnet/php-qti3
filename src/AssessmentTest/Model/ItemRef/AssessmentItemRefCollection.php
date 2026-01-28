@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef;
+namespace Qti3\AssessmentTest\Model\ItemRef;
 
-use App\SharedKernel\Domain\AbstractCollection;
+use Qti3\AbstractCollection;
 
 /** @template-extends AbstractCollection<AssessmentItemRef> */
 class AssessmentItemRefCollection extends AbstractCollection

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model;
+namespace Qti3\Tests\Shared\Model;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\DefaultValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\IContentNode;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\Shared\Model\DefaultValue;
+use Qti3\Shared\Model\IContentNode;
+use Qti3\Shared\Model\Value;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

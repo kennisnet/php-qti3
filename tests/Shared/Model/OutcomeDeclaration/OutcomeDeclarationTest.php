@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration;
+namespace Qti3\Tests\Shared\Model\OutcomeDeclaration;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\DefaultValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\DefaultValue;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
+use Qti3\Shared\Model\Value;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

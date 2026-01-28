@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Model\PackageFile;
+namespace Qti3\Package\Model\PackageFile;
 
-use App\SharedKernel\Domain\AbstractCollection;
+use Qti3\AbstractCollection;
 
 /**
  * @template-extends AbstractCollection<PackageFile>

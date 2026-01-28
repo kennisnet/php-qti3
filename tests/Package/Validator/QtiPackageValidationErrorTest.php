@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Validator;
+namespace Qti3\Tests\Package\Validator;
 
-use App\SharedKernel\Domain\Exception\ErrorType;
-use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\Exception\ErrorType;
+use Qti3\Package\Validator\QtiPackageValidationError;
+use Qti3\StringCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

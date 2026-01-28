@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration;
+namespace Qti3\Tests\Shared\Model\OutcomeDeclaration;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

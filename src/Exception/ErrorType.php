@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Exception;
+namespace Qti3\Exception;
 
 enum ErrorType: string
 {

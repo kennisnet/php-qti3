@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration;
+namespace Qti3\Shared\Model\OutcomeDeclaration;
 
 enum ExternalScored: string
 {

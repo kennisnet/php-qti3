@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service;
+namespace Qti3\Package\Service;
 
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
+use Qti3\Package\Model\IPackageReader;
+use Qti3\Package\Model\IPackageWriter;
 
 interface IZipPackageFactory
 {

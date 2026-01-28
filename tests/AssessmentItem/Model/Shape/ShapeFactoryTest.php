@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape;
+namespace Qti3\Tests\AssessmentItem\Model\Shape;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Circle;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\DefaultShape;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Polygon;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Rectangle;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\ShapeFactory;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\ShapeName;
+use Qti3\AssessmentItem\Model\Shape\Circle;
+use Qti3\AssessmentItem\Model\Shape\DefaultShape;
+use Qti3\AssessmentItem\Model\Shape\Polygon;
+use Qti3\AssessmentItem\Model\Shape\Rectangle;
+use Qti3\AssessmentItem\Model\Shape\ShapeFactory;
+use Qti3\AssessmentItem\Model\Shape\ShapeName;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

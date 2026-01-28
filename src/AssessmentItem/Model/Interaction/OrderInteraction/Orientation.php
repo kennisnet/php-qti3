@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\OrderInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\OrderInteraction;
 
 enum Orientation: string
 {

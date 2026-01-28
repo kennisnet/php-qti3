@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser;
+namespace Qti3\AssessmentItem\Service\Parser;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\DefaultValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\ExternalScored;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\DefaultValue;
+use Qti3\Shared\Model\OutcomeDeclaration\ExternalScored;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
+use Qti3\Shared\Model\Value;
 use DOMElement;
 
 class OutcomeDeclarationParser extends AbstractParser

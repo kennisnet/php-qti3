@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model;
+namespace Qti3\Tests\AssessmentTest\Model;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTest;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestId;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSectionCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\NavigationMode;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\SubmissionMode;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPart;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPartCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentTest\Model\AssessmentTest;
+use Qti3\AssessmentTest\Model\AssessmentTestId;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
+use Qti3\AssessmentTest\Model\Section\AssessmentSection;
+use Qti3\AssessmentTest\Model\Section\AssessmentSectionCollection;
+use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
+use Qti3\AssessmentTest\Model\TestPart\SubmissionMode;
+use Qti3\AssessmentTest\Model\TestPart\TestPart;
+use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 
 class AssessmentTestStub
 {

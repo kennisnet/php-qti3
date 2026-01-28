@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section;
+namespace Qti3\AssessmentTest\Model\Section;
 
-use App\SharedKernel\Domain\AbstractCollection;
+use Qti3\AbstractCollection;
 
 /**
  * @template-extends AbstractCollection<AssessmentSection>

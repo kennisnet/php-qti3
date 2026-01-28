@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Model\Manifest;
+namespace Qti3\Package\Model\Manifest;
 
-use App\SharedKernel\Domain\AbstractCollection;
+use Qti3\AbstractCollection;
 
 /**
  * @template-extends AbstractCollection<ManifestResourceFile>

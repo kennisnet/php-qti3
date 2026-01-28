@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest;
+namespace Qti3\Package\Service\QtiPackageBuilder\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceCollection;
+use Qti3\Package\Model\Manifest\ManifestResource;
+use Qti3\Package\Model\Manifest\ManifestResourceCollection;
 use DOMDocument;
 use DOMElement;
 

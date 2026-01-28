@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Xml\Reader;
+namespace Qti3\Shared\Xml\Reader;
 
 use DOMDocument;
 

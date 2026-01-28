@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\MatchInteraction;
+namespace Qti3\Tests\AssessmentItem\Model\Interaction\MatchInteraction;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\MatchInteraction\SimpleAssociableChoice;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\MatchInteraction\SimpleMatchSet;
+use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\SimpleAssociableChoice;
+use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\SimpleMatchSet;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

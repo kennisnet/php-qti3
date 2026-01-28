@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart;
+namespace Qti3\AssessmentTest\Model\TestPart;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSectionCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\IContentNode;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentTest\Model\Section\AssessmentSectionCollection;
+use Qti3\Shared\Model\IContentNode;
+use Qti3\Shared\Model\QtiElement;
 
 class TestPart extends QtiElement
 {

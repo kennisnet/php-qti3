@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest;
+namespace Qti3\Tests\Package\Service\QtiPackageBuilder\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
 use DOMDocument;
 use DOMElement;
 use PHPUnit\Framework\Attributes\Test;

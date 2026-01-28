@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser;
+namespace Qti3\AssessmentItem\Service\Parser;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\Shared\Model\Processing\IProcessingElement;
+use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
 use DOMElement;
 
 class ResponseProcessingParser extends AbstractParser

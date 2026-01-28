@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem\Zip;
+namespace Qti3\Infrastructure\Filesystem\Zip;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IMemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\IPackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Infrastructure\Filesystem\FileSystemUtils;
-use App\SharedKernel\Infrastructure\Filesystem\Zip\Exception\ZipArchiveOpenFileException;
-use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
+use Qti3\Package\Model\FileContent\IMemoryFileContent;
+use Qti3\Package\Model\IPackageWriter;
+use Qti3\Package\Model\PackageFile\IPackageFile;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Infrastructure\Filesystem\FileSystemUtils;
+use Qti3\Infrastructure\Filesystem\Zip\Exception\ZipArchiveOpenFileException;
+use Qti3\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 use RuntimeException;
 use ZipArchive;
 

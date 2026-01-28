@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest;
+namespace Qti3\Tests\Package\Model\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestFactory;
-use App\SharedKernel\Infrastructure\Serializer\XmlReader;
+use Qti3\Package\Model\Manifest\Manifest;
+use Qti3\Package\Model\Manifest\ManifestFactory;
+use Qti3\Infrastructure\Serializer\XmlReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

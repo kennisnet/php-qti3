@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef;
+namespace Qti3\AssessmentTest\Model\ItemRef;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\Shared\Model\QtiElement;
 
 final class AssessmentItemRef extends QtiElement
 {

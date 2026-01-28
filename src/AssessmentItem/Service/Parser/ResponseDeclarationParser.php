@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser;
+namespace Qti3\AssessmentItem\Service\Parser;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\AreaMapEntry;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\AreaMapping;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\CorrectResponse;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\MapEntry;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\Mapping;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\ShapeFactory;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\AreaMapEntry;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\AreaMapping;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\CorrectResponse;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\MapEntry;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\Mapping;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
+use Qti3\AssessmentItem\Model\Shape\ShapeFactory;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\Value;
 use DOMElement;
 
 class ResponseDeclarationParser extends AbstractParser

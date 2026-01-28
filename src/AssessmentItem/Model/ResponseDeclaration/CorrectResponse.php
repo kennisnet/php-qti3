@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration;
+namespace Qti3\AssessmentItem\Model\ResponseDeclaration;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\Shared\Model\QtiElement;
+use Qti3\Shared\Model\Value;
 use InvalidArgumentException;
 
 class CorrectResponse extends QtiElement

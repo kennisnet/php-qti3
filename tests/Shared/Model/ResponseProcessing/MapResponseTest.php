@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing;
+namespace Qti3\Tests\Shared\Model\ResponseProcessing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\MapResponse;
+use Qti3\Shared\Model\ResponseProcessing\MapResponse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest;
+namespace Qti3\Tests\Package\Model\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\Manifest\ManifestResource;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\Manifest\ManifestResourceFileCollection;
+use Qti3\Package\Model\PackageFile\PackageFile;
+use Qti3\Package\Model\PackageFile\PackageFileCollection;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceType;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

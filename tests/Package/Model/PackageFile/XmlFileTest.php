@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\PackageFile;
+namespace Qti3\Tests\Package\Model\PackageFile;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
-use App\SharedKernel\Infrastructure\Serializer\XmlReader;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\PackageFile\XmlFile;
+use Qti3\Infrastructure\Serializer\XmlReader;
 use DOMDocument;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;

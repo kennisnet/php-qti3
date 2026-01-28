@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Model\Manifest;
+namespace Qti3\Package\Model\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
+use Qti3\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\PackageFile\XmlFile;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Shared\Xml\Reader\IXmlReader;
 use DOMElement;
 use DOMXPath;
 use RuntimeException;

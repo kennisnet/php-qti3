@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\State;
+namespace Qti3\State;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ValueConverter;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
+use Qti3\AssessmentItem\Service\ValueConverter;
+use Qti3\Shared\Model\Value;
 use InvalidArgumentException;
 
 class ResponseSet

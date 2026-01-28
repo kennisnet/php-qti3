@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser;
+namespace Qti3\AssessmentItem\Service\Parser;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\IXmlElement;
+use Qti3\Shared\Model\IXmlElement;
 use DOMElement;
 use DOMNode;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\HottextInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\TextNode;
+use Qti3\Shared\Model\QtiElement;
+use Qti3\Shared\Model\TextNode;
 
 class Hottext extends QtiElement
 {

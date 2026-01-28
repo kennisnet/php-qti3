@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model;
+namespace Qti3\Tests\AssessmentTest\Model;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestId;
+use Qti3\AssessmentTest\Model\AssessmentTestId;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

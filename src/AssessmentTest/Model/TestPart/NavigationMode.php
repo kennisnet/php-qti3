@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart;
+namespace Qti3\AssessmentTest\Model\TestPart;
 
 enum NavigationMode: string
 {

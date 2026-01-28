@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem;
+namespace Qti3\Infrastructure\Filesystem;
 
 use Exception;
 use RuntimeException;

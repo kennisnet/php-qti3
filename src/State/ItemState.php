@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\State;
+namespace Qti3\State;
 
-use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\Package\Validator\QtiPackageValidationError;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\StringCollection;
 use InvalidArgumentException;
 
 class ItemState

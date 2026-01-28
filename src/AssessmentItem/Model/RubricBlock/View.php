@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock;
+namespace Qti3\AssessmentItem\Model\RubricBlock;
 
 enum View: string
 {

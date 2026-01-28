@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Repository;
+namespace Qti3\AssessmentItem\Repository;
 
-use App\SharedKernel\Domain\Exception\ResourceNotFoundException;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
+use Qti3\Exception\ResourceNotFoundException;
+use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
 
 interface IAssessmentItemRepository
 {

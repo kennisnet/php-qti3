@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape;
+namespace Qti3\AssessmentItem\Model\Shape;
 
 class DefaultShape implements IShapeWithCoords
 {

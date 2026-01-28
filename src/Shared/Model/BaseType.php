@@ -4,7 +4,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Model;
+namespace Qti3\Shared\Model;
 
 // phpcs:disable PHPCompatibility.Variables.ForbiddenThisUseContexts.OutsideObjectContext
 enum BaseType: string

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Feedback;
+namespace Qti3\Tests\AssessmentItem\Model\Feedback;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Feedback\FeedbackInline;
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\TextNode;
+use Qti3\AssessmentItem\Model\Feedback\FeedbackInline;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\TextNode;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

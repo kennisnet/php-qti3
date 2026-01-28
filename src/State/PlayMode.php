@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\State;
+namespace Qti3\State;
 
 use InvalidArgumentException;
 

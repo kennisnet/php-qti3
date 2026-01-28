@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing;
+namespace Qti3\Tests\Shared\Model\OutcomeProcessing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\TestVariables;
+use Qti3\Shared\Model\OutcomeProcessing\TestVariables;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

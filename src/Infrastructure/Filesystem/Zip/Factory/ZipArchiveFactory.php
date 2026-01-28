@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem\Zip\Factory;
+namespace Qti3\Infrastructure\Filesystem\Zip\Factory;
 
 use ZipArchive;
 

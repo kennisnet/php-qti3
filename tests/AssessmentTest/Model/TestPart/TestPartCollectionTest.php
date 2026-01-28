@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart;
+namespace Qti3\Tests\AssessmentTest\Model\TestPart;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPart;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\AssessmentTest\Model\TestPart\TestPart;
+use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

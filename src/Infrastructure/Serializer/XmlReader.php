@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Serializer;
+namespace Qti3\Infrastructure\Serializer;
 
-use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
+use Qti3\Shared\Xml\Reader\IXmlReader;
 use DOMDocument;
 
 readonly class XmlReader implements IXmlReader

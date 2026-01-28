@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Model\Processing;
+namespace Qti3\Shared\Model\Processing;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ValueConverter;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\TextNode;
-use App\SharedKernel\Domain\Qti\State\ItemState;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\AssessmentItem\Service\ValueConverter;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\TextNode;
+use Qti3\State\ItemState;
+use Qti3\StringCollection;
 
 class BaseValue extends AbstractQtiExpression
 {

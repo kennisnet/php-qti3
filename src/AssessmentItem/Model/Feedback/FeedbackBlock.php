@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Feedback;
+namespace Qti3\AssessmentItem\Model\Feedback;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentBody;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\ContentBody;
+use Qti3\Shared\Model\QtiElement;
 
 class FeedbackBlock extends QtiElement
 {

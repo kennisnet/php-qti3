@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\State;
+namespace Qti3\Tests\State;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\CorrectResponse;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\Value;
-use App\SharedKernel\Domain\Qti\State\ResponseSet;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\CorrectResponse;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\Value;
+use Qti3\State\ResponseSet;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

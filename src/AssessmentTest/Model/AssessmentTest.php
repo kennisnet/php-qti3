@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentTest\Model;
+namespace Qti3\AssessmentTest\Model;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock\RubricBlock;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Feedback\TestFeedbackCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPartCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\IContentNode;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\OutcomeProcessing;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentTest\Model\Feedback\TestFeedbackCollection;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\Shared\Model\IContentNode;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Model\OutcomeProcessing\OutcomeProcessing;
+use Qti3\Shared\Model\QtiElement;
 use RuntimeException;
 
 class AssessmentTest extends QtiElement

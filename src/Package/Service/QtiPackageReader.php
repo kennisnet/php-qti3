@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service;
+namespace Qti3\Package\Service;
 
-use App\SharedKernel\Domain\Qti\Package\IQtiPackageFactory;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestFactory;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
-use App\SharedKernel\Domain\Qti\Package\Model\Metadata\Metadata;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\XmlFile;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
+use Qti3\Package\IQtiPackageFactory;
+use Qti3\Package\Model\IPackageReader;
+use Qti3\Package\Model\Manifest\Manifest;
+use Qti3\Package\Model\Manifest\ManifestFactory;
+use Qti3\Package\Model\Manifest\ManifestResource;
+use Qti3\Package\Model\Metadata\Metadata;
+use Qti3\Package\Model\PackageFile\PackageFile;
+use Qti3\Package\Model\PackageFile\PackageFileCollection;
+use Qti3\Package\Model\PackageFile\XmlFile;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceCollection;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Shared\Xml\Reader\IXmlReader;
 
 readonly class QtiPackageReader implements IQtiPackageFactory
 {

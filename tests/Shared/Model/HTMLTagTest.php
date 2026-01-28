@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model;
+namespace Qti3\Tests\Shared\Model;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\HTMLTag;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
+use Qti3\Shared\Model\HTMLTag;
+use Qti3\Shared\Model\QtiResource;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing;
+namespace Qti3\Shared\Model\OutcomeProcessing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\SetOutcomeValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\Processing\AbstractQtiExpression;
+use Qti3\Shared\Model\Processing\SetOutcomeValue;
+use Qti3\Shared\Model\QtiElement;
 
 class OutcomeElseIf extends QtiElement
 {

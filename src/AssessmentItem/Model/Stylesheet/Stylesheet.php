@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Stylesheet;
+namespace Qti3\AssessmentItem\Model\Stylesheet;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\IQtiResourceProvider;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
+use Qti3\Shared\Model\IQtiResourceProvider;
+use Qti3\Shared\Model\QtiElement;
+use Qti3\Shared\Model\QtiResource;
 
 class Stylesheet extends QtiElement implements IQtiResourceProvider
 {

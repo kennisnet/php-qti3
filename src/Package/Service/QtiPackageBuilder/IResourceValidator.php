@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
+namespace Qti3\Package\Service\QtiPackageBuilder;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
+use Qti3\Shared\Model\QtiResource;
 
 interface IResourceValidator
 {

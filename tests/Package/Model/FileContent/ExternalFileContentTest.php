@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\FileContent;
+namespace Qti3\Tests\Package\Model\FileContent;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\ExternalFileContent;
-use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
-use App\SharedKernel\Infrastructure\Filesystem\ResourceDownloader;
+use Qti3\Package\Model\FileContent\ExternalFileContent;
+use Qti3\Package\Service\IResourceDownloader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -18,7 +17,7 @@ class ExternalFileContentTest extends TestCase
     {
         // Arrange
 
-        $resourceDownloader = $this->createMock(ResourceDownloader::class);
+        $resourceDownloader = $this->createMock(IResourceDownloader::class);
         $resourceDownloader->expects($this->once())
             ->method('downloadFileToStream')
             ->with('https://example.com/file.txt')

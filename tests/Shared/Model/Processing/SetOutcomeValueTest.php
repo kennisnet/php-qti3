@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model\Processing;
+namespace Qti3\Tests\Shared\Model\Processing;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\BaseValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\SetOutcomeValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseProcessing;
-use App\SharedKernel\Domain\Qti\State\ItemState;
-use App\SharedKernel\Domain\Qti\State\OutcomeSet;
-use App\SharedKernel\Domain\Qti\State\ResponseSet;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Model\Processing\BaseValue;
+use Qti3\Shared\Model\Processing\SetOutcomeValue;
+use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\State\ItemState;
+use Qti3\State\OutcomeSet;
+use Qti3\State\ResponseSet;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart;
+namespace Qti3\Tests\AssessmentTest\Model\TestPart;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSectionCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\NavigationMode;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\SubmissionMode;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPart;
+use Qti3\AssessmentTest\Model\Section\AssessmentSectionCollection;
+use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
+use Qti3\AssessmentTest\Model\TestPart\SubmissionMode;
+use Qti3\AssessmentTest\Model\TestPart\TestPart;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

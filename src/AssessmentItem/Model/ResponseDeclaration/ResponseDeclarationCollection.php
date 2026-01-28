@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration;
+namespace Qti3\AssessmentItem\Model\ResponseDeclaration;
 
-use App\SharedKernel\Domain\AbstractCollection;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\AbstractCollection;
+use Qti3\StringCollection;
 use InvalidArgumentException;
 
 /**

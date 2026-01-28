@@ -2,32 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Exception;
+namespace Qti3\Exception;
 
-use Throwable;
+use RuntimeException;
 
-final class NotFoundException extends DomainError
+class NotFoundException extends RuntimeException
 {
-    public function __construct(
-        private readonly string $customMessage,
-        private readonly string $errorCode,
-        private readonly ?Throwable $previous = null,
-    ) {
-        parent::__construct($this->errorMessage(), previous: $this->previous);
-    }
-
-    public function errorCode(): string
+    public function __construct(string $message, public readonly string $errorCode = '', ?\Throwable $previous = null)
     {
-        return $this->errorCode;
-    }
-
-    public function errorType(): ErrorType
-    {
-        return ErrorType::NOT_FOUND;
-    }
-
-    protected function errorMessage(): string
-    {
-        return $this->customMessage;
+        parent::__construct($message, 0, $previous);
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem\Zip\Exception;
+namespace Qti3\Infrastructure\Filesystem\Zip\Exception;
 
 use RuntimeException;
 

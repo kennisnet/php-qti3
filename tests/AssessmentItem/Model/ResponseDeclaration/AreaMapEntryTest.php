@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration;
+namespace Qti3\Tests\AssessmentItem\Model\ResponseDeclaration;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\AreaMapEntry;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Rectangle;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\AreaMapEntry;
+use Qti3\AssessmentItem\Model\Shape\Rectangle;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

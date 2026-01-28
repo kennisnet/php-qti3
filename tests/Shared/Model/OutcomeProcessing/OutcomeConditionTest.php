@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing;
+namespace Qti3\Tests\Shared\Model\OutcomeProcessing;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\OutcomeCondition;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\OutcomeElse;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\OutcomeElseIf;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeProcessing\OutcomeIf;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\BaseValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IsNull;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\SetOutcomeValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\Variable;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\OutcomeProcessing\OutcomeCondition;
+use Qti3\Shared\Model\OutcomeProcessing\OutcomeElse;
+use Qti3\Shared\Model\OutcomeProcessing\OutcomeElseIf;
+use Qti3\Shared\Model\OutcomeProcessing\OutcomeIf;
+use Qti3\Shared\Model\Processing\BaseValue;
+use Qti3\Shared\Model\Processing\IsNull;
+use Qti3\Shared\Model\Processing\SetOutcomeValue;
+use Qti3\Shared\Model\Processing\Variable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

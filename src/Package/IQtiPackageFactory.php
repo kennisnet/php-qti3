@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package;
+namespace Qti3\Package;
 
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
+use Qti3\Package\Model\QtiPackage;
 
 interface IQtiPackageFactory
 {

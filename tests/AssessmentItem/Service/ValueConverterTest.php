@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Service;
+namespace Qti3\Tests\AssessmentItem\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ValueConverter;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
+use Qti3\AssessmentItem\Service\ValueConverter;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

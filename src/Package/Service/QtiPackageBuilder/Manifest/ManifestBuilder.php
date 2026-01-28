@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest;
+namespace Qti3\Package\Service\QtiPackageBuilder\Manifest;
 
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\Manifest;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResource;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceCollection;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IXmlBuilder;
-use App\SharedKernel\Domain\Qti\Shared\Xml\Reader\IXmlReader;
+use Qti3\Package\Model\Manifest\Manifest;
+use Qti3\Package\Model\Manifest\ManifestResource;
+use Qti3\Package\Model\Manifest\ManifestResourceCollection;
+use Qti3\Package\Model\Resource\ResourceCollection;
+use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
+use Qti3\Shared\Xml\Reader\IXmlReader;
 use DOMDocument;
 use DOMElement;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Validator;
+namespace Qti3\Package\Validator;
 
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\StringCollection;
 
 interface IQtiPackageValidator
 {

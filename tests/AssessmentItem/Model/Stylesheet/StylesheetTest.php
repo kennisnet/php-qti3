@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Stylesheet;
+namespace Qti3\Tests\AssessmentItem\Model\Stylesheet;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Stylesheet\Stylesheet;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiResource;
+use Qti3\AssessmentItem\Model\Stylesheet\Stylesheet;
+use Qti3\Shared\Model\QtiResource;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

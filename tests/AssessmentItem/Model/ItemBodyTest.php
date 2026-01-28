@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model;
+namespace Qti3\Tests\AssessmentItem\Model;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ItemBody;
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\HTMLTag;
+use Qti3\AssessmentItem\Model\ItemBody;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\HTMLTag;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Validator;
+namespace Qti3\Tests\Package\Validator;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Service\ResponseProcessor;
-use App\SharedKernel\Domain\Qti\Package\Validator\QtiPackageValidationError;
-use App\SharedKernel\Domain\Qti\Package\Validator\ResponseProcessingValidator;
-use App\SharedKernel\Domain\StringCollection;
-use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\QtiPackageMock;
+use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\Package\Validator\QtiPackageValidationError;
+use Qti3\Package\Validator\ResponseProcessingValidator;
+use Qti3\StringCollection;
+use Qti3\Tests\Package\Model\QtiPackageMock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

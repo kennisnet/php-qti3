@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing;
+namespace Qti3\Shared\Model\ResponseProcessing;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Circle;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Coordinate;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\DefaultShape;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\IShapeWithCoords;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Polygon;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Shape\Rectangle;
-use App\SharedKernel\Domain\Qti\Shared\Model\BaseType;
-use App\SharedKernel\Domain\Qti\Shared\Model\Cardinality;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\AbstractQtiExpression;
-use App\SharedKernel\Domain\Qti\State\ItemState;
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\AssessmentItem\Model\Shape\Circle;
+use Qti3\AssessmentItem\Model\Shape\Coordinate;
+use Qti3\AssessmentItem\Model\Shape\DefaultShape;
+use Qti3\AssessmentItem\Model\Shape\IShapeWithCoords;
+use Qti3\AssessmentItem\Model\Shape\Polygon;
+use Qti3\AssessmentItem\Model\Shape\Rectangle;
+use Qti3\Shared\Model\BaseType;
+use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Model\Processing\AbstractQtiExpression;
+use Qti3\State\ItemState;
+use Qti3\StringCollection;
 use Exception;
 
 class MapResponsePoint extends AbstractQtiExpression

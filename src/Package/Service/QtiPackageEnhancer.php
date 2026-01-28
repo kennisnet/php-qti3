@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Service;
+namespace Qti3\Package\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTest;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestId;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\Section\AssessmentSectionCollection;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\NavigationMode;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\SubmissionMode;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPart;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\TestPart\TestPartCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\AssessmentTest\Model\AssessmentTest;
+use Qti3\AssessmentTest\Model\AssessmentTestId;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
+use Qti3\AssessmentTest\Model\Section\AssessmentSection;
+use Qti3\AssessmentTest\Model\Section\AssessmentSectionCollection;
+use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
+use Qti3\AssessmentTest\Model\TestPart\SubmissionMode;
+use Qti3\AssessmentTest\Model\TestPart\TestPart;
+use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 
 class QtiPackageEnhancer
 {

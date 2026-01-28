@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\Package\Service;
+namespace Qti3\Tests\Package\Service;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Repository\IAssessmentItemRepository;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Repository\IAssessmentTestRepository;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\Resource;
-use App\SharedKernel\Domain\Qti\Package\Model\Resource\ResourceType;
-use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\IResourceValidator;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
-use App\SharedKernel\Domain\Qti\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemStub;
-use App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\AssessmentTestStub;
-use App\Tests\Unit\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestMock;
+use Qti3\AssessmentItem\Repository\IAssessmentItemRepository;
+use Qti3\AssessmentTest\Repository\IAssessmentTestRepository;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\PackageFile\PackageFile;
+use Qti3\Package\Model\PackageFile\PackageFileCollection;
+use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Service\IResourceDownloader;
+use Qti3\Package\Service\QtiPackageBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\IResourceValidator;
+use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
+use Qti3\Tests\AssessmentItem\Model\AssessmentItemStub;
+use Qti3\Tests\AssessmentTest\Model\AssessmentTestStub;
+use Qti3\Tests\Package\Model\Manifest\ManifestMock;
 use Exception;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

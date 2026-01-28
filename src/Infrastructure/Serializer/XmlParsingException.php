@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Serializer;
+namespace Qti3\Infrastructure\Serializer;
 
 use InvalidArgumentException;
 

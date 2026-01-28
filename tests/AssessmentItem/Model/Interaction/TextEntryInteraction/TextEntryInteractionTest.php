@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\TextEntryInteraction;
+namespace Qti3\Tests\AssessmentItem\Model\Interaction\TextEntryInteraction;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteraction;
+use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteraction;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\State;
+namespace Qti3\Tests\State;
 
-use App\SharedKernel\Domain\Qti\State\PlayMode;
+use Qti3\State\PlayMode;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

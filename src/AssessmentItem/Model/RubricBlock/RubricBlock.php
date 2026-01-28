@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\RubricBlock;
+namespace Qti3\AssessmentItem\Model\RubricBlock;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentBody;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\ContentBody;
+use Qti3\Shared\Model\QtiElement;
 
 class RubricBlock extends QtiElement
 {

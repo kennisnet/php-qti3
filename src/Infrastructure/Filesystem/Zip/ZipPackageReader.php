@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem\Zip;
+namespace Qti3\Infrastructure\Filesystem\Zip;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
-use App\SharedKernel\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
+use Qti3\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\IPackageReader;
+use Qti3\Infrastructure\Filesystem\Zip\Factory\ZipArchiveFactory;
 use DateTimeImmutable;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use RuntimeException;
 use ZipArchive;
 
 readonly class ZipPackageReader implements IPackageReader
@@ -23,7 +23,7 @@ readonly class ZipPackageReader implements IPackageReader
         $this->zip = $zipArchiveFactory->create();
 
         if ($this->zip->open($zipfilePath) !== true) {
-            throw new BadRequestException('Could not open ZIP file');
+            throw new RuntimeException('Could not open ZIP file');
         }
     }
 
@@ -31,7 +31,7 @@ readonly class ZipPackageReader implements IPackageReader
     {
         $content = $this->zip->getFromName($filepath);
         if ($content === false) {
-            throw new BadRequestException(sprintf('File %s not found in ZIP', $filepath));
+            throw new RuntimeException(sprintf('File %s not found in ZIP', $filepath));
         }
 
         return new MemoryFileContent($content);

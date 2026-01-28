@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem;
+namespace Qti3\Infrastructure\Filesystem;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageWriter;
-use App\SharedKernel\Domain\Qti\Package\Model\QtiPackage;
+use Qti3\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\IPackageWriter;
+use Qti3\Package\Model\QtiPackage;
 use Exception;
 use League\Flysystem\FilesystemOperator;
 

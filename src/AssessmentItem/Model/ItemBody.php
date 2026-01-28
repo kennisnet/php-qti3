@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model;
+namespace Qti3\AssessmentItem\Model;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\HTMLTag;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\HTMLTag;
+use Qti3\Shared\Model\QtiElement;
 use InvalidArgumentException;
 
 class ItemBody extends QtiElement

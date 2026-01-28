@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Service\Parser;
+namespace Qti3\AssessmentItem\Service\Parser;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\IProcessingElement;
-use App\SharedKernel\Domain\Qti\Shared\Model\Processing\SetOutcomeValue;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseCondition;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseElse;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseElseIf;
-use App\SharedKernel\Domain\Qti\Shared\Model\ResponseProcessing\ResponseIf;
+use Qti3\Shared\Model\Processing\IProcessingElement;
+use Qti3\Shared\Model\Processing\SetOutcomeValue;
+use Qti3\Shared\Model\ResponseProcessing\ResponseCondition;
+use Qti3\Shared\Model\ResponseProcessing\ResponseElse;
+use Qti3\Shared\Model\ResponseProcessing\ResponseElseIf;
+use Qti3\Shared\Model\ResponseProcessing\ResponseIf;
 use DOMElement;
 
 class ProcessingElementParser extends AbstractParser

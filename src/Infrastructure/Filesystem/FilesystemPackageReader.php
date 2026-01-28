@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Filesystem;
+namespace Qti3\Infrastructure\Filesystem;
 
-use App\SharedKernel\Domain\Exception\NotFoundException;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\IFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\IPackageReader;
+use Qti3\Exception\NotFoundException;
+use Qti3\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\IPackageReader;
 use DateTimeImmutable;
 use League\Flysystem\FilesystemOperator;
 
@@ -36,6 +36,6 @@ readonly class FilesystemPackageReader implements IPackageReader
 
     public function getLastModified(): ?DateTimeImmutable
     {
-        return new DateTimeImmutable()->setTimestamp($this->dataStorage->lastModified($this->folderName));
+        return (new DateTimeImmutable())->setTimestamp($this->dataStorage->lastModified($this->folderName));
     }
 }

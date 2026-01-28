@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentItem\Model;
+namespace Qti3\Tests\AssessmentItem\Model;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItem;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ItemBody;
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\HTMLTag;
-use App\SharedKernel\Domain\Qti\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Model\ItemBody;
+use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\HTMLTag;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 
 class AssessmentItemStub
 {

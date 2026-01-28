@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\AssessmentItem\Model\Interaction\HottextInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
 
-use App\SharedKernel\Domain\Qti\Shared\Model\ContentNodeCollection;
-use App\SharedKernel\Domain\Qti\Shared\Model\QtiElement;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\QtiElement;
 
 /**
  * The HotTextInteraction.Type (qti-hottext-interaction)

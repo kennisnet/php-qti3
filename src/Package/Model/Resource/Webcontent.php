@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Qti\Package\Model\Resource;
+namespace Qti3\Package\Model\Resource;
 
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\ExternalFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\FileContent\MemoryFileContent;
-use App\SharedKernel\Domain\Qti\Package\Model\Manifest\ManifestResourceDependencyCollection;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFile;
-use App\SharedKernel\Domain\Qti\Package\Model\PackageFile\PackageFileCollection;
-use App\SharedKernel\Domain\Qti\Package\Service\IResourceDownloader;
+use Qti3\Package\Model\FileContent\ExternalFileContent;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\PackageFile\PackageFile;
+use Qti3\Package\Model\PackageFile\PackageFileCollection;
+use Qti3\Package\Service\IResourceDownloader;
 use RuntimeException;
 
 class Webcontent extends Resource

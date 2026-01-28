@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef;
+namespace Qti3\Tests\AssessmentTest\Model\ItemRef;
 
-use App\SharedKernel\Domain\Qti\AssessmentItem\Model\AssessmentItemId;
-use App\SharedKernel\Domain\Qti\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

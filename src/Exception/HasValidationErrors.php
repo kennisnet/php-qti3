@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\Exception;
+namespace Qti3\Exception;
 
-use App\SharedKernel\Domain\StringCollection;
+use Qti3\StringCollection;
 
 interface HasValidationErrors
 {
