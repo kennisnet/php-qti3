@@ -8,7 +8,7 @@ use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\PackageFile;
 use Qti3\Package\Model\PackageFile\PackageFileCollection;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\StringCollection;
 
 class Warnings extends Resource
 {

@@ -12,7 +12,7 @@ use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
 use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
-use Qti3\Shared\Model\OutcomeProcessing\OutcomeProcessing;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeProcessing;
 use Qti3\Shared\Model\QtiElement;
 use RuntimeException;
 

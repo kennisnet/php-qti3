@@ -22,4 +22,10 @@ class TextNodeTest extends TestCase
     {
         $this->assertEquals('<p>Test</p>', $this->htmlText->__toString());
     }
+
+    #[Test]
+    public function getContentForXmlReturnsContent(): void
+    {
+        $this->assertSame('<p>Test</p>', $this->htmlText->getContentForXml());
+    }
 }

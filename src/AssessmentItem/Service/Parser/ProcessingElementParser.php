@@ -6,10 +6,10 @@ namespace Qti3\AssessmentItem\Service\Parser;
 
 use Qti3\Shared\Model\Processing\IProcessingElement;
 use Qti3\Shared\Model\Processing\SetOutcomeValue;
-use Qti3\Shared\Model\ResponseProcessing\ResponseCondition;
-use Qti3\Shared\Model\ResponseProcessing\ResponseElse;
-use Qti3\Shared\Model\ResponseProcessing\ResponseElseIf;
-use Qti3\Shared\Model\ResponseProcessing\ResponseIf;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseCondition;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseElse;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseElseIf;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseIf;
 use DOMElement;
 
 class ProcessingElementParser extends AbstractParser

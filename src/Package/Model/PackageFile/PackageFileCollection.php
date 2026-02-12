@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Model\PackageFile;
 
-use Qti3\AbstractCollection;
+use Qti3\Shared\Collection\AbstractCollection;
 
 /**
  * @template-extends AbstractCollection<PackageFile>

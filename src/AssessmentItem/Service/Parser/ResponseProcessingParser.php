@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Qti3\AssessmentItem\Service\Parser;
 
 use Qti3\Shared\Model\Processing\IProcessingElement;
-use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use DOMElement;
 
 class ResponseProcessingParser extends AbstractParser

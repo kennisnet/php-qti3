@@ -11,10 +11,10 @@ use Qti3\Shared\Model\Cardinality;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\Shared\Model\Processing\BaseValue;
 use Qti3\Shared\Model\Processing\SetOutcomeValue;
-use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
-use Qti3\State\ItemState;
-use Qti3\State\OutcomeSet;
-use Qti3\State\ResponseSet;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\State\ItemState;
+use Qti3\AssessmentItem\Model\State\OutcomeSet;
+use Qti3\AssessmentItem\Model\State\ResponseSet;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

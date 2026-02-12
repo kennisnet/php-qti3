@@ -41,10 +41,10 @@ use Qti3\Shared\Model\Processing\Substring;
 use Qti3\Shared\Model\Processing\Subtract;
 use Qti3\Shared\Model\Processing\Sum;
 use Qti3\Shared\Model\Processing\Variable;
-use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
-use Qti3\State\ItemState;
-use Qti3\State\OutcomeSet;
-use Qti3\State\ResponseSet;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\State\ItemState;
+use Qti3\AssessmentItem\Model\State\OutcomeSet;
+use Qti3\AssessmentItem\Model\State\ResponseSet;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

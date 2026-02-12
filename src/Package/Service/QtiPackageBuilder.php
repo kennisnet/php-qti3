@@ -24,7 +24,7 @@ use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Shared\Model\IQtiResourceProvider;
 use Qti3\Shared\Model\IXmlElement;
 use Qti3\Shared\Model\QtiResource;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\StringCollection;
 use Exception;
 
 class QtiPackageBuilder

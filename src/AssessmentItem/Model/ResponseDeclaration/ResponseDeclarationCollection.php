@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\ResponseDeclaration;
 
-use Qti3\AbstractCollection;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\AbstractCollection;
+use Qti3\Shared\Collection\StringCollection;
 use InvalidArgumentException;
 
 /**

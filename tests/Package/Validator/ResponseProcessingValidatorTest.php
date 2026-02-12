@@ -7,7 +7,7 @@ namespace Qti3\Tests\Package\Validator;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Validator\QtiPackageValidationError;
 use Qti3\Package\Validator\ResponseProcessingValidator;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Tests\Package\Model\QtiPackageMock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

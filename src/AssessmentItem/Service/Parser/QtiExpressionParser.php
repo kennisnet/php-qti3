@@ -38,8 +38,8 @@ use Qti3\Shared\Model\Processing\Substring;
 use Qti3\Shared\Model\Processing\Subtract;
 use Qti3\Shared\Model\Processing\Sum;
 use Qti3\Shared\Model\Processing\Variable;
-use Qti3\Shared\Model\ResponseProcessing\MapResponse;
-use Qti3\Shared\Model\ResponseProcessing\MapResponsePoint;
+use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponse;
+use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponsePoint;
 use DOMElement;
 
 class QtiExpressionParser extends AbstractParser

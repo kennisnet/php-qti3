@@ -8,7 +8,7 @@ use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Model\Stylesheet\Stylesheet;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\Shared\Model\QtiElement;
-use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 
 class AssessmentItem extends QtiElement
 {

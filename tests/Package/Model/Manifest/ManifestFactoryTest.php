@@ -6,7 +6,7 @@ namespace Qti3\Tests\Package\Model\Manifest;
 
 use Qti3\Package\Model\Manifest\Manifest;
 use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Shared\Xml\Reader\XmlReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -14,7 +14,7 @@ use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Shared\Xml\Reader\XmlReader;
 use DOMDocument;
 
 class QtiPackageMock extends QtiPackage

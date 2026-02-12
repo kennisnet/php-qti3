@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Tests\Package\Model\Manifest;
 
 use Qti3\Package\Model\Manifest\Manifest;
-use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Shared\Xml\Reader\XmlReader;
 
 class ManifestMock extends Manifest
 {

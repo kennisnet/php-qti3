@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Repository;
 
-use Qti3\Exception\ResourceNotFoundException;
+use Qti3\Shared\Exception\ResourceNotFoundException;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentItem\Model\AssessmentItemId;
 

@@ -8,8 +8,8 @@ use Qti3\AssessmentItem\Service\ValueConverter;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
 use Qti3\Shared\Model\TextNode;
-use Qti3\State\ItemState;
-use Qti3\StringCollection;
+use Qti3\AssessmentItem\Model\State\ItemState;
+use Qti3\Shared\Collection\StringCollection;
 
 class BaseValue extends AbstractQtiExpression
 {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Qti3\Shared\Model\Processing;
 
-use Qti3\Shared\Model\OutcomeProcessing\IOutcomeProcessingElement;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\IOutcomeProcessingElement;
 use Qti3\Shared\Model\QtiElement;
-use Qti3\State\ItemState;
-use Qti3\StringCollection;
+use Qti3\AssessmentItem\Model\State\ItemState;
+use Qti3\Shared\Collection\StringCollection;
 
 class SetOutcomeValue extends QtiElement implements IProcessingElement, IOutcomeProcessingElement
 {

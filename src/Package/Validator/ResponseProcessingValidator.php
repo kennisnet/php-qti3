@@ -9,7 +9,7 @@ use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\StringCollection;
 use Exception;
 
 readonly class ResponseProcessingValidator implements IQtiPackageValidator

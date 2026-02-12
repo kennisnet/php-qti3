@@ -81,4 +81,25 @@ class OutcomeDeclarationTest extends TestCase
             'external-scored' => null,
         ], $outcomeDeclaration->attributes());
     }
+
+    #[Test]
+    public function aFeedbackDeclarationCanBeCreated(): void
+    {
+        $outcomeDeclaration = OutcomeDeclaration::feedbackDeclaration();
+
+        $this->assertSame('FEEDBACK', $outcomeDeclaration->identifier);
+        $this->assertSame(BaseType::IDENTIFIER, $outcomeDeclaration->baseType);
+        $this->assertSame(Cardinality::SINGLE, $outcomeDeclaration->cardinality);
+        $this->assertNull($outcomeDeclaration->defaultValue);
+    }
+
+    #[Test]
+    public function aFeedbackDeclarationCanBeCreatedWithCustomIdentifier(): void
+    {
+        $outcomeDeclaration = OutcomeDeclaration::feedbackDeclaration('CUSTOM_FEEDBACK');
+
+        $this->assertSame('CUSTOM_FEEDBACK', $outcomeDeclaration->identifier);
+        $this->assertSame(BaseType::IDENTIFIER, $outcomeDeclaration->baseType);
+        $this->assertSame(Cardinality::SINGLE, $outcomeDeclaration->cardinality);
+    }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Model;
 
-use Qti3\Exception\ResourceNotFoundException;
+use Qti3\Shared\Exception\ResourceNotFoundException;
 use Qti3\Package\Model\Manifest\Manifest;
 use Qti3\Package\Model\Manifest\ManifestResource;
 use Qti3\Package\Model\Metadata\Metadata;

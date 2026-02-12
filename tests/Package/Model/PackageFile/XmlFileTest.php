@@ -6,7 +6,7 @@ namespace Qti3\Tests\Package\Model\PackageFile;
 
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\PackageFile\XmlFile;
-use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Shared\Xml\Reader\XmlReader;
 use DOMDocument;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;

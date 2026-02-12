@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Qti3\AssessmentItem\Service;
 
 use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
-use Qti3\Shared\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use DOMDocument;
 
 class AssessmentItemDeterminator

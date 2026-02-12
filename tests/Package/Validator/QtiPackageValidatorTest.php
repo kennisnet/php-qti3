@@ -18,11 +18,13 @@ use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Validator\IImsQtiPackageValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
+use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
-use Qti3\StringCollection;
-use Qti3\Infrastructure\Serializer\XmlReader;
+use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\Tests\Package\Model\Manifest\ManifestMock;
 use Qti3\Tests\Package\Model\QtiPackageMock;
 use PHPUnit\Framework\Attributes\Test;
@@ -88,5 +90,50 @@ class QtiPackageValidatorTest extends TestCase
         // Assert
 
         $this->assertCount(5, $errors);
+    }
+
+    #[Test]
+    public function validatePackageWithRealSchemaValidatorReturnsErrors(): void
+    {
+        $xmlReader = new XmlReader();
+        $realValidator = new QtiPackageValidator(
+            new QtiSchemaValidator(new ManifestFactory($xmlReader), $xmlReader),
+            new ResponseProcessingValidator(
+                new ResponseProcessor(
+                    new ResponseDeclarationParser(),
+                    new OutcomeDeclarationParser(),
+                    new ResponseProcessingParser(
+                        new ProcessingElementParser(
+                            new QtiExpressionParser(),
+                        ),
+                    ),
+                    new AssessmentItemDeterminator(),
+                ),
+            ),
+        );
+
+        $qtiPackage = new QtiPackageMock(
+            new ResourceCollection(),
+            ManifestMock::create(),
+        );
+
+        $qtiPackage->addResource(new Resource(
+            'item001',
+            ResourceType::ASSESSMENT_ITEM,
+            'item001.xml',
+            new PackageFileCollection([
+                new XmlFile(
+                    'item001.xml',
+                    new MemoryFileContent(file_get_contents(__DIR__ . '/resources/item001.xml')),
+                    $this->xmlReader,
+                ),
+            ]),
+            new ManifestResourceDependencyCollection(),
+        ));
+
+        $errors = $realValidator->validate($qtiPackage);
+
+        // Should contain both schema validation errors (missing manifest identifier) and response processing errors
+        $this->assertGreaterThanOrEqual(5, $errors->count());
     }
 }

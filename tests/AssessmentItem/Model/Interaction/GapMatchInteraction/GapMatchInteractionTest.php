@@ -76,4 +76,17 @@ class GapMatchInteractionTest extends TestCase
             prompt: new Prompt(new ContentNodeCollection([new TextNode('Prompt')])),
         );
     }
+
+    #[Test]
+    public function gapTextChildrenReturnsContentNodes(): void
+    {
+        $textNode = new TextNode('Hello');
+        $content = new ContentNodeCollection([$textNode]);
+        $gapText = new GapText('gap1', 1, $content);
+
+        $children = $gapText->children();
+
+        $this->assertCount(1, $children);
+        $this->assertSame($textNode, $children[0]);
+    }
 }

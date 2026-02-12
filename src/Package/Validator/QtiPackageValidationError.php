@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Validator;
 
-use Qti3\Exception\DomainError;
-use Qti3\Exception\ErrorType;
-use Qti3\Exception\HasValidationErrors;
-use Qti3\StringCollection;
+use Qti3\Shared\Exception\DomainError;
+use Qti3\Shared\Exception\ErrorType;
+use Qti3\Shared\Exception\HasValidationErrors;
+use Qti3\Shared\Collection\StringCollection;
 
 class QtiPackageValidationError extends DomainError implements HasValidationErrors
 {

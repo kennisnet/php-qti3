@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Shared\Model\Processing;
 
-use Qti3\State\ItemState;
+use Qti3\AssessmentItem\Model\State\ItemState;
 use RuntimeException;
 
 class IndexExpression

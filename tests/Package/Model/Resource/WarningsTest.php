@@ -6,7 +6,7 @@ namespace Qti3\Tests\Package\Model\Resource;
 
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Resource\Warnings;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\StringCollection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

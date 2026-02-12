@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Package\Validator;
 
 use Qti3\Package\Model\QtiPackage;
-use Qti3\StringCollection;
+use Qti3\Shared\Collection\StringCollection;
 
 readonly class QtiPackageValidator
 {
