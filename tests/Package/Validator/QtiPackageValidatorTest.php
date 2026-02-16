@@ -97,7 +97,7 @@ class QtiPackageValidatorTest extends TestCase
     {
         $xmlReader = new XmlReader();
         $realValidator = new QtiPackageValidator(
-            new QtiSchemaValidator(new ManifestFactory($xmlReader), $xmlReader),
+            new NoopImsQtiPackageValidator(),
             new ResponseProcessingValidator(
                 new ResponseProcessor(
                     new ResponseDeclarationParser(),

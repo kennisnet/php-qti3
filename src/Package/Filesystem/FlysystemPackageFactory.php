@@ -7,9 +7,9 @@ namespace Qti3\Package\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use Qti3\Package\Model\IPackageReader;
 use Qti3\Package\Model\IPackageWriter;
-use Qti3\Package\Service\IFlysystemPackageFactory;
+use Qti3\Package\Service\IFilesystemPackageFactory;
 
-readonly class FlysystemPackageFactory implements IFlysystemPackageFactory
+readonly class FlysystemPackageFactory implements IFilesystemPackageFactory
 {
     public function __construct(
         private FilesystemOperator $filesystem,

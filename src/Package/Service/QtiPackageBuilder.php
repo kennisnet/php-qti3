@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Package\Service;
 
 use Qti3\AssessmentItem\Model\AssessmentItem;
-use Qti3\AssessmentItem\Model\AssessmentItemId;
-use Qti3\AssessmentItem\Repository\IAssessmentItemRepository;
 use Qti3\AssessmentTest\Model\AssessmentTest;
-use Qti3\AssessmentTest\Model\AssessmentTestId;
-use Qti3\AssessmentTest\Repository\IAssessmentTestRepository;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\QtiPackage;
@@ -33,27 +29,9 @@ class QtiPackageBuilder
         private readonly ManifestBuilder $manifestBuilder,
         private readonly TestResourceBuilder $testResourceBuilder,
         private readonly ItemResourceBuilder $itemResourceBuilder,
-        private readonly IAssessmentTestRepository $assessmentTestRepository,
-        private readonly IAssessmentItemRepository $assessmentItemRepository,
         private readonly IResourceValidator $resourceValidator,
         private readonly IResourceDownloader $resourceDownloader,
     ) {}
-
-    public function buildFromAssessmentId(
-        AssessmentTestId $assessmentTestId,
-    ): QtiPackage {
-        $assessmentTest = $this->assessmentTestRepository->getById($assessmentTestId);
-
-        /** @var array<int,AssessmentItemId> $itemIds */
-        $itemIds = array_filter(array_map(
-            fn($itemRef): ?AssessmentItemId => $itemRef->itemId,
-            $assessmentTest->getItemRefs(),
-        ), fn($value): bool => $value !== null);
-
-        $assessmentItems = $this->assessmentItemRepository->getByIds($itemIds);
-
-        return $this->buildForTest($assessmentTest, $assessmentItems);
-    }
 
     /**
      * @param array<int,AssessmentItem> $assessmentItems

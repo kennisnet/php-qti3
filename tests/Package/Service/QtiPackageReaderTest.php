@@ -16,7 +16,7 @@ use Qti3\Package\Model\Manifest\ManifestResourceFile;
 use Qti3\Package\Model\Manifest\ManifestResourceFileCollection;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\Package\Service\IFlysystemPackageFactory;
+use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\Package\Service\QtiPackageReader;
 use Qti3\Shared\Xml\Reader\IXmlReader;
@@ -28,7 +28,7 @@ class QtiPackageReaderTest extends TestCase
     private ManifestFactory $manifestFactory;
     private IXmlReader $xmlReader;
     private IZipPackageFactory $zipPackageFactory;
-    private IFlysystemPackageFactory $filesystemPackageFactory;
+    private IFilesystemPackageFactory $filesystemPackageFactory;
     private IPackageReader $packageReader;
     private Manifest $manifest;
     private QtiPackageReader $qtiPackageReader;
@@ -38,7 +38,7 @@ class QtiPackageReaderTest extends TestCase
         $this->manifestFactory = $this->createMock(ManifestFactory::class);
         $this->xmlReader = $this->createMock(IXmlReader::class);
         $this->zipPackageFactory = $this->createMock(IZipPackageFactory::class);
-        $this->filesystemPackageFactory = $this->createMock(IFlysystemPackageFactory::class);
+        $this->filesystemPackageFactory = $this->createMock(IFilesystemPackageFactory::class);
         $this->packageReader = $this->createMock(IPackageReader::class);
         $this->manifest = $this->createMock(Manifest::class);
 

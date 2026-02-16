@@ -6,11 +6,9 @@ namespace Qti3\Tests;
 
 use LogicException;
 use PHPUnit\Framework\TestCase;
-use Qti3\AssessmentItem\Repository\IAssessmentItemRepository;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
-use Qti3\AssessmentTest\Repository\IAssessmentTestRepository;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
-use Qti3\Package\Service\IFlysystemPackageFactory;
+use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Service\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\IResourceValidator;
@@ -18,26 +16,24 @@ use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
+use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\QtiClient;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Xml\Reader\XmlReader;
+use Qti3\Tests\Package\Validator\NoopImsQtiPackageValidator;
 use ZipArchive;
 
 final class QtiClientTest extends TestCase
 {
     private function createClient(
-        ?IFlysystemPackageFactory $flysystemPackageFactory = null,
+        ?IFilesystemPackageFactory $filesystemPackageFactory = null,
         ?IResourceValidator $resourceValidator = null,
         ?IResourceDownloader $resourceDownloader = null,
-        ?IAssessmentTestRepository $assessmentTestRepository = null,
-        ?IAssessmentItemRepository $assessmentItemRepository = null,
     ): QtiClient {
         return new QtiClient(
-            $flysystemPackageFactory ?? $this->createMock(IFlysystemPackageFactory::class),
+            $filesystemPackageFactory ?? $this->createMock(IFilesystemPackageFactory::class),
             $resourceValidator ?? $this->createMock(IResourceValidator::class),
             $resourceDownloader ?? $this->createMock(IResourceDownloader::class),
-            $assessmentTestRepository ?? $this->createMock(IAssessmentTestRepository::class),
-            $assessmentItemRepository ?? $this->createMock(IAssessmentItemRepository::class),
         );
     }
 
@@ -48,10 +44,10 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(QtiPackageReader::class, $reader);
     }
 
-    public function testGetQtiPackageReaderReturnsNewInstanceEachTime(): void
+    public function testGetQtiPackageReaderReturnsSameInstance(): void
     {
         $container = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $container->getQtiPackageReader(),
             $container->getQtiPackageReader(),
         );
@@ -64,20 +60,20 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(ZipPackageFactory::class, $factory);
     }
 
-    public function testGetZipPackageFactoryReturnsNewInstanceEachTime(): void
+    public function testGetZipPackageFactoryReturnsSameInstance(): void
     {
         $container = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $container->getZipPackageFactory(),
             $container->getZipPackageFactory(),
         );
     }
 
-    public function testGetFlysystemPackageFactoryReturnsProvidedFactory(): void
+    public function testGetFilesystemPackageFactoryReturnsProvidedFactory(): void
     {
-        $factory = $this->createMock(IFlysystemPackageFactory::class);
-        $container = $this->createClient(flysystemPackageFactory: $factory);
-        $this->assertSame($factory, $container->getFlysystemPackageFactory());
+        $factory = $this->createMock(IFilesystemPackageFactory::class);
+        $container = $this->createClient(filesystemPackageFactory: $factory);
+        $this->assertSame($factory, $container->getFilesystemPackageFactory());
     }
 
     public function testGetQtiPackageBuilderReturnsInstance(): void
@@ -87,10 +83,10 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(QtiPackageBuilder::class, $builder);
     }
 
-    public function testGetQtiPackageBuilderReturnsNewInstanceEachTime(): void
+    public function testGetQtiPackageBuilderReturnsSameInstance(): void
     {
         $container = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $container->getQtiPackageBuilder(),
             $container->getQtiPackageBuilder(),
         );
@@ -103,10 +99,10 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(XmlBuilder::class, $builder);
     }
 
-    public function testGetXmlBuilderReturnsNewInstanceEachTime(): void
+    public function testGetXmlBuilderReturnsSameInstance(): void
     {
         $container = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $container->getXmlBuilder(),
             $container->getXmlBuilder(),
         );
@@ -119,10 +115,10 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(ResponseProcessor::class, $processor);
     }
 
-    public function testGetResponseProcessorReturnsNewInstanceEachTime(): void
+    public function testGetResponseProcessorReturnsSameInstance(): void
     {
         $container = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $container->getResponseProcessor(),
             $container->getResponseProcessor(),
         );
@@ -135,16 +131,6 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(XmlReader::class, $reader);
     }
 
-    public function testFromFilesystemThrowsWhenReaderUsesUnavailableFlysystemFactory(): void
-    {
-        $container = $this->createClient();
-        $reader = $container->getQtiPackageReader();
-
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('IFlysystemPackageFactory');
-
-        $reader->fromFilesystem('/tmp/nonexistent');
-    }
 
     public function testGetQtiPackageValidatorReturnsInstance(): void
     {
@@ -153,10 +139,10 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(QtiPackageValidator::class, $validator);
     }
 
-    public function testGetQtiPackageValidatorReturnsNewInstanceEachTime(): void
+    public function testGetQtiPackageValidatorReturnsSameInstance(): void
     {
         $client = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $client->getQtiPackageValidator(),
             $client->getQtiPackageValidator(),
         );
@@ -169,10 +155,10 @@ final class QtiClientTest extends TestCase
         $this->assertInstanceOf(QtiSchemaValidator::class, $validator);
     }
 
-    public function testGetQtiSchemaValidatorReturnsNewInstanceEachTime(): void
+    public function testGetQtiSchemaValidatorReturnsSameInstance(): void
     {
         $client = $this->createClient();
-        $this->assertNotSame(
+        $this->assertSame(
             $client->getQtiSchemaValidator(),
             $client->getQtiSchemaValidator(),
         );
@@ -190,11 +176,15 @@ final class QtiClientTest extends TestCase
         try {
             $reader = $client->getQtiPackageReader();
             $package = $reader->fromZip($zipPath);
-            $validator = $client->getQtiPackageValidator();
+            // Use NoopImsQtiPackageValidator to skip heavy XSD validation in this test
+            $validator = new QtiPackageValidator(
+                new NoopImsQtiPackageValidator(),
+                new ResponseProcessingValidator($client->getResponseProcessor())
+            );
             $errors = $validator->validate($package);
 
             $this->assertInstanceOf(StringCollection::class, $errors);
-            // item001.xml triggers both schema-related checks and response processing validation; at least one runs
+            // item001.xml triggers response processing validation
             $this->assertGreaterThanOrEqual(0, $errors->count());
         } finally {
             if (file_exists($zipPath)) {

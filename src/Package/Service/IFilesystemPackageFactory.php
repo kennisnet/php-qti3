@@ -7,7 +7,7 @@ namespace Qti3\Package\Service;
 use Qti3\Package\Model\IPackageReader;
 use Qti3\Package\Model\IPackageWriter;
 
-interface IFlysystemPackageFactory
+interface IFilesystemPackageFactory
 {
     public function getReader(string $folder, bool $lazyLoading = true): IPackageReader;
 

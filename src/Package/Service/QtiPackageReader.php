@@ -25,7 +25,7 @@ readonly class QtiPackageReader implements IQtiPackageFactory
         private ManifestFactory $manifestFactory,
         private IXmlReader $xmlReader,
         private IZipPackageFactory $zipPackageFactory,
-        private IFlysystemPackageFactory $filesystemPackageFactory,
+        private IFilesystemPackageFactory $filesystemPackageFactory,
     ) {}
 
     public function fromFilesystem(string $folder, bool $lazyLoading = true): QtiPackage

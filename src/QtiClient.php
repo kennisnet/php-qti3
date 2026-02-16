@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Qti3;
 
 use LogicException;
-use Qti3\AssessmentItem\Model\AssessmentItem;
-use Qti3\AssessmentItem\Model\AssessmentItemId;
-use Qti3\AssessmentItem\Repository\IAssessmentItemRepository;
 use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
@@ -15,16 +12,13 @@ use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
-use Qti3\AssessmentTest\Model\AssessmentTest;
-use Qti3\AssessmentTest\Model\AssessmentTestId;
-use Qti3\AssessmentTest\Repository\IAssessmentTestRepository;
 use Qti3\Package\Filesystem\FileSystemUtils;
 use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Model\IPackageReader;
 use Qti3\Package\Model\IPackageWriter;
 use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\Package\Service\IFlysystemPackageFactory;
+use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Service\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\Package\Service\QtiPackageBuilder;
@@ -44,47 +38,56 @@ use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlReader;
 
-final readonly class QtiClient
+final class QtiClient
 {
+    private ?QtiPackageReader $qtiPackageReader = null;
+    private ?IZipPackageFactory $zipPackageFactory = null;
+    private ?QtiPackageBuilder $qtiPackageBuilder = null;
+    private ?IXmlBuilder $xmlBuilder = null;
+    private ?ResponseProcessor $responseProcessor = null;
+    private ?QtiPackageValidator $qtiPackageValidator = null;
+    private ?QtiSchemaValidator $qtiSchemaValidator = null;
+    private ?IXmlReader $xmlReader = null;
+    private ?ManifestFactory $manifestFactory = null;
+    private ?ManifestBuilder $manifestBuilder = null;
+    private ?TestResourceBuilder $testResourceBuilder = null;
+    private ?ItemResourceBuilder $itemResourceBuilder = null;
+
     public function __construct(
-        private IFlysystemPackageFactory $flysystemPackageFactory,
-        private IResourceValidator $resourceValidator,
-        private IResourceDownloader $resourceDownloader,
-        private IAssessmentTestRepository $assessmentTestRepository,
-        private IAssessmentItemRepository $assessmentItemRepository,
+        private readonly IFilesystemPackageFactory $filesystemPackageFactory,
+        private readonly IResourceValidator $resourceValidator,
+        private readonly IResourceDownloader $resourceDownloader,
     ) {}
 
     public function getQtiPackageReader(): QtiPackageReader
     {
-        return new QtiPackageReader(
+        return $this->qtiPackageReader ??= new QtiPackageReader(
             $this->getManifestFactory(),
             $this->getXmlReader(),
             $this->getZipPackageFactory(),
-            $this->createUnavailableFlysystemFactory(),
+            $this->filesystemPackageFactory,
         );
     }
 
     public function getZipPackageFactory(): IZipPackageFactory
     {
-        return new ZipPackageFactory(
+        return $this->zipPackageFactory ??= new ZipPackageFactory(
             new ZipArchiveFactory(),
             new FileSystemUtils(),
         );
     }
 
-    public function getFlysystemPackageFactory(): IFlysystemPackageFactory
+    public function getFilesystemPackageFactory(): IFilesystemPackageFactory
     {
-        return $this->flysystemPackageFactory;
+        return $this->filesystemPackageFactory;
     }
 
     public function getQtiPackageBuilder(): QtiPackageBuilder
     {
-        return new QtiPackageBuilder(
-            $this->createManifestBuilder(),
-            $this->createTestResourceBuilder(),
-            $this->createItemResourceBuilder(),
-            $this->assessmentTestRepository,
-            $this->assessmentItemRepository,
+        return $this->qtiPackageBuilder ??= new QtiPackageBuilder(
+            $this->getManifestBuilder(),
+            $this->getTestResourceBuilder(),
+            $this->getItemResourceBuilder(),
             $this->resourceValidator,
             $this->resourceDownloader,
         );
@@ -92,12 +95,12 @@ final readonly class QtiClient
 
     public function getXmlBuilder(): IXmlBuilder
     {
-        return new XmlBuilder();
+        return $this->xmlBuilder ??= new XmlBuilder();
     }
 
     public function getResponseProcessor(): ResponseProcessor
     {
-        return new ResponseProcessor(
+        return $this->responseProcessor ??= new ResponseProcessor(
             new ResponseDeclarationParser(),
             new OutcomeDeclarationParser(),
             new ResponseProcessingParser(
@@ -111,30 +114,33 @@ final readonly class QtiClient
 
     public function getQtiPackageValidator(): QtiPackageValidator
     {
-        return new QtiPackageValidator(
-            new QtiSchemaValidator($this->getManifestFactory(), $this->getXmlReader()),
+        return $this->qtiPackageValidator ??= new QtiPackageValidator(
+            $this->getQtiSchemaValidator(),
             new ResponseProcessingValidator($this->getResponseProcessor()),
         );
     }
 
     public function getQtiSchemaValidator(): QtiSchemaValidator
     {
-        return new QtiSchemaValidator($this->getManifestFactory(), $this->getXmlReader());
+        return $this->qtiSchemaValidator ??= new QtiSchemaValidator(
+            $this->getManifestFactory(),
+            $this->getXmlReader(),
+        );
     }
 
     public function getXmlReader(): IXmlReader
     {
-        return new XmlReader();
+        return $this->xmlReader ??= new XmlReader();
     }
 
     private function getManifestFactory(): ManifestFactory
     {
-        return new ManifestFactory($this->getXmlReader());
+        return $this->manifestFactory ??= new ManifestFactory($this->getXmlReader());
     }
 
-    private function createManifestBuilder(): ManifestBuilder
+    private function getManifestBuilder(): ManifestBuilder
     {
-        return new ManifestBuilder(
+        return $this->manifestBuilder ??= new ManifestBuilder(
             $this->getXmlBuilder(),
             new MetadataBuilder(),
             new OrganizationsBuilder(),
@@ -143,69 +149,19 @@ final readonly class QtiClient
         );
     }
 
-    private function createTestResourceBuilder(): TestResourceBuilder
+    private function getTestResourceBuilder(): TestResourceBuilder
     {
-        return new TestResourceBuilder(
+        return $this->testResourceBuilder ??= new TestResourceBuilder(
             $this->getXmlBuilder(),
             $this->getXmlReader(),
         );
     }
 
-    private function createItemResourceBuilder(): ItemResourceBuilder
+    private function getItemResourceBuilder(): ItemResourceBuilder
     {
-        return new ItemResourceBuilder(
+        return $this->itemResourceBuilder ??= new ItemResourceBuilder(
             $this->getXmlBuilder(),
             $this->getXmlReader(),
         );
-    }
-
-    private function createUnavailableFlysystemFactory(): IFlysystemPackageFactory
-    {
-        return new class implements IFlysystemPackageFactory {
-            public function getReader(string $folder, bool $lazyLoading = true): IPackageReader
-            {
-                throw new LogicException(
-                    'requires an IFlysystemPackageFactory. Provide it via the Qti3 constructor.',
-                );
-            }
-
-            public function getWriter(string $folder): IPackageWriter
-            {
-                throw new LogicException(
-                    'requires an IFlysystemPackageFactory. Provide it via the Qti3 constructor.',
-                );
-            }
-        };
-    }
-
-    private function createUnavailableTestRepository(): IAssessmentTestRepository
-    {
-        return new class implements IAssessmentTestRepository {
-            public function getById(AssessmentTestId $assessmentTestId): AssessmentTest
-            {
-                throw new LogicException(
-                    'IAssessmentTestRepository is required for this operation. Provide it via the Qti3 constructor.',
-                );
-            }
-        };
-    }
-
-    private function createUnavailableItemRepository(): IAssessmentItemRepository
-    {
-        return new class implements IAssessmentItemRepository {
-            public function getById(AssessmentItemId $assessmentItemId): AssessmentItem
-            {
-                throw new LogicException(
-                    'IAssessmentItemRepository is required for this operation. Provide it via the Qti3 constructor.',
-                );
-            }
-
-            public function getByIds(array $assessmentItemIds): array
-            {
-                throw new LogicException(
-                    'IAssessmentItemRepository is required for this operation. Provide it via the Qti3 constructor.',
-                );
-            }
-        };
     }
 }
