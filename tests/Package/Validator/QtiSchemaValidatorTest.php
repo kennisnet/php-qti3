@@ -247,6 +247,183 @@ class QtiSchemaValidatorTest extends TestCase
         }
     }
 
+    #[Test]
+    public function validatePackageWithInvalidManifestNamespaceReturnsError(): void
+    {
+        $manifest = Manifest::fromString(
+            '<manifest xmlns="http://wrong.namespace.example" identifier="TEST">'
+            . '<resources><resource identifier="r1" type="imsqti_item_xmlv3p0" href="item.xml">'
+            . '<file href="item.xml"/>'
+            . '</resource></resources>'
+            . '</manifest>',
+            $this->xmlReader,
+        );
+
+        $qtiPackage = new QtiPackage(new ResourceCollection(), $manifest);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertTrue($this->errorsContain($errors, 'Manifest has invalid namespace'));
+        $this->assertTrue($this->errorsContain($errors, 'expected: http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1'));
+    }
+
+    #[Test]
+    public function validatePackageWithResourceMissingIdentifierReturnsError(): void
+    {
+        $manifest = Manifest::fromString(
+            '<manifest xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1" identifier="MANIFEST_QTI">'
+            . '<resource identifier="item1" type="imsqti_item_xmlv3p0" href="item.xml">'
+            . '<file href="item.xml"/>'
+            . '</resource>'
+            . '</manifest>',
+            $this->xmlReader,
+        );
+
+        $itemXml = '<?xml version="1.0"?>'
+            . '<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" '
+            . 'identifier="item1" title="Item" time-dependent="false"/>';
+
+        $resources = new ResourceCollection([
+            new Resource(
+                '', // empty identifier
+                ResourceType::ASSESSMENT_ITEM,
+                'item.xml',
+                new PackageFileCollection([
+                    new XmlFile('item.xml', new MemoryFileContent($itemXml), $this->xmlReader),
+                ]),
+                new ManifestResourceDependencyCollection(),
+            ),
+        ]);
+
+        $qtiPackage = new QtiPackage($resources, $manifest);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertTrue($this->errorsContain($errors, 'Resource is missing identifier'));
+    }
+
+    #[Test]
+    public function validateAssessmentItemWithInvalidXmlReturnsError(): void
+    {
+        $malformedXml = '<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" ';
+        // unclosed tag / invalid XML
+
+        $qtiPackage = $this->createPackageWithItem('item.xml', $malformedXml);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertTrue($this->errorsContain($errors, 'Invalid XML -'));
+    }
+
+    #[Test]
+    public function validateAssessmentItemWithEmptyOrInvalidXmlDocumentReturnsError(): void
+    {
+        // XML with no root element: parser may report "Invalid XML" or (if ever supported) "Empty XML document"
+        $contentWithNoRoot = '<?xml version="1.0"?>';
+        $qtiPackage = $this->createPackageWithItem('item.xml', $contentWithNoRoot);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertGreaterThanOrEqual(1, $errors->count());
+        $this->assertTrue(
+            $this->errorsContain($errors, 'Empty XML document') || $this->errorsContain($errors, 'Invalid XML -'),
+            'Expected "Empty XML document" or "Invalid XML -" in: ' . implode('; ', iterator_to_array($errors)),
+        );
+    }
+
+    #[Test]
+    public function validateZipPackageWithResourceHrefMissingInZipReturnsError(): void
+    {
+        $manifestXml = '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1" identifier="MANIFEST_QTI">'
+            . '<resources>'
+            . '<resource identifier="item1" type="imsqti_item_xmlv3p0" href="missing-item.xml">'
+            . '<file href="missing-item.xml"/>'
+            . '</resource>'
+            . '</resources>'
+            . '</manifest>';
+        // Do not add missing-item.xml to the ZIP
+        $zipPath = $this->createTempZip([
+            'imsmanifest.xml' => $manifestXml,
+        ]);
+
+        try {
+            $errors = $this->validator->validateZipPackage($zipPath);
+
+            $this->assertTrue($this->errorsContain($errors, 'Resource href not found in package: missing-item.xml'));
+        } finally {
+            unlink($zipPath);
+        }
+    }
+
+    #[Test]
+    public function validateZipPackageWithMalformedManifestXmlReturnsError(): void
+    {
+        $zipPath = $this->createTempZip([
+            'imsmanifest.xml' => 'this is not valid XML <<<',
+        ]);
+
+        try {
+            $errors = $this->validator->validateZipPackage($zipPath);
+
+            $this->assertTrue($this->errorsContain($errors, 'Manifest XML is invalid:'));
+        } finally {
+            unlink($zipPath);
+        }
+    }
+
+    #[Test]
+    public function validateAssessmentItemWithXsdViolationReturnsError(): void
+    {
+        $validRootButInvalidChild = '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" '
+            . 'identifier="item1" title="Item" time-dependent="false">'
+            . '<invalid-element-not-in-xsd/>'
+            . '</qti-assessment-item>';
+
+        $qtiPackage = $this->createPackageWithItem('item.xml', $validRootButInvalidChild);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        $this->assertTrue($this->errorsContain($errors, 'XSD validation error'));
+    }
+
+    #[Test]
+    public function validatePackageWithNonQtiResourceTypeXmlReturnsNoQtiErrors(): void
+    {
+        $manifest = Manifest::fromString(
+            '<manifest xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1" identifier="MANIFEST_QTI">'
+            . '<resource identifier="wc1" type="webcontent" href="content.xml">'
+            . '<file href="content.xml"/>'
+            . '</resource>'
+            . '</manifest>',
+            $this->xmlReader,
+        );
+
+        $randomXml = '<?xml version="1.0"?><root><arbitrary/></root>';
+
+        $resources = new ResourceCollection([
+            new Resource(
+                'wc1',
+                ResourceType::WEBCONTENT,
+                'content.xml',
+                new PackageFileCollection([
+                    new XmlFile('content.xml', new MemoryFileContent($randomXml), $this->xmlReader),
+                ]),
+                new ManifestResourceDependencyCollection(),
+            ),
+        ]);
+
+        $qtiPackage = new QtiPackage($resources, $manifest);
+
+        $errors = $this->validator->validate($qtiPackage);
+
+        // Default branch: no QTI root/XSD checks for non-item/test types; no structural errors
+        $this->assertFalse($this->errorsContain($errors, 'Root element must be'));
+        $this->assertFalse($this->errorsContain($errors, 'Invalid namespace'));
+        $this->assertCount(0, $errors);
+    }
+
     private function createValidPackage(): QtiPackage
     {
         $validItemXml = file_get_contents(__DIR__ . '/resources/item001.xml');

@@ -37,7 +37,7 @@ class QtiPackageValidatorTest extends TestCase
 
     public function setUp(): void
     {
-        $imsQtiPackageValidator = $this->createMock(IIMSQtiPackageValidator::class);
+        $imsQtiPackageValidator = $this->createMock(IImsQtiPackageValidator::class);
         $imsQtiPackageValidator
             ->method('validate')->willReturn(new StringCollection([]));
 

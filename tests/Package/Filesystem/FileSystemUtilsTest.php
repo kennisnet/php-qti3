@@ -63,7 +63,9 @@ class FileSystemUtilsTest extends TestCase
         $this->tempFiles[] = $filename;
 
         $this->assertFileExists($filename);
-        $this->assertStringStartsWith(sys_get_temp_dir(), $filename);
+        $tempDir = realpath(sys_get_temp_dir());
+        $this->assertNotFalse($tempDir);
+        $this->assertStringStartsWith($tempDir, realpath($filename));
     }
 
     #[Test]
