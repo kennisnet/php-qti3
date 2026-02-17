@@ -32,7 +32,7 @@ class AssessmentItem extends QtiElement
     {
         return [
             'title' => $this->title,
-            'identifier' => '_' . $this->identifier,
+            'identifier' => (string) $this->identifier,
             'adaptive' => 'false',
             'time-dependent' => 'false',
             'xml:lang' => 'nl-NL',

@@ -22,7 +22,7 @@ class AssessmentTestStub
     public static function assessmentTest(): AssessmentTest
     {
         return new AssessmentTest(
-            AssessmentTestId::fromQuestionnaireId(1),
+            AssessmentTestId::fromString('e076edda-bf70-5105-a9a9-118d7eecd0c4'),
             new OutcomeDeclarationCollection([]),
             new TestPartCollection([
                 new TestPart(
@@ -35,9 +35,8 @@ class AssessmentTestStub
                             'title',
                             new AssessmentItemRefCollection([
                                 new AssessmentItemRef(
-                                    'ITEM001',
+                                    AssessmentItemId::fromString('10fe19b2-8b6e-53fa-8522-1220c67ddce1'),
                                     'ITEM001.xml',
-                                    AssessmentItemId::fromQuestionnaire(1, 0),
                                 ),
                             ]),
                         ),
@@ -51,7 +50,7 @@ class AssessmentTestStub
     public static function assessmentTestWithTwoItems(): AssessmentTest
     {
         return new AssessmentTest(
-            AssessmentTestId::fromQuestionnaireId(1),
+            AssessmentTestId::fromString('e076edda-bf70-5105-a9a9-118d7eecd0c4'),
             new OutcomeDeclarationCollection([]),
             new TestPartCollection([
                 new TestPart(
@@ -64,14 +63,12 @@ class AssessmentTestStub
                             'title',
                             new AssessmentItemRefCollection([
                                 new AssessmentItemRef(
-                                    'ITEM001',
+                                    AssessmentItemId::fromString('10fe19b2-8b6e-53fa-8522-1220c67ddce1'),
                                     'ITEM001.xml',
-                                    AssessmentItemId::fromQuestionnaire(1, 0),
                                 ),
                                 new AssessmentItemRef(
-                                    'ITEM002',
+                                    AssessmentItemId::fromString('22222222-2222-2222-2222-222222222222'),
                                     'ITEM002.xml',
-                                    AssessmentItemId::fromQuestionnaire(1, 1),
                                 ),
                             ]),
                         ),

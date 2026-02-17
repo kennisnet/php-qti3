@@ -34,7 +34,7 @@ class AssessmentTest extends QtiElement
     public function attributes(): array
     {
         return [
-            'identifier' => '_' . $this->identifier,
+            'identifier' => (string) $this->identifier,
             'title' => $this->title,
             'xmlns' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0',
             'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
@@ -72,7 +72,7 @@ class AssessmentTest extends QtiElement
     public function findItemRef(AssessmentItemId $assessmentItemId): AssessmentItemRef
     {
         foreach ($this->getItemRefs() as $itemRef) {
-            if ($itemRef->itemId && $itemRef->itemId->equals($assessmentItemId)) {
+            if ($itemRef->identifier->equals($assessmentItemId)) {
                 return $itemRef;
             }
         }

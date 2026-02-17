@@ -21,7 +21,7 @@ class AssessmentItemStub
         ]));
 
         return new AssessmentItem(
-            identifier: AssessmentItemId::fromQuestionnaire(1, 0),
+            identifier: AssessmentItemId::fromString('10fe19b2-8b6e-53fa-8522-1220c67ddce1'),
             itemBody: $itemBody,
             responseDeclarations: new ResponseDeclarationCollection(),
             outcomeDeclarations: new OutcomeDeclarationCollection(),
@@ -35,7 +35,7 @@ class AssessmentItemStub
         ]));
 
         return new AssessmentItem(
-            identifier: AssessmentItemId::fromQuestionnaire(1, 0),
+            identifier: AssessmentItemId::fromString('10fe19b2-8b6e-53fa-8522-1220c67ddce1'),
             itemBody: $itemBody,
             responseDeclarations: new ResponseDeclarationCollection(),
             outcomeDeclarations: new OutcomeDeclarationCollection(),

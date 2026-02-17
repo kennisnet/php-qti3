@@ -103,11 +103,12 @@ $writer->write($qtiPackage);
 
 ### Assessment Test Level
 
-**UC-T1: Generate test from package (not yet implemented)**
+**UC-T1: Generate test from package**
 
 ```php
-// Note: buildFromPackage method is not yet implemented in QtiPackageBuilder
-// $test = $testBuilder->buildFromPackage($qtiPackage, $testIdentifier);
+$testBuilder = $qtiClient->getTestBuilder();
+$test = $testBuilder->buildFromPackage($qtiPackage);
+// $test is now of type Qti3\AssessmentTest\Model\AssessmentTest
 ```
 
 **UC-T2: Generate package from test**

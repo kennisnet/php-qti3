@@ -51,7 +51,7 @@ readonly class QtiPackageReader implements IQtiPackageFactory
         foreach ($manifest->getResources() as $manifestResource) {
             $files = new PackageFileCollection();
             foreach ($manifestResource->files as $manifestFile) {
-                $extension = pathinfo((string) $manifestFile->href, PATHINFO_EXTENSION);
+                $extension = pathinfo($manifestFile->href, PATHINFO_EXTENSION);
                 $fileContent = $reader->getFileContent($manifestFile->href);
 
                 if ($extension === 'xml') {

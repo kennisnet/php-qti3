@@ -30,7 +30,7 @@ class AssessmentItemTest extends TestCase
         $attributes = $assessment->attributes();
         $this->assertEquals([
             'title' => '',
-            'identifier' => '_10fe19b2-8b6e-53fa-8522-1220c67ddce1',
+            'identifier' => '10fe19b2-8b6e-53fa-8522-1220c67ddce1',
             'time-dependent' => 'false',
             'xml:lang' => 'nl-NL',
             'xmlns' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0',

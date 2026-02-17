@@ -56,7 +56,7 @@ class QtiPackageBuilder
             $dependencies = $this->processWebcontent($webcontent, $assessmentItem, $warnings);
 
             $resources->add($this->itemResourceBuilder->build(
-                $itemRef->identifier,
+                (string) $itemRef->identifier,
                 $assessmentItem,
                 $dependencies,
             ));

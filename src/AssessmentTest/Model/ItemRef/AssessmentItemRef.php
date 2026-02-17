@@ -10,9 +10,8 @@ use Qti3\Shared\Model\QtiElement;
 final class AssessmentItemRef extends QtiElement
 {
     public function __construct(
-        public readonly string $identifier,
+        public readonly AssessmentItemId $identifier,
         public readonly string $href,
-        public readonly ?AssessmentItemId $itemId = null,
         public readonly ?string $category = null,
     ) {}
 
@@ -22,7 +21,7 @@ final class AssessmentItemRef extends QtiElement
     public function attributes(): array
     {
         return [
-            'identifier' => $this->identifier,
+            'identifier' => (string) $this->identifier,
             'href' => $this->href,
             'category' => $this->category,
         ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Tests\Unit\AssessmentTest\Model\Section;
 
+use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
 use Qti3\AssessmentTest\Model\Section\AssessmentSection;
@@ -22,7 +23,7 @@ class AssessmentSectionTest extends TestCase
 
         $itemRefs = new AssessmentItemRefCollection(
             [new AssessmentItemRef(
-                identifier: 'ITEM001',
+                identifier: AssessmentItemId::fromString('ITEM001'),
                 href: 'ITEM001.xml',
             )],
         );

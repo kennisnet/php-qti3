@@ -11,6 +11,11 @@ use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
+use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
+use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
+use Qti3\AssessmentTest\Service\Parser\TestPartParser;
+use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\Package\Filesystem\FileSystemUtils;
 use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
@@ -50,6 +55,12 @@ final class QtiClient
     private ?TestResourceBuilder $testResourceBuilder = null;
     private ?ItemResourceBuilder $itemResourceBuilder = null;
 
+    private ?AssessmentTestParser $assessmentTestParser = null;
+    private ?TestPartParser $testPartParser = null;
+    private ?AssessmentSectionParser $assessmentSectionParser = null;
+    private ?AssessmentItemRefParser $assessmentItemRefParser = null;
+    private ?TestBuilder $testBuilder = null;
+
     public function __construct(
         private readonly IFilesystemPackageFactory $filesystemPackageFactory,
         private readonly IResourceValidator $resourceValidator,
@@ -63,6 +74,40 @@ final class QtiClient
             $this->getXmlReader(),
             $this->getZipPackageFactory(),
             $this->filesystemPackageFactory,
+        );
+    }
+
+    public function getAssessmentTestParser(): AssessmentTestParser
+    {
+        return $this->assessmentTestParser ??= new AssessmentTestParser(
+            new OutcomeDeclarationParser(),
+            $this->getTestPartParser(),
+        );
+    }
+
+    private function getTestPartParser(): TestPartParser
+    {
+        return $this->testPartParser ??= new TestPartParser(
+            $this->getAssessmentSectionParser(),
+        );
+    }
+
+    private function getAssessmentSectionParser(): AssessmentSectionParser
+    {
+        return $this->assessmentSectionParser ??= new AssessmentSectionParser(
+            $this->getAssessmentItemRefParser(),
+        );
+    }
+
+    private function getAssessmentItemRefParser(): AssessmentItemRefParser
+    {
+        return $this->assessmentItemRefParser ??= new AssessmentItemRefParser();
+    }
+
+    public function getTestBuilder(): TestBuilder
+    {
+        return $this->testBuilder ??= new TestBuilder(
+            $this->getAssessmentTestParser(),
         );
     }
 

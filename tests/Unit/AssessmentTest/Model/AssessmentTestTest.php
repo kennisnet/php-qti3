@@ -61,9 +61,9 @@ class AssessmentTestTest extends TestCase
     public function anItemRefCanBeFound(): void
     {
         $assessmentTest = AssessmentTestStub::assessmentTest();
-        $assessmentItemId = AssessmentItemId::fromQuestionnaire(1, 0);
+        $assessmentItemId = AssessmentItemId::fromString('10fe19b2-8b6e-53fa-8522-1220c67ddce1');
         $itemRef = $assessmentTest->findItemRef($assessmentItemId);
-        $this->assertSame((string) $assessmentItemId, (string) $itemRef->itemId);
+        $this->assertSame((string) $assessmentItemId, (string) $itemRef->identifier);
     }
 
     #[Test]
@@ -71,7 +71,7 @@ class AssessmentTestTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
         $assessmentTest = AssessmentTestStub::assessmentTest();
-        $assessmentItemId = AssessmentItemId::fromQuestionnaire(1, 1);
+        $assessmentItemId = AssessmentItemId::fromString('22222222-2222-2222-2222-222222222222');
         $assessmentTest->findItemRef($assessmentItemId);
     }
 }
