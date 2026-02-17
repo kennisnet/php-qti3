@@ -4,15 +4,6 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service\Parser;
 
-use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
-use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
-use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapMatchInteraction;
-use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
-use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
-use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
-use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\OrderInteraction;
-use Qti3\AssessmentItem\Model\Interaction\SelectPointInteraction\SelectPointInteraction;
-use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteraction;
 use Qti3\AssessmentItem\Model\ItemBody;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
@@ -23,7 +14,7 @@ use DOMText;
 
 class ItemBodyParser extends AbstractParser
 {
-    public function __construct(private readonly ?InteractionParser $interactionParser = null) {}
+    public function __construct(private readonly InteractionParser $interactionParser) {}
 
     public function parse(DOMElement $element): ItemBody
     {
@@ -53,19 +44,7 @@ class ItemBodyParser extends AbstractParser
         if ($node instanceof DOMElement) {
             $tagName = $node->nodeName;
 
-            // Interactions: delegate to InteractionParser when available
-            $interactionTags = [
-                ChoiceInteraction::qtiTagName(),
-                TextEntryInteraction::qtiTagName(),
-                ExtendedTextInteraction::qtiTagName(),
-                GapMatchInteraction::qtiTagName(),
-                HotspotInteraction::qtiTagName(),
-                HottextInteraction::qtiTagName(),
-                MatchInteraction::qtiTagName(),
-                OrderInteraction::qtiTagName(),
-                SelectPointInteraction::qtiTagName(),
-            ];
-            if (in_array($tagName, $interactionTags, true) && $this->interactionParser !== null) {
+            if (str_starts_with($tagName, 'qti-') && str_ends_with($tagName, '-interaction')) {
                 return $this->interactionParser->parse($node);
             }
 

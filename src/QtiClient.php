@@ -6,6 +6,7 @@ namespace Qti3;
 
 use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
 use Qti3\AssessmentItem\Service\Parser\AssessmentItemParser;
+use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ItemBodyParser;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
@@ -94,7 +95,7 @@ final class QtiClient
 
     private function getItemBodyParser(): ItemBodyParser
     {
-        return $this->itemBodyParser ??= new ItemBodyParser(new \Qti3\AssessmentItem\Service\Parser\InteractionParser());
+        return $this->itemBodyParser ??= new ItemBodyParser(new InteractionParser());
     }
 
     public function getAssessmentTestParser(): AssessmentTestParser
