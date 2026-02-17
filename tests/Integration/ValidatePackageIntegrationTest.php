@@ -57,7 +57,7 @@ class ValidatePackageIntegrationTest extends TestCase
     {
         $client = $this->createClient();
         $reader = $client->getQtiPackageReader();
-        $package = $reader->fromZip($this->getFixturePath('toetsen/valid-package.zip'));
+        $package = $reader->fromZip($this->getFixturePath('valid-package.zip'));
 
         $assessmentTests = $package->resources->filterByType(ResourceType::ASSESSMENT_TEST);
         $this->assertCount(1, $assessmentTests, 'Package should contain exactly 1 assessment test');
@@ -82,7 +82,7 @@ class ValidatePackageIntegrationTest extends TestCase
     {
         $client = $this->createClient();
         $reader = $client->getQtiPackageReader();
-        $package = $reader->fromZip($this->getFixturePath('toetsen/valid-package.zip'));
+        $package = $reader->fromZip($this->getFixturePath('valid-package.zip'));
 
         $validator = new QtiPackageValidator(
             new NoopImsQtiPackageValidator(),
@@ -94,10 +94,73 @@ class ValidatePackageIntegrationTest extends TestCase
         $this->assertCount(0, $errors, 'Valid package should produce no validation errors. Got: ' . implode('; ', iterator_to_array($errors)));
     }
 
-    private function getFixturePath(string $relativePath): string
+    public function testImportInvalidResponseProcessingZipPackageFailsValidation(): void
     {
-        $path = __DIR__ . '/../../fixtures/' . $relativePath;
-        $this->assertFileExists($path, "Fixture file not found: $relativePath");
+        $client = $this->createClient();
+        $reader = $client->getQtiPackageReader();
+        $package = $reader->fromZip($this->getFixturePath('invalid-response-processing.zip'));
+
+        $validator = new QtiPackageValidator(
+            new NoopImsQtiPackageValidator(),
+            new ResponseProcessingValidator($client->getResponseProcessor()),
+        );
+        $errors = $validator->validate($package);
+
+        $this->assertInstanceOf(StringCollection::class, $errors);
+        $this->assertGreaterThan(0, $errors->count(), 'Package should have validation errors');
+
+        $errorMessages = iterator_to_array($errors);
+        $this->assertSame('QUE_1_1.xml: Correct response for response declaration with identifier RESPONSE not found', $errorMessages[0]);
+    }
+
+    public function testImportNoMaxScoreAllItemsZipPackageFailsValidation(): void
+    {
+        $client = $this->createClient();
+        $reader = $client->getQtiPackageReader();
+        $package = $reader->fromZip($this->getFixturePath('no-max-score-all-items.zip'));
+
+        $validator = new QtiPackageValidator(
+            new NoopImsQtiPackageValidator(),
+            new ResponseProcessingValidator($client->getResponseProcessor()),
+        );
+        $errors = $validator->validate($package);
+
+        $this->assertInstanceOf(StringCollection::class, $errors);
+        $this->assertGreaterThan(0, $errors->count(), 'Package should have validation errors');
+
+        $errorMessages = iterator_to_array($errors);
+        $this->assertContains('QUE_1_1.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_2_1.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertNotContains('QUE_2_2.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_2_3.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_2_4.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_2_5.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_3_1.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_4_1.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertNotContains('QUE_5_1.xml: Outcome declaration with identifier MAXSCORE not found', $errorMessages);
+        $this->assertContains('QUE_6_1.xml: Missing default value for MAXSCORE outcome declaration', $errorMessages);
+    }
+
+    public function testImportNoMetadataZipPackagePassesValidation(): void
+    {
+        $client = $this->createClient();
+        $reader = $client->getQtiPackageReader();
+        $package = $reader->fromZip($this->getFixturePath('no-metadata.zip'));
+
+        $validator = new QtiPackageValidator(
+            new NoopImsQtiPackageValidator(),
+            new ResponseProcessingValidator($client->getResponseProcessor()),
+        );
+        $errors = $validator->validate($package);
+
+        $this->assertInstanceOf(StringCollection::class, $errors);
+        $this->assertCount(0, $errors, 'Package without metadata should produce no validation errors. Got: ' . implode('; ', iterator_to_array($errors)));
+    }
+
+    private function getFixturePath(string $filename): string
+    {
+        $path = __DIR__ . '/../../fixtures/' . $filename;
+        $this->assertFileExists($path, "Fixture file not found: $filename");
         return $path;
     }
 }
