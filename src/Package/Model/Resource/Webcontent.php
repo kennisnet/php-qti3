@@ -9,7 +9,7 @@ use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\PackageFile;
 use Qti3\Package\Model\PackageFile\PackageFileCollection;
-use Qti3\Package\Service\IResourceDownloader;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use RuntimeException;
 
 class Webcontent extends Resource

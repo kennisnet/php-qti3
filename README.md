@@ -24,7 +24,7 @@ use Qti3\QtiClient;
 $qtiClient = new QtiClient(
     $filesystemPackageFactory, // Instance of Qti3\Package\Service\IFilesystemPackageFactory
     $resourceValidator,        // Instance of Qti3\Package\Validator\Resource\IResourceValidator
-    $resourceDownloader,       // Instance of Qti3\Package\Service\IResourceDownloader
+    $resourceDownloader,       // Instance of Qti3\Package\Downloader\Resource\IResourceDownloader
 );
 ```
 

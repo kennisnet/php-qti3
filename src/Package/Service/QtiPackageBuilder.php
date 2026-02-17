@@ -13,6 +13,7 @@ use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\Warnings;
 use Qti3\Package\Model\Resource\Webcontent;
 use Qti3\Package\Model\Resource\WebcontentCollection;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;

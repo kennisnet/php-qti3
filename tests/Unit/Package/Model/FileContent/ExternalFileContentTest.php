@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Tests\Unit\Package\Model\FileContent;
 
 use Qti3\Package\Model\FileContent\ExternalFileContent;
-use Qti3\Package\Service\IResourceDownloader;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

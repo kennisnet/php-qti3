@@ -20,7 +20,7 @@
     },
     "suggest": {
         "league/flysystem": "Required for FlysystemPackageReader and FlysystemPackageWriter (^3.0)",
-        "symfony/http-client": "Required for PsrHttpClientResourceValidator (^7.0)"
+        "symfony/http-client": "Required for PsrHttpClientResourceValidator and PsrHttpClientResourceDownloader (^7.0)"
     },
     "autoload": {
         "psr-4": {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Package\Service;
+namespace Qti3\Package\Downloader\Resource;
 
 interface IResourceDownloader
 {

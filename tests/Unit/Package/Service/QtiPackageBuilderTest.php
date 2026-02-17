@@ -11,7 +11,7 @@ use Qti3\Package\Model\PackageFile\PackageFileCollection;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\Package\Service\IResourceDownloader;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;

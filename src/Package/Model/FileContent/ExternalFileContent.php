@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Model\FileContent;
 
-use Qti3\Package\Service\IResourceDownloader;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use RuntimeException;
 
 readonly class ExternalFileContent implements IFileContent

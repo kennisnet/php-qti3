@@ -16,7 +16,7 @@ use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Service\IFilesystemPackageFactory;
-use Qti3\Package\Service\IResourceDownloader;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\Resource\IResourceValidator;
