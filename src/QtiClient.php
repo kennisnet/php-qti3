@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Qti3;
 
 use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
+use Qti3\AssessmentItem\Service\Parser\AssessmentItemParser;
+use Qti3\AssessmentItem\Service\Parser\ItemBodyParser;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
 use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
@@ -55,6 +57,8 @@ final class QtiClient
     private ?TestResourceBuilder $testResourceBuilder = null;
     private ?ItemResourceBuilder $itemResourceBuilder = null;
 
+    private ?AssessmentItemParser $assessmentItemParser = null;
+    private ?ItemBodyParser $itemBodyParser = null;
     private ?AssessmentTestParser $assessmentTestParser = null;
     private ?TestPartParser $testPartParser = null;
     private ?AssessmentSectionParser $assessmentSectionParser = null;
@@ -75,6 +79,22 @@ final class QtiClient
             $this->getZipPackageFactory(),
             $this->filesystemPackageFactory,
         );
+    }
+
+    public function getAssessmentItemParser(): AssessmentItemParser
+    {
+        $qtiExpressionParser = new QtiExpressionParser();
+        return $this->assessmentItemParser ??= new AssessmentItemParser(
+            new ResponseDeclarationParser(),
+            new OutcomeDeclarationParser(),
+            $this->getItemBodyParser(),
+            new ResponseProcessingParser(new ProcessingElementParser($qtiExpressionParser)),
+        );
+    }
+
+    private function getItemBodyParser(): ItemBodyParser
+    {
+        return $this->itemBodyParser ??= new ItemBodyParser();
     }
 
     public function getAssessmentTestParser(): AssessmentTestParser
