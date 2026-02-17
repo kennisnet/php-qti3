@@ -12,6 +12,7 @@ use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
+use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
 
 #[Group('integration')]
 class ItemParserIntegrationTest extends TestCase
@@ -44,6 +45,10 @@ class ItemParserIntegrationTest extends TestCase
     <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" />
     <qti-item-body>
         <p>Wat is de hoofdstad van Nederland?</p>
+        <qti-choice-interaction response-identifier="RESPONSE" shuffle="false" max-choices="1">
+            <qti-simple-choice identifier="choiceA">Amsterdam</qti-simple-choice>
+            <qti-simple-choice identifier="choiceB">Rotterdam</qti-simple-choice>
+        </qti-choice-interaction>
         <div>Extra info</div>
     </qti-item-body>
     <qti-response-processing template="https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/match_correct.xml" />
@@ -77,7 +82,7 @@ XML;
 
         // Item Body
         $itemBody = $assessmentItem->itemBody;
-        $this->assertCount(2, $itemBody->content);
+        $this->assertCount(3, $itemBody->content);
         
         /** @var HTMLTag $p */
         $p = $itemBody->content->all()[0];
@@ -86,8 +91,18 @@ XML;
         $this->assertInstanceOf(TextNode::class, $p->children()[0]);
         $this->assertSame('Wat is de hoofdstad van Nederland?', (string)$p->children()[0]);
 
+        // Interaction
+        $interaction = $itemBody->content->all()[1];
+        $this->assertInstanceOf(ChoiceInteraction::class, $interaction);
+        $this->assertSame('RESPONSE', $interaction->responseIdentifier);
+        $this->assertFalse($interaction->shuffle);
+        $this->assertSame(1, $interaction->maxChoices);
+        $this->assertCount(2, $interaction->choices);
+        $this->assertSame('choiceA', $interaction->choices[0]->identifier);
+        $this->assertSame('choiceB', $interaction->choices[1]->identifier);
+
         /** @var HTMLTag $div */
-        $div = $itemBody->content->all()[1];
+        $div = $itemBody->content->all()[2];
         $this->assertInstanceOf(HTMLTag::class, $div);
         $this->assertSame('div', $div->tagName());
         $this->assertSame('Extra info', (string)$div->children()[0]);

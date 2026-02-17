@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service\Parser;
 
+use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
+use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapMatchInteraction;
+use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
+use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
+use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\OrderInteraction;
+use Qti3\AssessmentItem\Model\Interaction\SelectPointInteraction\SelectPointInteraction;
+use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteraction;
 use Qti3\AssessmentItem\Model\ItemBody;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
@@ -14,6 +23,8 @@ use DOMText;
 
 class ItemBodyParser extends AbstractParser
 {
+    public function __construct(private readonly ?InteractionParser $interactionParser = null) {}
+
     public function parse(DOMElement $element): ItemBody
     {
         $this->validateTag($element, ItemBody::qtiTagName());
@@ -41,11 +52,24 @@ class ItemBodyParser extends AbstractParser
 
         if ($node instanceof DOMElement) {
             $tagName = $node->nodeName;
-            
-            // Check if it's an interaction or other QTI element
-            // For now, we mainly support HTML tags and perhaps simple QTI elements if they exist in ItemBody
-            // Based on ItemBody::ALLOWED_HTML_TAGS, we only allow certain HTML tags as direct children
-            
+
+            // Interactions: delegate to InteractionParser when available
+            $interactionTags = [
+                ChoiceInteraction::qtiTagName(),
+                TextEntryInteraction::qtiTagName(),
+                ExtendedTextInteraction::qtiTagName(),
+                GapMatchInteraction::qtiTagName(),
+                HotspotInteraction::qtiTagName(),
+                HottextInteraction::qtiTagName(),
+                MatchInteraction::qtiTagName(),
+                OrderInteraction::qtiTagName(),
+                SelectPointInteraction::qtiTagName(),
+            ];
+            if (in_array($tagName, $interactionTags, true) && $this->interactionParser !== null) {
+                return $this->interactionParser->parse($node);
+            }
+
+            // Default: treat as HTML content
             $attributes = [];
             foreach ($node->attributes as $attr) {
                 $attributes[$attr->nodeName] = $attr->nodeValue;

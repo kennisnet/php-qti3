@@ -94,7 +94,7 @@ final class QtiClient
 
     private function getItemBodyParser(): ItemBodyParser
     {
-        return $this->itemBodyParser ??= new ItemBodyParser();
+        return $this->itemBodyParser ??= new ItemBodyParser(new \Qti3\AssessmentItem\Service\Parser\InteractionParser());
     }
 
     public function getAssessmentTestParser(): AssessmentTestParser
