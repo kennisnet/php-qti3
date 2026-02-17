@@ -10,6 +10,7 @@ use Qti3\AssessmentItem\Model\ItemBody;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
+use Qti3\AssessmentItem\Model\Feedback\ModalFeedback;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use DOMElement;
@@ -22,6 +23,7 @@ class AssessmentItemParser extends AbstractParser
         private readonly ItemBodyParser $itemBodyParser,
         private readonly ResponseProcessingParser $responseProcessingParser,
         private readonly StylesheetParser $stylesheetParser,
+        private readonly ModalFeedbackParser $modalFeedbackParser,
     ) {}
 
     public function parse(DOMElement $element): AssessmentItem
@@ -37,6 +39,7 @@ class AssessmentItemParser extends AbstractParser
         $itemBody = null;
         $responseProcessing = null;
         $stylesheet = null;
+        $modalFeedbacks = [];
 
         foreach ($this->getChildren($element) as $child) {
             if ($child->nodeName === ResponseDeclaration::qtiTagName()) {
@@ -49,6 +52,8 @@ class AssessmentItemParser extends AbstractParser
                 $responseProcessing = $this->responseProcessingParser->parse($child);
             } elseif ($child->nodeName === \Qti3\AssessmentItem\Model\Stylesheet\Stylesheet::qtiTagName()) {
                 $stylesheet = $this->stylesheetParser->parse($child);
+            } elseif ($child->nodeName === ModalFeedback::qtiTagName()) {
+                $modalFeedbacks[] = $this->modalFeedbackParser->parse($child);
             }
         }
 
@@ -64,6 +69,7 @@ class AssessmentItemParser extends AbstractParser
             $responseProcessing,
             $title,
             $stylesheet,
+            $modalFeedbacks,
         );
     }
 }

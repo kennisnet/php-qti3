@@ -37,8 +37,8 @@ class ShapeFactoryTest extends TestCase
     #[Test]
     public function testCreatePolygon(): void
     {
-        // Polygon expects at least 4 pairs and de eerste en laatste moeten gelijk zijn.
-        $coords = '0,0,10,0,10,10,0,0'; // twee paar (0,0), (10,0), (10,10), (0,0)
+        // Polygon expects at least 4 pairs and the first and last must be equal.
+        $coords = '0,0,10,0,10,10,0,0'; // two pairs (0,0), (10,0), (10,10), (0,0)
         $shape = ShapeFactory::create(ShapeName::POLYGON->value, $coords);
         $this->assertInstanceOf(Polygon::class, $shape);
         $this->assertSame($coords, $shape->coords());

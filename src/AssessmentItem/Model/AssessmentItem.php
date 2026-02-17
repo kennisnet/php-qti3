@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model;
 
+use Qti3\AssessmentItem\Model\Feedback\ModalFeedback;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Model\Stylesheet\Stylesheet;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
@@ -14,6 +15,9 @@ class AssessmentItem extends QtiElement
 {
     private readonly Stylesheet $stylesheet;
 
+    /**
+     * @param array<int,ModalFeedback> $modalFeedbacks
+     */
     public function __construct(
         public readonly AssessmentItemId $identifier,
         public readonly ItemBody $itemBody,
@@ -22,6 +26,7 @@ class AssessmentItem extends QtiElement
         public readonly ?ResponseProcessing $responseProcessing = null,
         public readonly string $title = '',
         ?Stylesheet $stylesheet = null,
+        public readonly array $modalFeedbacks = [],
     ) {
         $this->stylesheet = $stylesheet ?? new Stylesheet(__DIR__ . '/../Resources/stylesheet.css');
     }
@@ -51,6 +56,7 @@ class AssessmentItem extends QtiElement
             $this->stylesheet,
             $this->itemBody,
             $this->responseProcessing,
+            ...$this->modalFeedbacks,
         ];
     }
 

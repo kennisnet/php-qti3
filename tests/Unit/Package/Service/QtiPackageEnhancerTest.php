@@ -65,7 +65,7 @@ class QtiPackageEnhancerTest extends TestCase
     public function generateTestCreatesCorrectAssessmentTest(): void
     {
         // Arrange
-        $manifest = $this->createMock(Manifest::class); // Maak een mock van het verwachte manifest
+        $manifest = $this->createMock(Manifest::class); // Create a mock of the expected manifest
 
         $package = new QtiPackageMock(
             resources: new ResourceCollection(),
