@@ -14,7 +14,11 @@ use DOMText;
 
 class ItemBodyParser extends AbstractParser
 {
-    public function __construct(private readonly InteractionParser $interactionParser) {}
+    public function __construct(
+        private readonly InteractionParser $interactionParser,
+        private readonly RubricBlockParser $rubricBlockParser,
+        private readonly FeedbackBlockParser $feedbackBlockParser,
+    ) {}
 
     public function parse(DOMElement $element): ItemBody
     {
@@ -46,6 +50,14 @@ class ItemBodyParser extends AbstractParser
 
             if (str_starts_with($tagName, 'qti-') && str_ends_with($tagName, '-interaction')) {
                 return $this->interactionParser->parse($node);
+            }
+
+            if ($tagName === \Qti3\AssessmentItem\Model\RubricBlock\RubricBlock::qtiTagName()) {
+                return $this->rubricBlockParser->parse($node);
+            }
+
+            if ($tagName === \Qti3\AssessmentItem\Model\Feedback\FeedbackBlock::qtiTagName()) {
+                return $this->feedbackBlockParser->parse($node);
             }
 
             // Default: treat as HTML content

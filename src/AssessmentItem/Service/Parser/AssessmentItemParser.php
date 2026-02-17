@@ -21,6 +21,7 @@ class AssessmentItemParser extends AbstractParser
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
         private readonly ItemBodyParser $itemBodyParser,
         private readonly ResponseProcessingParser $responseProcessingParser,
+        private readonly StylesheetParser $stylesheetParser,
     ) {}
 
     public function parse(DOMElement $element): AssessmentItem
@@ -35,6 +36,7 @@ class AssessmentItemParser extends AbstractParser
         $outcomeDeclarations = new OutcomeDeclarationCollection();
         $itemBody = null;
         $responseProcessing = null;
+        $stylesheet = null;
 
         foreach ($this->getChildren($element) as $child) {
             if ($child->nodeName === ResponseDeclaration::qtiTagName()) {
@@ -45,6 +47,8 @@ class AssessmentItemParser extends AbstractParser
                 $itemBody = $this->itemBodyParser->parse($child);
             } elseif ($child->nodeName === ResponseProcessing::qtiTagName()) {
                 $responseProcessing = $this->responseProcessingParser->parse($child);
+            } elseif ($child->nodeName === \Qti3\AssessmentItem\Model\Stylesheet\Stylesheet::qtiTagName()) {
+                $stylesheet = $this->stylesheetParser->parse($child);
             }
         }
 
@@ -59,6 +63,7 @@ class AssessmentItemParser extends AbstractParser
             $outcomeDeclarations,
             $responseProcessing,
             $title,
+            $stylesheet,
         );
     }
 }
