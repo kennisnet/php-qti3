@@ -7,7 +7,7 @@ use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Service\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\IResourceValidator;
+use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
 use Qti3\Package\Validator\QtiSchemaValidator;

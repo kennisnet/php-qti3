@@ -5,7 +5,7 @@ namespace Qti3\Tests\Integration;
 use PHPUnit\Framework\TestCase;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Service\IResourceDownloader;
-use Qti3\Package\Service\QtiPackageBuilder\IResourceValidator;
+use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\QtiClient;

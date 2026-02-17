@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Qti3;
 
-use LogicException;
 use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
@@ -15,14 +14,12 @@ use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Filesystem\FileSystemUtils;
 use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
-use Qti3\Package\Model\IPackageReader;
-use Qti3\Package\Model\IPackageWriter;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Service\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\Package\Service\QtiPackageBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\IResourceValidator;
+use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;

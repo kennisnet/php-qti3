@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Package\Service\QtiPackageBuilder;
+namespace Qti3\Package\Validator\Resource;
 
 use Qti3\Shared\Model\QtiResource;
 
