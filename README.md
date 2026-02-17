@@ -128,7 +128,7 @@ $package = $packageBuilder->buildForTest($test, $items);
 ```php
 // $itemXml is of type DomDocument
 $assessmentItemParser = $qtiClient->getAssessmentItemParser();
-$item = $assessmentItemParser->parse($dom->documentElement);
+$item = $assessmentItemParser->parse($itemXml);
 // $item is now of type Qti3\AssessmentItem\Model\AssessmentItem
 ```
 
