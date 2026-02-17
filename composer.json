@@ -5,7 +5,7 @@
     "license": "MIT",
     "keywords": ["qti", "qti3", "assessment", "testing", "ims", "education"],
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "ext-dom": "*",
         "ext-libxml": "*",
         "ext-zip": "*",
