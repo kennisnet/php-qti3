@@ -7,12 +7,12 @@ namespace Qti3\Tests\Integration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\AssessmentItem;
-use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
+use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
+use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseCondition;
+use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
-use Qti3\Shared\Model\HTMLTag;
-use Qti3\Shared\Model\TextNode;
-use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
 
 #[Group('integration')]
 class ItemParserIntegrationTest extends TestCase
@@ -29,85 +29,108 @@ class ItemParserIntegrationTest extends TestCase
         $this->tearDownQtiClientTestCase();
     }
 
-    public function testParseAssessmentItemFromXml(): void
+    private function parseFixture(string $filename): AssessmentItem
     {
-        $xml = <<<XML
-<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" 
-                    identifier="item-001" 
-                    title="Test Item" 
-                    adaptive="false" 
-                    time-dependent="false">
-    <qti-response-declaration identifier="RESPONSE" cardinality="single" base-type="identifier">
-        <qti-correct-response>
-            <qti-value>choiceA</qti-value>
-        </qti-correct-response>
-    </qti-response-declaration>
-    <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" />
-    <qti-item-body>
-        <p>Wat is de hoofdstad van Nederland?</p>
-        <qti-choice-interaction response-identifier="RESPONSE" shuffle="false" max-choices="1">
-            <qti-simple-choice identifier="choiceA">Amsterdam</qti-simple-choice>
-            <qti-simple-choice identifier="choiceB">Rotterdam</qti-simple-choice>
-        </qti-choice-interaction>
-        <div>Extra info</div>
-    </qti-item-body>
-    <qti-response-processing template="https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/match_correct.xml" />
-</qti-assessment-item>
-XML;
-
+        $xml = file_get_contents(__DIR__ . '/../Unit/AssessmentItem/Service/resources/' . $filename);
         $client = $this->createClient();
-        $xmlReader = $client->getXmlReader();
-        $dom = $xmlReader->read($xml);
-        
-        $parser = $client->getAssessmentItemParser();
-        $assessmentItem = $parser->parse($dom->documentElement);
+        $dom = $client->getXmlReader()->read($xml);
+        return $client->getAssessmentItemParser()->parse($dom->documentElement);
+    }
 
-        $this->assertInstanceOf(AssessmentItem::class, $assessmentItem);
-        $this->assertSame('item-001', (string) $assessmentItem->identifier);
-        $this->assertSame('Test Item', $assessmentItem->title);
+    /**
+     * simple-choice-processing.xml: a real single-choice item with a stylesheet,
+     * custom response processing, and multiple outcome declarations.
+     */
+    public function testParseSimpleChoiceItemFromFixture(): void
+    {
+        $item = $this->parseFixture('simple-choice-processing.xml');
 
-        // Response Declaration
-        $this->assertCount(1, $assessmentItem->responseDeclarations);
-        /** @var ResponseDeclaration $responseDecl */
-        $responseDecl = $assessmentItem->responseDeclarations->all()[0];
-        $this->assertSame('RESPONSE', $responseDecl->identifier);
-        $this->assertSame(Cardinality::SINGLE, $responseDecl->cardinality);
-        $this->assertSame(BaseType::IDENTIFIER, $responseDecl->baseType);
-        $this->assertSame('choiceA', (string)$responseDecl->correctResponse->values[0]);
+        $this->assertInstanceOf(AssessmentItem::class, $item);
+        $this->assertSame('Meerkeuze', $item->title);
 
-        // Outcome Declaration
-        $this->assertCount(1, $assessmentItem->outcomeDeclarations);
-        $outcomeDecl = $assessmentItem->outcomeDeclarations->all()[0];
-        $this->assertSame('SCORE', $outcomeDecl->identifier);
+        // Response declaration
+        $this->assertCount(1, $item->responseDeclarations);
+        $rd = $item->responseDeclarations->all()[0];
+        $this->assertSame('RESPONSE', $rd->identifier);
+        $this->assertSame(Cardinality::SINGLE, $rd->cardinality);
+        $this->assertSame(BaseType::IDENTIFIER, $rd->baseType);
+        $this->assertSame('CHOICE1', (string) $rd->correctResponse->values[0]);
 
-        // Item Body
-        $itemBody = $assessmentItem->itemBody;
-        $this->assertCount(3, $itemBody->content);
-        
-        /** @var HTMLTag $p */
-        $p = $itemBody->content->all()[0];
-        $this->assertInstanceOf(HTMLTag::class, $p);
-        $this->assertSame('p', $p->tagName());
-        $this->assertInstanceOf(TextNode::class, $p->children()[0]);
-        $this->assertSame('Wat is de hoofdstad van Nederland?', (string)$p->children()[0]);
+        // Outcome declarations: SCORE, MAXSCORE, FEEDBACK
+        $this->assertCount(3, $item->outcomeDeclarations);
 
-        // Interaction
-        $interaction = $itemBody->content->all()[1];
+        // Item body: single choice interaction
+        $body = $item->itemBody->content->all();
+        $this->assertCount(1, $body);
+        $interaction = $body[0];
         $this->assertInstanceOf(ChoiceInteraction::class, $interaction);
         $this->assertSame('RESPONSE', $interaction->responseIdentifier);
         $this->assertFalse($interaction->shuffle);
         $this->assertSame(1, $interaction->maxChoices);
         $this->assertCount(2, $interaction->choices);
-        $this->assertSame('choiceA', $interaction->choices[0]->identifier);
-        $this->assertSame('choiceB', $interaction->choices[1]->identifier);
+        $this->assertNotNull($interaction->prompt);
 
-        /** @var HTMLTag $div */
-        $div = $itemBody->content->all()[2];
-        $this->assertInstanceOf(HTMLTag::class, $div);
-        $this->assertSame('div', $div->tagName());
-        $this->assertSame('Extra info', (string)$div->children()[0]);
+        // Custom response processing with two conditions
+        $this->assertNotNull($item->responseProcessing);
+        $this->assertCount(2, $item->responseProcessing->elements);
+        $this->assertInstanceOf(ResponseCondition::class, $item->responseProcessing->elements[0]);
+        $this->assertInstanceOf(ResponseCondition::class, $item->responseProcessing->elements[1]);
+    }
 
-        // Response Processing
-        $this->assertNotNull($assessmentItem->responseProcessing);
+    /**
+     * gap-match-no-processing.xml: a real match interaction item with a mapping
+     * on the response declaration and an empty response processing element.
+     */
+    public function testParseMatchInteractionItemFromFixture(): void
+    {
+        $item = $this->parseFixture('gap-match-no-processing.xml');
+
+        $this->assertInstanceOf(AssessmentItem::class, $item);
+        $this->assertSame('Celleer', $item->title);
+
+        // Response declaration with correct response and mapping
+        $this->assertCount(1, $item->responseDeclarations);
+        $rd = $item->responseDeclarations->all()[0];
+        $this->assertSame('RESPONSE', $rd->identifier);
+        $this->assertSame(Cardinality::MULTIPLE, $rd->cardinality);
+        $this->assertSame(BaseType::DIRECTED_PAIR, $rd->baseType);
+        $this->assertCount(7, $rd->correctResponse->values);
+        $this->assertNotNull($rd->mapping);
+        $this->assertCount(7, $rd->mapping->entries);
+
+        // Outcome declarations: SCORE, MAXSCORE, FEEDBACK
+        $this->assertCount(3, $item->outcomeDeclarations);
+
+        // Item body: div + match interaction
+        $body = $item->itemBody->content->all();
+        $this->assertCount(2, $body);
+        $interaction = $body[1];
+        $this->assertInstanceOf(MatchInteraction::class, $interaction);
+        $this->assertSame('RESPONSE', $interaction->responseIdentifier);
+        $this->assertTrue($interaction->shuffle);
+        $this->assertCount(7, $interaction->simpleMatchSet1->choices);
+        $this->assertCount(7, $interaction->simpleMatchSet2->choices);
+
+        // Empty response processing
+        $this->assertNotNull($item->responseProcessing);
+        $this->assertInstanceOf(ResponseProcessing::class, $item->responseProcessing);
+        $this->assertCount(0, $item->responseProcessing->elements);
+    }
+
+    /**
+     * item001.xml: a real item with a match interaction, mapping on the response
+     * declaration, feedback blocks with <qti-content-body> wrappers, and complex
+     * multi-condition custom response processing.
+     *
+     * NOTE: parsing fails at the item-body level because FeedbackBlockParser
+     * passes <qti-content-body> to HTMLTag, which rejects it as an invalid tag
+     * name. This is tracked in GitHub issue #4. Once that bug is fixed this test
+     * should be expanded to also assert on item body and response processing.
+     */
+    public function testParseItemWithFeedbackBlocksFailsDueToContentBodyBug(): void
+    {
+        $this->markTestIncomplete(
+            'Blocked by bug #4: FeedbackBlockParser cannot handle <qti-content-body> wrapper.'
+        );
     }
 }

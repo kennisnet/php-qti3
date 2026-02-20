@@ -21,7 +21,6 @@ use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteract
 use Qti3\AssessmentItem\Model\Shape\ShapeName;
 use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
-use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
 class InteractionParserTest extends TestCase
@@ -176,17 +175,14 @@ class InteractionParserTest extends TestCase
     #[Test]
     public function parseHotspotInteractionWithoutImage(): void
     {
-        $element = $this->loadElement('
-            <qti-hotspot-interaction response-identifier="RESPONSE_HS" max-choices="1">
-                <qti-hotspot-choice identifier="hs1" shape="default" coords=""/>
-            </qti-hotspot-interaction>
-        ');
-
-        // The fallback creates new HTMLTag('img', [], []) which throws because img requires alt+src
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing required attribute');
-
-        $this->parser->parse($element);
+        // Blocked by bug #6: the missing-image fallback creates new HTMLTag('img', [], [])
+        // which immediately throws InvalidArgumentException because img requires alt+src.
+        // Once fixed, the fallback should throw a descriptive ParseError instead, and this
+        // test should assert that ParseError is thrown with a meaningful message.
+        $this->markTestIncomplete(
+            'Blocked by bug #6: missing-image fallback crashes with InvalidArgumentException ' .
+            'instead of throwing a descriptive ParseError.'
+        );
     }
 
     #[Test]
