@@ -77,9 +77,9 @@ class ResponseDeclarationParser extends AbstractParser
                 },
                 $mappingChildren,
             ),
-            $this->parseFloat($element->getAttribute('default-value')),
-            $this->parseFloat($element->getAttribute('lower-bound')),
-            $this->parseFloat($element->getAttribute('upper-bound')),
+            $this->parseFloat($mapping->getAttribute('default-value')),
+            $this->parseFloat($mapping->getAttribute('lower-bound')),
+            $this->parseFloat($mapping->getAttribute('upper-bound')),
         );
     }
 
