@@ -111,10 +111,12 @@ class ItemParserIntegrationTest extends TestCase
         $this->assertCount(7, $interaction->simpleMatchSet1->choices);
         $this->assertCount(7, $interaction->simpleMatchSet2->choices);
 
-        // Empty response processing
+        // Response processing with a single condition (intentionally non-empty so the
+        // AssessmentItemDeterminator classifies this item as type "question").
         $this->assertNotNull($item->responseProcessing);
         $this->assertInstanceOf(ResponseProcessing::class, $item->responseProcessing);
-        $this->assertCount(0, $item->responseProcessing->elements);
+        $this->assertCount(1, $item->responseProcessing->elements);
+        $this->assertInstanceOf(ResponseCondition::class, $item->responseProcessing->elements[0]);
     }
 
     /**
