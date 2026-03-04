@@ -21,8 +21,9 @@ class AssessmentItem extends QtiElement
         public readonly ?OutcomeDeclarationCollection $outcomeDeclarations = null,
         public readonly ?ResponseProcessing $responseProcessing = null,
         public readonly string $title = '',
+        ?Stylesheet $stylesheet = null,
     ) {
-        $this->stylesheet = new Stylesheet(__DIR__ . '/../Resources/stylesheet.css');
+        $this->stylesheet = $stylesheet ?? new Stylesheet(__DIR__ . '/../Resources/stylesheet.css');
     }
 
     /**
