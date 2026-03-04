@@ -25,7 +25,7 @@ readonly class PsrHttpClientResourceDownloader implements IResourceDownloader
         $filename = $this->dataFolder . '/' . $targetFilePath;
 
         if ($this->fileSystemUtils->isValidFile($filename)) {
-            return $filename; // al gedownload
+            return $filename; // already downloaded
         }
 
         $this->fileSystemUtils->ensureDirectory(dirname($filename));

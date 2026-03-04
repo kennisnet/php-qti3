@@ -16,6 +16,7 @@ use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
 use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
+use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
@@ -94,6 +95,7 @@ final class QtiClient
             $this->getItemBodyParser(),
             new ResponseProcessingParser(new ProcessingElementParser($qtiExpressionParser)),
             new StylesheetParser(),
+            new ModalFeedbackParser(new StylesheetParser()),
         );
     }
 

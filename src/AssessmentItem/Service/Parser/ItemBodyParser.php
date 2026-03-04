@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service\Parser;
 
+use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
 use Qti3\AssessmentItem\Model\ItemBody;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
@@ -52,11 +54,11 @@ class ItemBodyParser extends AbstractParser
                 return $this->interactionParser->parse($node);
             }
 
-            if ($tagName === \Qti3\AssessmentItem\Model\RubricBlock\RubricBlock::qtiTagName()) {
+            if ($tagName === RubricBlock::qtiTagName()) {
                 return $this->rubricBlockParser->parse($node);
             }
 
-            if ($tagName === \Qti3\AssessmentItem\Model\Feedback\FeedbackBlock::qtiTagName()) {
+            if ($tagName === FeedbackBlock::qtiTagName()) {
                 return $this->feedbackBlockParser->parse($node);
             }
 

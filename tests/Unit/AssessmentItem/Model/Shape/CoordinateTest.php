@@ -15,7 +15,7 @@ class CoordinateTest extends TestCase
 
     protected function setUp(): void
     {
-        // Initialisatie van een standaard Coordinate object voor tests
+        // Initialize a standard Coordinate object for tests
         $this->coordinate = new Coordinate('418');
     }
 
