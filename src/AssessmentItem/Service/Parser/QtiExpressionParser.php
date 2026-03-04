@@ -46,7 +46,7 @@ class QtiExpressionParser extends AbstractParser
 {
     public function parse(DOMElement $element): AbstractQtiExpression
     {
-        $tagName = $element->nodeName;
+        $tagName = strtolower($element->nodeName);
         $children = $this->getChildren($element);
 
         if ($tagName === Correct::qtiTagName()) {
