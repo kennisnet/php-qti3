@@ -12,7 +12,21 @@ class AssessmentItemDeterminator
 {
     public function determineType(DOMDocument $itemXml): string
     {
-        $hasResponseProcessing = $itemXml->getElementsByTagName(ResponseProcessing::qtiTagName())->length > 0;
+        $hasResponseProcessing = false;
+        $responseProcessingNodes = $itemXml->getElementsByTagName(ResponseProcessing::qtiTagName());
+        foreach ($responseProcessingNodes as $node) {
+            if ($node->hasAttributes()) {
+                $hasResponseProcessing = true;
+                break;
+            }
+            foreach ($node->childNodes as $child) {
+                if ($child->nodeType === XML_ELEMENT_NODE) {
+                    $hasResponseProcessing = true;
+                    break 2;
+                }
+            }
+        }
+
         $hasExtendedTextInteraction = $itemXml->getElementsByTagName(ExtendedTextInteraction::qtiTagName())->length > 0;
 
         if ($hasResponseProcessing || $hasExtendedTextInteraction) {

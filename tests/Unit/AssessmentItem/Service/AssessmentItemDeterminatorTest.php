@@ -38,10 +38,37 @@ class AssessmentItemDeterminatorTest extends TestCase
     }
 
     #[Test]
-    public function determineTypeReturnsQuestionWhenResponseProcessingPresent(): void
+    public function determineTypeReturnsQuestionWhenResponseProcessingPresentAndNotEmpty(): void
+    {
+        $xml = new DOMDocument();
+        $xml->loadXML('<qti-assessment-item><qti-response-processing><qti-response-condition/></qti-response-processing></qti-assessment-item>');
+
+        $this->assertEquals('question', $this->determinator->determineType($xml));
+    }
+
+    #[Test]
+    public function determineTypeReturnsInfoWhenResponseProcessingIsEmpty(): void
     {
         $xml = new DOMDocument();
         $xml->loadXML('<qti-assessment-item><qti-response-processing/></qti-assessment-item>');
+
+        $this->assertEquals('info', $this->determinator->determineType($xml));
+    }
+
+    #[Test]
+    public function determineTypeReturnsInfoWhenResponseProcessingContainsOnlyWhitespace(): void
+    {
+        $xml = new DOMDocument();
+        $xml->loadXML("<qti-assessment-item>\n    <qti-response-processing>\n    </qti-response-processing>\n</qti-assessment-item>");
+
+        $this->assertEquals('info', $this->determinator->determineType($xml));
+    }
+
+    #[Test]
+    public function determineTypeReturnsQuestionWhenResponseProcessingContainsTemplate(): void
+    {
+        $xml = new DOMDocument();
+        $xml->loadXML('<qti-assessment-item><qti-response-processing template="https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/match_correct.xml"/></qti-assessment-item>');
 
         $this->assertEquals('question', $this->determinator->determineType($xml));
     }

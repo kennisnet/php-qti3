@@ -91,7 +91,13 @@
             </qti-simple-match-set>
         </qti-match-interaction>
     </qti-item-body>
-    <qti-response-processing/>
+    <qti-response-processing>
+        <qti-response-condition>
+            <qti-response-if>
+                <qti-base-value base-type="boolean">true</qti-base-value>
+            </qti-response-if>
+        </qti-response-condition>
+    </qti-response-processing>
     <qti-modal-feedback show-hide="show" outcome-identifier="FEEDBACK" identifier="correct">
         <qti-content-body>Het antwoord is goed</qti-content-body>
     </qti-modal-feedback>

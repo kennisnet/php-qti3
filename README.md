@@ -123,19 +123,22 @@ $package = $packageBuilder->buildForTest($test, $items);
 
 ### Assessment Item Level
 
-**UC-I1: Generate item from XML (not yet implemented)**
+**UC-I1: Parse item XML to model**
 
 ```php
-// Note: itemParser is not yet directly exposed by QtiClient
-// $item = $itemParser->parse($itemXml);
+// $itemXml is of type DomDocument
+$assessmentItemParser = $qtiClient->getAssessmentItemParser();
+$item = $assessmentItemParser->parse($itemXml);
+// $item is now of type Qti3\AssessmentItem\Model\AssessmentItem
 ```
 
 **UC-I2: Generate XML from item**
 
 ```php
+// $item is of type Qti3\AssessmentItem\Model\AssessmentItem
 $xmlBuilder = $qtiClient->getXmlBuilder();
-$itemXml = $xmlBuilder->generateXmlFromObject($item)->saveXML();
-// $itemXml is now of type string
+$itemXml = $xmlBuilder->generateXmlFromObject($item);
+// $itemXml is now of type DomDocument
 ```
 
 **UC-I3: Response processing**
@@ -148,6 +151,20 @@ $responseProcessor->processResponses($itemState, $responses);
 $outcomes = $itemState->outcomeSet->outcomes;
 // $outcomes is now an associative array with outcome-identifier->value
 ```
+
+### Supported interactions
+
+The `AssessmentItem` parser supports all current QTI 3.0 interaction types listed below via the `InteractionParser` used by `ItemBodyParser`:
+
+- `qti-choice-interaction`
+- `qti-text-entry-interaction`
+- `qti-extended-text-interaction`
+- `qti-gap-match-interaction`
+- `qti-hotspot-interaction`
+- `qti-hottext-interaction`
+- `qti-match-interaction`
+- `qti-order-interaction`
+- `qti-select-point-interaction`
 
 ## Running Tests
 
