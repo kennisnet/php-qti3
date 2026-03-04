@@ -175,14 +175,16 @@ class InteractionParserTest extends TestCase
     #[Test]
     public function parseHotspotInteractionWithoutImage(): void
     {
-        // Blocked by bug #6: the missing-image fallback creates new HTMLTag('img', [], [])
-        // which immediately throws InvalidArgumentException because img requires alt+src.
-        // Once fixed, the fallback should throw a descriptive ParseError instead, and this
-        // test should assert that ParseError is thrown with a meaningful message.
-        $this->markTestIncomplete(
-            'Blocked by bug #6: missing-image fallback crashes with InvalidArgumentException ' .
-            'instead of throwing a descriptive ParseError.'
-        );
+        $element = $this->loadElement('
+            <qti-hotspot-interaction response-identifier="RESPONSE" max-choices="1">
+                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,100,100"/>
+            </qti-hotspot-interaction>
+        ');
+
+        $this->expectException(ParseError::class);
+        $this->expectExceptionMessage('HotspotInteraction must contain an img element');
+
+        $this->parser->parse($element);
     }
 
     #[Test]
