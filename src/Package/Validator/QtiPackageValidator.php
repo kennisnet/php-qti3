@@ -10,7 +10,7 @@ use Qti3\Shared\Collection\StringCollection;
 readonly class QtiPackageValidator
 {
     public function __construct(
-        private IImsQtiPackageValidator $imsValidator,
+        private IQtiSyntaxValidator $syntaxValidator,
         private ResponseProcessingValidator $responseProcessingValidator,
     ) {}
 
@@ -18,7 +18,7 @@ readonly class QtiPackageValidator
     {
         /** @var array<int, IQtiPackageValidator> $validators */
         $validators = [
-            $this->imsValidator,
+            $this->syntaxValidator,
             $this->responseProcessingValidator,
         ];
 

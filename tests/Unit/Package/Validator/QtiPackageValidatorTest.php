@@ -19,7 +19,7 @@ use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\Package\Validator\IImsQtiPackageValidator;
+use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
@@ -37,7 +37,7 @@ class QtiPackageValidatorTest extends TestCase
 
     public function setUp(): void
     {
-        $imsQtiPackageValidator = $this->createMock(IImsQtiPackageValidator::class);
+        $imsQtiPackageValidator = $this->createMock(IQtiSyntaxValidator::class);
         $imsQtiPackageValidator
             ->method('validate')->willReturn(new StringCollection([]));
 
@@ -97,7 +97,7 @@ class QtiPackageValidatorTest extends TestCase
     {
         $xmlReader = new XmlReader();
         $realValidator = new QtiPackageValidator(
-            new NoopImsQtiPackageValidator(),
+            new NoopQtiSyntaxValidator(),
             new ResponseProcessingValidator(
                 new ResponseProcessor(
                     new ResponseDeclarationParser(),
