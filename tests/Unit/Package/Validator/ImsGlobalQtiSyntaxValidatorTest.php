@@ -109,6 +109,34 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
     }
 
     #[Test]
+    public function validateZipPackageReturnsErrorOnNon200Response(): void
+    {
+        $tmpFile = $this->createTempFile();
+
+        $this->httpClient->method('sendRequest')
+            ->willReturn($this->mockResponse('Internal Server Error', statusCode: 500));
+
+        $errors = $this->validator->validateZipPackage($tmpFile);
+
+        $this->assertCount(1, $errors);
+        $this->assertStringContainsString('IMS validator returned HTTP 500', $errors->all()[0]);
+    }
+
+    #[Test]
+    public function validateZipPackageReturnsErrorOnInvalidJson(): void
+    {
+        $tmpFile = $this->createTempFile();
+
+        $this->httpClient->method('sendRequest')
+            ->willReturn($this->mockResponse('not-valid-json'));
+
+        $errors = $this->validator->validateZipPackage($tmpFile);
+
+        $this->assertCount(1, $errors);
+        $this->assertStringContainsString('IMS validator returned invalid JSON response', $errors->all()[0]);
+    }
+
+    #[Test]
     public function validatePackageWritesToZipAndDelegates(): void
     {
         $tmpFile = $this->createTempFile();
@@ -139,12 +167,13 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
         return $path;
     }
 
-    private function mockResponse(string $body): ResponseInterface
+    private function mockResponse(string $body, int $statusCode = 200): ResponseInterface
     {
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('getContents')->willReturn($body);
 
         $response = $this->createMock(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn($statusCode);
         $response->method('getBody')->willReturn($stream);
 
         return $response;

@@ -91,15 +91,17 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
             return new StringCollection(['IMS validator request failed: ' . $e->getMessage()]);
         }
 
-        /**
-         * @var array{
-         *     errors: array<int, array{
-         *         location: array{resource: string, line: int, column: int},
-         *         message: string
-         *     }>
-         * } $result
-         */
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200) {
+            return new StringCollection([
+                sprintf('IMS validator returned HTTP %d: %s', $statusCode, $response->getBody()->getContents()),
+            ]);
+        }
+
         $result = json_decode($response->getBody()->getContents(), true);
+        if (!is_array($result)) {
+            return new StringCollection(['IMS validator returned invalid JSON response']);
+        }
 
         return new StringCollection(
             array_map(
@@ -121,9 +123,7 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
      */
     public function validate(QtiPackage $qtiPackage): StringCollection
     {
-        /** @var non-falsy-string $tmpBase */
-        $tmpBase = tempnam(sys_get_temp_dir(), 'qti_package_');
-        $tmpZip = $tmpBase . '.zip';
+        $tmpZip = sys_get_temp_dir() . '/qti_package_' . bin2hex(random_bytes(8)) . '.zip';
 
         $writer = $this->zipPackageFactory->getWriter($tmpZip);
         $writer->write($qtiPackage);
@@ -131,7 +131,6 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
         try {
             return $this->validateZipPackage($writer->getPublicUrl());
         } finally {
-            FileSystemUtils::removeFile($tmpBase);
             FileSystemUtils::removeFile($tmpZip);
         }
     }
