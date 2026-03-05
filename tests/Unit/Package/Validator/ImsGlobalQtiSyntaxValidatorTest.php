@@ -15,8 +15,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Model\IPackageWriter;
-use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Validator\ImsGlobalQtiSyntaxValidator;
+use Qti3\Tests\Unit\Package\Model\QtiPackageMock;
 
 class ImsGlobalQtiSyntaxValidatorTest extends TestCase
 {
@@ -29,15 +29,15 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
     protected function setUp(): void
     {
         $this->httpClient = $this->createMock(ClientInterface::class);
-        $this->requestFactory = $this->createStub(RequestFactoryInterface::class);
-        $this->streamFactory = $this->createStub(StreamFactoryInterface::class);
+        $this->requestFactory = $this->createMock(RequestFactoryInterface::class);
+        $this->streamFactory = $this->createMock(StreamFactoryInterface::class);
         $this->zipPackageFactory = $this->createMock(ZipPackageFactory::class);
 
-        $request = $this->createStub(RequestInterface::class);
+        $request = $this->createMock(RequestInterface::class);
         $request->method('withHeader')->willReturnSelf();
         $request->method('withBody')->willReturnSelf();
         $this->requestFactory->method('createRequest')->willReturn($request);
-        $this->streamFactory->method('createStream')->willReturn($this->createStub(StreamInterface::class));
+        $this->streamFactory->method('createStream')->willReturn($this->createMock(StreamInterface::class));
 
         $this->validator = new ImsGlobalQtiSyntaxValidator(
             $this->httpClient,
@@ -49,110 +49,104 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
     }
 
     #[Test]
-    public function validateZipPackageReturnsErrorForNonExistentFile(): void
+    public function validateZipPackageReturnsEmptyCollectionOnSuccess(): void
     {
+        $tmpFile = $this->createTempFile();
+
+        $this->httpClient->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn($this->mockResponse(json_encode(['errors' => []])));
+
+        $errors = $this->validator->validateZipPackage($tmpFile);
+
+        $this->assertCount(0, $errors);
+    }
+
+    #[Test]
+    public function validateZipPackageFormatsErrorMessages(): void
+    {
+        $tmpFile = $this->createTempFile();
+
+        $this->httpClient->method('sendRequest')->willReturn(
+            $this->mockResponse(json_encode([
+                'errors' => [
+                    ['location' => ['resource' => '/item1.xml', 'line' => 5, 'column' => 3], 'message' => 'Invalid structure'],
+                    ['location' => ['resource' => '/item2.xml', 'line' => 10, 'column' => 1], 'message' => 'Missing required attribute'],
+                ],
+            ])),
+        );
+
+        $errors = $this->validator->validateZipPackage($tmpFile);
+
+        $this->assertCount(2, $errors);
+        $this->assertSame('Location: /item1.xml [5,3] Description: `Invalid structure`', $errors->all()[0]);
+        $this->assertSame('Location: /item2.xml [10,1] Description: `Missing required attribute`', $errors->all()[1]);
+    }
+
+    #[Test]
+    public function validateZipPackageReturnsErrorWhenFileDoesNotExist(): void
+    {
+        $this->httpClient->expects($this->never())->method('sendRequest');
+
         $errors = $this->validator->validateZipPackage('/non/existent/package.zip');
 
         $this->assertCount(1, $errors);
-        $this->assertStringContainsString('Package file does not exist', (string) $errors->first());
+        $this->assertStringContainsString('/non/existent/package.zip', $errors->all()[0]);
     }
 
     #[Test]
-    public function validateZipPackageReturnsValidationErrors(): void
+    public function validateZipPackageReturnsErrorOnHttpClientException(): void
     {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'qti_test_');
-        file_put_contents($tmpFile, 'fake-zip-content');
+        $tmpFile = $this->createTempFile();
 
-        try {
-            $responseBody = $this->createStub(StreamInterface::class);
-            $responseBody->method('getContents')->willReturn(json_encode([
-                'errors' => [
-                    [
-                        'location' => ['resource' => 'item001.xml', 'line' => 10, 'column' => 5],
-                        'message' => 'Missing required attribute',
-                    ],
-                    [
-                        'location' => ['resource' => 'item002.xml', 'line' => 3, 'column' => 1],
-                        'message' => 'Invalid element',
-                    ],
-                ],
-            ]));
+        $this->httpClient->method('sendRequest')
+            ->willThrowException($this->createMock(ClientExceptionInterface::class));
 
-            $response = $this->createStub(ResponseInterface::class);
-            $response->method('getBody')->willReturn($responseBody);
-
-            $this->httpClient->method('sendRequest')->willReturn($response);
-
-            $errors = $this->validator->validateZipPackage($tmpFile);
-
-            $this->assertCount(2, $errors);
-            $this->assertStringContainsString('item001.xml', (string) $errors->first());
-            $this->assertStringContainsString('Missing required attribute', (string) $errors->first());
-        } finally {
-            unlink($tmpFile);
-        }
-    }
-
-    #[Test]
-    public function validateZipPackageReturnsEmptyCollectionWhenNoErrors(): void
-    {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'qti_test_');
-        file_put_contents($tmpFile, 'fake-zip-content');
-
-        try {
-            $responseBody = $this->createStub(StreamInterface::class);
-            $responseBody->method('getContents')->willReturn(json_encode(['errors' => []]));
-
-            $response = $this->createStub(ResponseInterface::class);
-            $response->method('getBody')->willReturn($responseBody);
-
-            $this->httpClient->method('sendRequest')->willReturn($response);
-
-            $errors = $this->validator->validateZipPackage($tmpFile);
-
-            $this->assertCount(0, $errors);
-        } finally {
-            unlink($tmpFile);
-        }
-    }
-
-    #[Test]
-    public function validateZipPackageReturnsErrorWhenHttpClientThrows(): void
-    {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'qti_test_');
-        file_put_contents($tmpFile, 'fake-zip-content');
-
-        try {
-            $exception = new class ('Connection refused') extends \RuntimeException implements ClientExceptionInterface {};
-            $this->httpClient->method('sendRequest')->willThrowException($exception);
-
-            $errors = $this->validator->validateZipPackage($tmpFile);
-
-            $this->assertCount(1, $errors);
-            $this->assertStringContainsString('IMS validator request failed', (string) $errors->first());
-            $this->assertStringContainsString('Connection refused', (string) $errors->first());
-        } finally {
-            unlink($tmpFile);
-        }
-    }
-
-    #[Test]
-    public function validateDelegatesToValidateZipPackageAndCleansUp(): void
-    {
-        $qtiPackage = $this->createStub(QtiPackage::class);
-        $tmpZipPath = sys_get_temp_dir() . '/test_validate_' . bin2hex(random_bytes(4)) . '.zip';
-
-        $writer = $this->createMock(IPackageWriter::class);
-        $writer->expects($this->once())->method('write')->with($qtiPackage);
-        $writer->method('getPublicUrl')->willReturn($tmpZipPath);
-
-        $this->zipPackageFactory->method('getWriter')->willReturn($writer);
-
-        // The file won't exist at $tmpZipPath, so validateZipPackage will return the
-        // "file does not exist" error — that's fine, we're testing the delegation flow
-        $errors = $this->validator->validate($qtiPackage);
+        $errors = $this->validator->validateZipPackage($tmpFile);
 
         $this->assertCount(1, $errors);
-        $this->assertStringContainsString('Package file does not exist', (string) $errors->first());
+        $this->assertStringContainsString('IMS validator request failed', $errors->all()[0]);
+    }
+
+    #[Test]
+    public function validatePackageWritesToZipAndDelegates(): void
+    {
+        $tmpFile = $this->createTempFile();
+
+        $writer = $this->createMock(IPackageWriter::class);
+        $writer->expects($this->once())->method('write');
+        $writer->method('getPublicUrl')->willReturn($tmpFile);
+
+        $this->zipPackageFactory->expects($this->once())
+            ->method('getWriter')
+            ->willReturn($writer);
+
+        $this->httpClient->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn($this->mockResponse(json_encode(['errors' => []])));
+
+        $errors = $this->validator->validate(new QtiPackageMock());
+
+        $this->assertCount(0, $errors);
+    }
+
+    private function createTempFile(): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'qti_test_');
+        file_put_contents($path, 'fake zip content');
+        $this->addToAssertionCount(0); // suppress "no assertions" if only used as fixture
+        register_shutdown_function(static fn () => is_file($path) && unlink($path));
+        return $path;
+    }
+
+    private function mockResponse(string $body): ResponseInterface
+    {
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn($body);
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getBody')->willReturn($stream);
+
+        return $response;
     }
 }

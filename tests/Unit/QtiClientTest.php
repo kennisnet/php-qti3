@@ -1,19 +1,22 @@
 <?php
 
-namespace Qti3\Tests\Unit\Unit;
+namespace Qti3\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
+use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\QtiClient;
 use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\Tests\Unit\Package\Model\QtiPackageMock;
 
 class QtiClientTest extends TestCase
@@ -107,7 +110,7 @@ class QtiClientTest extends TestCase
     {
         $container = $this->createClient();
         $processor = $container->getResponseProcessor();
-        $this->assertInstanceOf(\Qti3\AssessmentItem\Service\ResponseProcessor::class, $processor);
+        $this->assertInstanceOf(ResponseProcessor::class, $processor);
     }
 
     public function testGetResponseProcessorReturnsSameInstance(): void
@@ -123,14 +126,14 @@ class QtiClientTest extends TestCase
     {
         $container = $this->createClient();
         $reader = $container->getXmlReader();
-        $this->assertInstanceOf(\Qti3\Shared\Xml\Reader\XmlReader::class, $reader);
+        $this->assertInstanceOf(XmlReader::class, $reader);
     }
 
     public function testGetQtiPackageValidatorReturnsInstance(): void
     {
         $client = $this->createClient();
         $validator = $client->getQtiPackageValidator();
-        $this->assertInstanceOf(\Qti3\Package\Validator\QtiPackageValidator::class, $validator);
+        $this->assertInstanceOf(QtiPackageValidator::class, $validator);
     }
 
     public function testGetQtiPackageValidatorReturnsSameInstance(): void
@@ -165,7 +168,7 @@ class QtiClientTest extends TestCase
 
         // When no syntaxValidator is injected, QtiPackageValidator should still be created
         // (using the default QtiSchemaValidator internally)
-        $this->assertInstanceOf(\Qti3\Package\Validator\QtiPackageValidator::class, $validator);
+        $this->assertInstanceOf(QtiPackageValidator::class, $validator);
     }
 
     public function testGetQtiPackageValidatorUsesInjectedSyntaxValidator(): void
