@@ -9,6 +9,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Qti3\Package\Filesystem\FileSystemUtils;
+use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Shared\Collection\StringCollection;
 
@@ -30,7 +31,13 @@ use Qti3\Shared\Collection\StringCollection;
  *       $filesystemPackageFactory,
  *       $resourceValidator,
  *       $resourceDownloader,
- *       new ImsGlobalQtiSyntaxValidator($httpClient, $requestFactory, $streamFactory, 'http://localhost:8080/api/validate'),
+ *       new ImsGlobalQtiSyntaxValidator(
+ *           $httpClient,
+ *           $requestFactory,
+ *           $streamFactory,
+ *           new ZipPackageFactory(new ZipArchiveFactory(), new FileSystemUtils()),
+ *           'http://localhost:8080/api/validate',
+ *       ),
  *   );
  */
 final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
@@ -41,6 +48,7 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
+        private readonly ZipPackageFactory $zipPackageFactory,
         private readonly string $endpointUrl,
     ) {}
 
@@ -110,30 +118,21 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
     /**
      * Validates a parsed QtiPackage by writing it to a temporary ZIP file and
      * forwarding to {@see validateZipPackage()}.
-     *
-     * Note: this requires a way to serialise the QtiPackage back to a ZIP.
-     * Use {@see \Qti3\QtiClient::getQtiPackageBuilder()} to build the package
-     * first, or inject a ZipWriter if your project already has one available.
      */
     public function validate(QtiPackage $qtiPackage): StringCollection
     {
-        // TODO: write $qtiPackage to a temporary ZIP and delegate to validateZipPackage().
-        // Example using QtiPackageBuilder:
-        //
-        //   $tmpFile = tempnam(sys_get_temp_dir(), 'qti_') . '.zip';
-        //   $builder = $this->qtiPackageBuilder;      // inject via constructor
-        //   $builder->build($qtiPackage, $tmpFile);
-        //   try {
-        //       return $this->validateZipPackage($tmpFile);
-        //   } finally {
-        //       FileSystemUtils::removeFile($tmpFile);
-        //   }
+        /** @var non-falsy-string $tmpBase */
+        $tmpBase = tempnam(sys_get_temp_dir(), 'qti_package_');
+        $tmpZip = $tmpBase . '.zip';
 
-        throw new \LogicException(
-            sprintf(
-                '%s::validate() is not implemented. Serialise the package to a ZIP first and call validateZipPackage() directly.',
-                self::class,
-            ),
-        );
+        $writer = $this->zipPackageFactory->getWriter($tmpZip);
+        $writer->write($qtiPackage);
+
+        try {
+            return $this->validateZipPackage($writer->getPublicUrl());
+        } finally {
+            FileSystemUtils::removeFile($tmpBase);
+            FileSystemUtils::removeFile($tmpZip);
+        }
     }
 }

@@ -62,6 +62,9 @@ Then pass `ImsGlobalQtiSyntaxValidator` as the fourth argument to `QtiClient`:
 
 ```php
 use Qti3\QtiClient;
+use Qti3\Package\Filesystem\FileSystemUtils;
+use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
+use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Validator\ImsGlobalQtiSyntaxValidator;
 use Symfony\Component\HttpClient\Psr18Client;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -73,6 +76,7 @@ $syntaxValidator = new ImsGlobalQtiSyntaxValidator(
     httpClient: $httpClient,
     requestFactory: $psr17,
     streamFactory: $psr17,
+    zipPackageFactory: new ZipPackageFactory(new ZipArchiveFactory(), new FileSystemUtils()),
     endpointUrl: 'http://localhost:8080/api/validate',
 );
 
