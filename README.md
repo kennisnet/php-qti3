@@ -101,6 +101,19 @@ $writer = $filesystemPackageFactory->getWriter('/tmp/folder');
 $writer->write($qtiPackage);
 ```
 
+**UC-P5: Validate a QTI package**
+
+```php
+$validator = $qtiClient->getQtiPackageValidator();
+$errors = $validator->validate($qtiPackage);
+
+if ($errors->count() > 0) {
+    // $errors is a StringCollection of validation error messages
+}
+```
+
+By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`). To use the official **IMS Global QTI validator** (Docker image) instead, pass a custom `IQtiSyntaxValidator` implementation as the fourth argument to `QtiClient`. See [docs/ims-global-validator.md](docs/ims-global-validator.md) for setup instructions and a ready-to-use skeleton class.
+
 ### Assessment Test Level
 
 **UC-T1: Generate test from package**

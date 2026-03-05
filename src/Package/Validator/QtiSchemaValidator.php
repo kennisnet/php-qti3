@@ -19,7 +19,7 @@ use Qti3\Shared\Xml\Reader\XmlParsingException;
 use RuntimeException;
 use ZipArchive;
 
-readonly class QtiSchemaValidator implements IImsQtiPackageValidator
+readonly class QtiSchemaValidator implements IQtiSyntaxValidator
 {
     private const string QTI_NAMESPACE = 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0';
     private const string MANIFEST_NAMESPACE = 'http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1';

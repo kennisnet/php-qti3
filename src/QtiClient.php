@@ -41,6 +41,7 @@ use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
+use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
@@ -74,6 +75,7 @@ final class QtiClient
         private readonly IFilesystemPackageFactory $filesystemPackageFactory,
         private readonly IResourceValidator $resourceValidator,
         private readonly IResourceDownloader $resourceDownloader,
+        private readonly ?IQtiSyntaxValidator $syntaxValidator = null,
     ) {}
 
     public function getQtiPackageReader(): QtiPackageReader
@@ -188,7 +190,7 @@ final class QtiClient
     public function getQtiPackageValidator(): QtiPackageValidator
     {
         return $this->qtiPackageValidator ??= new QtiPackageValidator(
-            $this->getQtiSchemaValidator(),
+            $this->syntaxValidator ?? $this->getQtiSchemaValidator(),
             new ResponseProcessingValidator($this->getResponseProcessor()),
         );
     }

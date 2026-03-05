@@ -8,7 +8,7 @@ use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\Shared\Collection\StringCollection;
-use Qti3\Tests\Unit\Package\Validator\NoopImsQtiPackageValidator;
+use Qti3\Tests\Unit\Package\Validator\NoopQtiSyntaxValidator;
 
 #[Group('integration')]
 class ValidatePackageIntegrationTest extends TestCase
@@ -36,9 +36,9 @@ class ValidatePackageIntegrationTest extends TestCase
         try {
             $reader = $client->getQtiPackageReader();
             $package = $reader->fromZip($zipPath);
-            // Use NoopImsQtiPackageValidator to skip heavy XSD validation in this test
+            // Use NoopQtiSyntaxValidator to skip heavy XSD validation in this test
             $validator = new QtiPackageValidator(
-                new NoopImsQtiPackageValidator(),
+                new NoopQtiSyntaxValidator(),
                 new ResponseProcessingValidator($client->getResponseProcessor())
             );
             $errors = $validator->validate($package);
@@ -85,7 +85,7 @@ class ValidatePackageIntegrationTest extends TestCase
         $package = $reader->fromZip($this->getFixturePath('valid-package.zip'));
 
         $validator = new QtiPackageValidator(
-            new NoopImsQtiPackageValidator(),
+            new NoopQtiSyntaxValidator(),
             new ResponseProcessingValidator($client->getResponseProcessor()),
         );
         $errors = $validator->validate($package);
@@ -101,7 +101,7 @@ class ValidatePackageIntegrationTest extends TestCase
         $package = $reader->fromZip($this->getFixturePath('invalid-response-processing.zip'));
 
         $validator = new QtiPackageValidator(
-            new NoopImsQtiPackageValidator(),
+            new NoopQtiSyntaxValidator(),
             new ResponseProcessingValidator($client->getResponseProcessor()),
         );
         $errors = $validator->validate($package);
@@ -120,7 +120,7 @@ class ValidatePackageIntegrationTest extends TestCase
         $package = $reader->fromZip($this->getFixturePath('no-max-score-all-items.zip'));
 
         $validator = new QtiPackageValidator(
-            new NoopImsQtiPackageValidator(),
+            new NoopQtiSyntaxValidator(),
             new ResponseProcessingValidator($client->getResponseProcessor()),
         );
         $errors = $validator->validate($package);
@@ -148,7 +148,7 @@ class ValidatePackageIntegrationTest extends TestCase
         $package = $reader->fromZip($this->getFixturePath('no-metadata.zip'));
 
         $validator = new QtiPackageValidator(
-            new NoopImsQtiPackageValidator(),
+            new NoopQtiSyntaxValidator(),
             new ResponseProcessingValidator($client->getResponseProcessor()),
         );
         $errors = $validator->validate($package);
