@@ -73,6 +73,29 @@ class FeedbackBlockParserTest extends TestCase
     }
 
     #[Test]
+    public function parseWithContentBodyWrapper(): void
+    {
+        $element = $this->loadElement('
+            <qti-feedback-block identifier="fb-wrapped" outcome-identifier="FEEDBACK" show-hide="show">
+                <qti-content-body>
+                    <p>Wrapped content</p>
+                </qti-content-body>
+            </qti-feedback-block>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(FeedbackBlock::class, $result);
+        $this->assertSame('fb-wrapped', $result->identifier);
+        $content = $result->contentBody->content->all();
+        $this->assertCount(1, $content);
+        $this->assertInstanceOf(HTMLTag::class, $content[0]);
+        $this->assertSame('p', $content[0]->tagName());
+        $this->assertInstanceOf(TextNode::class, $content[0]->children()[0]);
+        $this->assertSame('Wrapped content', $content[0]->children()[0]->content);
+    }
+
+    #[Test]
     public function parseWrongTagThrows(): void
     {
         $element = $this->loadElement('<wrong-tag identifier="fb1"/>');
