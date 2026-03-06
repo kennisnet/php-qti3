@@ -10,18 +10,30 @@ final class Value extends QtiElement implements Stringable
 {
     public function __construct(
         public string|int|float|bool $value,
-    ) {}
+    ) {
+        if ($value === '') {
+            throw new \InvalidArgumentException('Value cannot be an empty string');
+        }
+    }
 
     /**
      * @return array<int,IContentNode>
      */
     public function children(): array
     {
-        return [new TextNode((string) $this->value)];
+        return [new TextNode($this->serialize())];
     }
 
     public function __toString(): string
     {
-        return (string) $this->value;
+        return $this->serialize();
+    }
+
+    private function serialize(): string
+    {
+        return match(true) {
+            is_bool($this->value) => $this->value ? 'true' : 'false',
+            default               => (string) $this->value,
+        };
     }
 }
