@@ -10,11 +10,7 @@ final class Value extends QtiElement implements Stringable
 {
     public function __construct(
         public string|int|float|bool $value,
-    ) {
-        if ($value === '') {
-            throw new \InvalidArgumentException('Value cannot be an empty string');
-        }
-    }
+    ) {}
 
     /**
      * @return array<int,IContentNode>

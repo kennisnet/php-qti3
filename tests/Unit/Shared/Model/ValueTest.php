@@ -58,14 +58,6 @@ class ValueTest extends TestCase
     }
 
     #[Test]
-    public function emptyStringThrows(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-
-        new Value('');
-    }
-
-    #[Test]
     public function childrenReturnsArrayWithSingleTextNode(): void
     {
         $value = new Value('hello');
