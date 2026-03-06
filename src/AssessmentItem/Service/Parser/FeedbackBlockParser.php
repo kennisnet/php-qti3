@@ -26,8 +26,18 @@ class FeedbackBlockParser extends AbstractParser
         $showHide = $element->getAttribute('show-hide') ?: Visibility::SHOW->value;
         $visibility = Visibility::from($showHide);
 
+        // When re-parsing serialized output, content may be wrapped in <qti-content-body>.
+        // Unwrap it so both original QTI XML and serializer output are handled correctly.
+        $contentRoot = $element;
+        foreach ($this->getChildren($element) as $child) {
+            if ($child->nodeName === 'qti-content-body') {
+                $contentRoot = $child;
+                break;
+            }
+        }
+
         $content = new ContentNodeCollection();
-        foreach ($element->childNodes as $child) {
+        foreach ($contentRoot->childNodes as $child) {
             $node = $this->parseContentNode($child);
             if ($node !== null) {
                 $content->add($node);

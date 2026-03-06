@@ -89,6 +89,29 @@ class RubricBlockParserTest extends TestCase
     }
 
     #[Test]
+    public function parseWithContentBodyWrapper(): void
+    {
+        $element = $this->loadElement('
+            <qti-rubric-block use="scoring" view="scorer">
+                <qti-content-body>
+                    <p>Wrapped rubric content</p>
+                </qti-content-body>
+            </qti-rubric-block>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(RubricBlock::class, $result);
+        $this->assertSame(qtiUse::SCORING, $result->use);
+        $content = $result->contentBody->content->all();
+        $this->assertCount(1, $content);
+        $this->assertInstanceOf(HTMLTag::class, $content[0]);
+        $this->assertSame('p', $content[0]->tagName());
+        $this->assertInstanceOf(TextNode::class, $content[0]->children()[0]);
+        $this->assertSame('Wrapped rubric content', $content[0]->children()[0]->content);
+    }
+
+    #[Test]
     public function parseWrongTagThrows(): void
     {
         $element = $this->loadElement('<wrong-tag use="instructions" view="candidate"/>');

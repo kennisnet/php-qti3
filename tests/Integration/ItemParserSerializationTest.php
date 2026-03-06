@@ -111,16 +111,9 @@ XML;
 
     /**
      * Verifies that mapping-based scoring (default-value, lower-bound,
-     * upper-bound, map entries) survives parsing. Uses custom response
-     * processing with qti-is-null, qti-map-response, and qti-set-outcome-value
-     * to exercise additional expression parser paths.
-     *
-     * Note: This test currently validates the first parse only for mapping bounds
-     * because of a known bug in ResponseDeclarationParser (lines 80-82) where
-     * default-value, lower-bound, and upper-bound are read from the
-     * qti-response-declaration element instead of the qti-mapping child element.
-     * Once that bug is fixed, the mapping bounds assertions can be tightened
-     * to also verify the serialization round-trip.
+     * upper-bound, map entries) survives a full parse → serialize → re-parse cycle.
+     * Uses custom response processing with qti-is-null, qti-map-response, and
+     * qti-set-outcome-value to exercise additional expression parser paths.
      */
     public function testSerializeItemWithMapResponseScoring(): void
     {
@@ -170,15 +163,6 @@ XML;
 </qti-assessment-item>
 XML;
 
-        // Mapping bounds (default-value, lower-bound, upper-bound) are not fully
-        // tested here due to bug #3: ResponseDeclarationParser reads them from the
-        // wrong element. Once fixed, assertions on $rd->mapping->defaultValue etc.
-        // should be added to this test.
-        $this->markTestIncomplete(
-            'Partially blocked by bug #3: mapping bounds (default-value, lower-bound, upper-bound) ' .
-            'are read from qti-response-declaration instead of qti-mapping in ResponseDeclarationParser:80-82.'
-        );
-
         $first = $this->parseItem($xml);
         $serialized = $this->serializeItem($first);
         $second = $this->parseItem($serialized);
@@ -206,9 +190,9 @@ XML;
         $this->assertSame('choiceC', $rd->mapping->entries[2]->mapKey);
         $this->assertSame(1.0, $rd->mapping->entries[2]->mappedValue);
 
-        // NOTE: Mapping bounds (default-value, lower-bound, upper-bound) are currently
-        // read from the wrong element in ResponseDeclarationParser:80-82.
-        // Once fixed, uncomment: $this->assertSame(0.0, $rd->mapping->defaultValue); etc.
+        $this->assertSame(0.0, $rd->mapping->defaultValue);
+        $this->assertSame(0.0, $rd->mapping->lowerBound);
+        $this->assertSame(2.0, $rd->mapping->upperBound);
 
         $interaction = $second->itemBody->content->all()[1];
         $this->assertInstanceOf(ChoiceInteraction::class, $interaction);
@@ -222,12 +206,8 @@ XML;
     }
 
     /**
-     * Verifies that feedback blocks and rubric blocks are correctly parsed
-     * from a full assessment item. Note: due to the ContentBody wrapper
-     * asymmetry (serialization adds a <qti-content-body> element that the
-     * parser doesn't expect), this test validates the first parse and
-     * checks that the serialized XML contains the expected structures,
-     * rather than doing a full re-parse comparison for these elements.
+     * Verifies that an item with feedback blocks and rubric blocks survives
+     * a full parse → serialize → re-parse cycle with all content preserved.
      */
     public function testSerializeItemWithFeedbackAndRubricBlocks(): void
     {
@@ -281,15 +261,6 @@ XML;
 </qti-assessment-item>
 XML;
 
-        // A full re-parse round-trip is not possible here due to bug #4: the serializer
-        // wraps feedback/rubric content in <qti-content-body> which the parser rejects.
-        // Once fixed, this test should be extended to re-parse the serialized output
-        // and replace the substring checks below with model assertions.
-        $this->markTestIncomplete(
-            'Partially blocked by bug #4: serializer adds <qti-content-body> wrapper that ' .
-            'the parser cannot handle, preventing a full parse → serialize → re-parse round-trip.'
-        );
-
         $first = $this->parseItem($xml);
 
         // Verify top-level
@@ -337,23 +308,40 @@ XML;
         $this->assertSame('incorrect', $feedbackHide->identifier);
         $this->assertSame(Visibility::HIDE, $feedbackHide->showHide);
 
-        // Verify serialization produces valid XML containing the expected structures
+        // Full round-trip: parse → serialize → re-parse
         $serialized = $this->serializeItem($first);
+        $second = $this->parseItem($serialized);
 
-        $this->assertStringContainsString('qti-rubric-block', $serialized);
-        $this->assertStringContainsString('use="scoring"', $serialized);
-        $this->assertStringContainsString('view="scorer"', $serialized);
-        $this->assertStringContainsString('qti-feedback-block', $serialized);
-        $this->assertStringContainsString('identifier="correct"', $serialized);
-        $this->assertStringContainsString('identifier="incorrect"', $serialized);
-        $this->assertStringContainsString('show-hide="show"', $serialized);
-        $this->assertStringContainsString('show-hide="hide"', $serialized);
-        $this->assertStringContainsString('outcome-identifier="FEEDBACK"', $serialized);
+        $this->assertSame('feedback-rubric-001', (string) $second->identifier);
+        $this->assertCount(1, $second->responseDeclarations);
+        $this->assertCount(2, $second->outcomeDeclarations);
 
-        // Verify response processing also serialized correctly
-        $this->assertStringContainsString('qti-response-condition', $serialized);
-        $this->assertStringContainsString('qti-response-if', $serialized);
-        $this->assertStringContainsString('qti-match', $serialized);
+        $body = $second->itemBody->content->all();
+        $this->assertCount(5, $body);
+
+        $rubric = $body[0];
+        $this->assertInstanceOf(RubricBlock::class, $rubric);
+        $this->assertSame(qtiUse::SCORING, $rubric->use);
+        $this->assertSame(View::SCORER, $rubric->view);
+        $rubricContent = $rubric->contentBody->content->all();
+        $this->assertCount(1, $rubricContent);
+        $this->assertInstanceOf(HTMLTag::class, $rubricContent[0]);
+        $this->assertSame('p', $rubricContent[0]->tagName());
+
+        $feedbackShow = $body[3];
+        $this->assertInstanceOf(FeedbackBlock::class, $feedbackShow);
+        $this->assertSame('correct', $feedbackShow->identifier);
+        $this->assertSame(Visibility::SHOW, $feedbackShow->showHide);
+        $this->assertCount(1, $feedbackShow->contentBody->content->all());
+
+        $feedbackHide = $body[4];
+        $this->assertInstanceOf(FeedbackBlock::class, $feedbackHide);
+        $this->assertSame('incorrect', $feedbackHide->identifier);
+        $this->assertSame(Visibility::HIDE, $feedbackHide->showHide);
+
+        $this->assertNotNull($second->responseProcessing);
+        $this->assertCount(1, $second->responseProcessing->elements);
+        $this->assertInstanceOf(ResponseCondition::class, $second->responseProcessing->elements[0]);
     }
 
     /**

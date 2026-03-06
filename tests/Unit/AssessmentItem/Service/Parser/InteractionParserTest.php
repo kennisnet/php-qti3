@@ -8,10 +8,15 @@ use DOMDocument;
 use DOMElement;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\AssessmentItem\Model\Feedback\FeedbackInline;
+use Qti3\AssessmentItem\Model\Feedback\Visibility;
 use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
 use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\Gap;
 use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapMatchInteraction;
+use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapText;
 use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
+use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\Hottext;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\OrderInteraction;
@@ -21,6 +26,7 @@ use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteract
 use Qti3\AssessmentItem\Model\Shape\ShapeName;
 use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
+use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
 class InteractionParserTest extends TestCase
@@ -175,14 +181,16 @@ class InteractionParserTest extends TestCase
     #[Test]
     public function parseHotspotInteractionWithoutImage(): void
     {
-        // Blocked by bug #6: the missing-image fallback creates new HTMLTag('img', [], [])
-        // which immediately throws InvalidArgumentException because img requires alt+src.
-        // Once fixed, the fallback should throw a descriptive ParseError instead, and this
-        // test should assert that ParseError is thrown with a meaningful message.
-        $this->markTestIncomplete(
-            'Blocked by bug #6: missing-image fallback crashes with InvalidArgumentException ' .
-            'instead of throwing a descriptive ParseError.'
-        );
+        $element = $this->loadElement('
+            <qti-hotspot-interaction response-identifier="RESPONSE" max-choices="1">
+                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,100,100"/>
+            </qti-hotspot-interaction>
+        ');
+
+        $this->expectException(ParseError::class);
+        $this->expectExceptionMessage('HotspotInteraction must contain an img element');
+
+        $this->parser->parse($element);
     }
 
     #[Test]
@@ -280,6 +288,110 @@ class InteractionParserTest extends TestCase
         $this->assertNotNull($result->prompt);
         $this->assertSame('Select points on the image', $result->prompt->content->all()[0]->content);
         $this->assertSame('img', $result->image->tagName());
+    }
+
+    #[Test]
+    public function parseSelectPointInteractionWithoutImage(): void
+    {
+        $element = $this->loadElement('
+            <qti-select-point-interaction response-identifier="RESPONSE" max-choices="1">
+                <qti-prompt>Click on the image</qti-prompt>
+            </qti-select-point-interaction>
+        ');
+
+        $this->expectException(ParseError::class);
+        $this->expectExceptionMessage('SelectPointInteraction must contain an img element');
+
+        $this->parser->parse($element);
+    }
+
+    #[Test]
+    public function parseHottextInteractionWithHottext(): void
+    {
+        $element = $this->loadElement('
+            <qti-hottext-interaction response-identifier="RESPONSE_HT" max-choices="1">
+                <p>The <qti-hottext identifier="ht1">cat</qti-hottext> sat on the <qti-hottext identifier="ht2">mat</qti-hottext>.</p>
+            </qti-hottext-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(HottextInteraction::class, $result);
+        $content = $result->content->all();
+        $this->assertCount(1, $content);
+
+        $p = $content[0];
+        $this->assertInstanceOf(HTMLTag::class, $p);
+
+        $children = $p->children();
+        $this->assertInstanceOf(TextNode::class, $children[0]);
+        $this->assertSame('The ', $children[0]->content);
+        $this->assertInstanceOf(Hottext::class, $children[1]);
+        $this->assertSame('ht1', $children[1]->identifier);
+        $this->assertSame('cat', $children[1]->content->content);
+        $this->assertInstanceOf(TextNode::class, $children[2]);
+        $this->assertSame(' sat on the ', $children[2]->content);
+        $this->assertInstanceOf(Hottext::class, $children[3]);
+        $this->assertSame('ht2', $children[3]->identifier);
+        $this->assertSame('mat', $children[3]->content->content);
+    }
+
+    #[Test]
+    public function parseGapMatchInteractionWithGapAndGapText(): void
+    {
+        $element = $this->loadElement('
+            <qti-gap-match-interaction response-identifier="RESPONSE_GAP" shuffle="false">
+                <qti-gap-text identifier="gt1" match-max="1">winter</qti-gap-text>
+                <qti-gap-text identifier="gt2" match-max="1">summer</qti-gap-text>
+                <p>In <qti-gap identifier="G1"/> the weather is cold.</p>
+            </qti-gap-match-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(GapMatchInteraction::class, $result);
+        $content = $result->content->all();
+
+        // Find GapText elements
+        $gapTexts = array_values(array_filter($content, fn($node) => $node instanceof GapText));
+        $this->assertCount(2, $gapTexts);
+        $this->assertSame('gt1', $gapTexts[0]->identifier);
+        $this->assertSame(1, $gapTexts[0]->matchMax);
+        $this->assertSame('winter', $gapTexts[0]->content->all()[0]->content);
+        $this->assertSame('gt2', $gapTexts[1]->identifier);
+
+        // Find the paragraph containing the Gap
+        $paragraphs = array_values(array_filter($content, fn($node) => $node instanceof HTMLTag));
+        $this->assertCount(1, $paragraphs);
+        $pChildren = $paragraphs[0]->children();
+        $gaps = array_values(array_filter($pChildren, fn($node) => $node instanceof Gap));
+        $this->assertCount(1, $gaps);
+        $this->assertSame('G1', $gaps[0]->identifier);
+    }
+
+    #[Test]
+    public function parseChoiceInteractionWithFeedbackInline(): void
+    {
+        $element = $this->loadElement('
+            <qti-choice-interaction response-identifier="RESPONSE" max-choices="1">
+                <qti-simple-choice identifier="A">
+                    Option A
+                    <qti-feedback-inline identifier="fb-a" outcome-identifier="FEEDBACK" show-hide="show">Correct!</qti-feedback-inline>
+                </qti-simple-choice>
+            </qti-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(ChoiceInteraction::class, $result);
+        $this->assertCount(1, $result->choices);
+        $choice = $result->choices[0];
+        $this->assertSame('A', $choice->identifier);
+        $this->assertNotNull($choice->feedbackInline);
+        $this->assertInstanceOf(FeedbackInline::class, $choice->feedbackInline);
+        $this->assertSame('fb-a', $choice->feedbackInline->identifier);
+        $this->assertSame('FEEDBACK', $choice->feedbackInline->outcomeIdentifier);
+        $this->assertSame(Visibility::SHOW, $choice->feedbackInline->showHide);
     }
 
     #[Test]
