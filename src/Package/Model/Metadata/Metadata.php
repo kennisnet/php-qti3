@@ -9,7 +9,7 @@ use DOMDocument;
 
 readonly class Metadata
 {
-    public function __construct(public DOMDocument $lomDocument) {}
+    public function __construct(public DOMDocument $domDocument) {}
 
     public static function fromString(string $content, IXmlReader $xmlReader): self
     {
