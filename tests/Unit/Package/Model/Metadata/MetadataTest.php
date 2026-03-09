@@ -22,6 +22,6 @@ class MetadataTest extends TestCase
         $domDocument->loadXML($xml);
         $metadata = new Metadata($domDocument);
 
-        $this->assertSame($domDocument, $metadata->lomDocument);
+        $this->assertSame($domDocument, $metadata->domDocument);
     }
 }
