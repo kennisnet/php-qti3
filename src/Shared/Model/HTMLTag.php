@@ -96,7 +96,7 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
             'tags' => ['source'],
             'type' => self::BLOCK,
             'allowedAttributes' => ['media', 'sizes', 'src', 'srcset', 'type'],
-            'requiredAttributes' => ['src'],
+            'requiredAttributes' => [],
         ],
         [
             'tags' => ['table'],
