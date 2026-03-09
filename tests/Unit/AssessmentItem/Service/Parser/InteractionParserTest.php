@@ -182,15 +182,34 @@ class InteractionParserTest extends TestCase
     public function parseHotspotInteractionWithoutImage(): void
     {
         $element = $this->loadElement('
-            <qti-hotspot-interaction response-identifier="RESPONSE" max-choices="1">
-                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,100,100"/>
+            <qti-hotspot-interaction response-identifier="RESPONSE_HS" max-choices="1">
+                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,10,10"/>
             </qti-hotspot-interaction>
         ');
 
         $this->expectException(ParseError::class);
-        $this->expectExceptionMessage('HotspotInteraction must contain an img element');
+        $this->expectExceptionMessage('HotspotInteraction is missing a required <img> or <picture> element.');
 
         $this->parser->parse($element);
+    }
+
+    #[Test]
+    public function parseHotspotInteractionWithPicture(): void
+    {
+        $element = $this->loadElement('
+            <qti-hotspot-interaction response-identifier="RESPONSE_HS" max-choices="1">
+                <picture>
+                    <source srcset="map.webp" type="image/webp"/>
+                    <img src="map.png" alt="A map"/>
+                </picture>
+                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,10,10"/>
+            </qti-hotspot-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(HotspotInteraction::class, $result);
+        $this->assertSame('picture', $result->image->tagName());
     }
 
     #[Test]
@@ -300,7 +319,7 @@ class InteractionParserTest extends TestCase
         ');
 
         $this->expectException(ParseError::class);
-        $this->expectExceptionMessage('SelectPointInteraction must contain an img element');
+        $this->expectExceptionMessage('SelectPointInteraction is missing a required <img> or <picture> element.');
 
         $this->parser->parse($element);
     }
