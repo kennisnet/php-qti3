@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Package\Validator;
 
 use DOMDocument;
+use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\Manifest;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Model\Manifest\ManifestResource;
@@ -30,6 +31,7 @@ readonly class QtiSchemaValidator implements IQtiSyntaxValidator
     public function __construct(
         private ManifestFactory $manifestFactory,
         private IXmlReader $xmlReader,
+        private QtiPackageVersionUpdater $versionUpdater,
     ) {}
 
     public function validateZipPackage(string $qtiPackageFilename): StringCollection
@@ -40,6 +42,19 @@ readonly class QtiSchemaValidator implements IQtiSyntaxValidator
             $errors->add('Package file does not exist: ' . $qtiPackageFilename);
             return $errors;
         }
+
+        $normalised = $this->versionUpdater->updateVersion($qtiPackageFilename);
+
+        try {
+            return $this->doValidateZipPackage($normalised);
+        } finally {
+            $this->versionUpdater->cleanup($normalised);
+        }
+    }
+
+    private function doValidateZipPackage(string $qtiPackageFilename): StringCollection
+    {
+        $errors = new StringCollection();
 
         $zip = new ZipArchive();
         $result = $zip->open($qtiPackageFilename, ZipArchive::RDONLY);

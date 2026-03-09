@@ -14,9 +14,11 @@ use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ZipArchive;
 
@@ -25,12 +27,15 @@ class QtiSchemaValidatorTest extends TestCase
     private QtiSchemaValidator $validator;
     private XmlReader $xmlReader;
     private ManifestFactory $manifestFactory;
+    private QtiPackageVersionUpdater&MockObject $versionUpdater;
 
     protected function setUp(): void
     {
         $this->xmlReader = new XmlReader();
         $this->manifestFactory = new ManifestFactory($this->xmlReader);
-        $this->validator = new QtiSchemaValidator($this->manifestFactory, $this->xmlReader);
+        $this->versionUpdater = $this->createMock(QtiPackageVersionUpdater::class);
+        $this->versionUpdater->method('updateVersion')->willReturnArgument(0);
+        $this->validator = new QtiSchemaValidator($this->manifestFactory, $this->xmlReader, $this->versionUpdater);
     }
 
     #[Test]

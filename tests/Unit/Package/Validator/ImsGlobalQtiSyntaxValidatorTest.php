@@ -13,6 +13,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
+use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Model\IPackageWriter;
 use Qti3\Package\Validator\ImsGlobalQtiSyntaxValidator;
@@ -24,6 +25,7 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
     private RequestFactoryInterface $requestFactory;
     private StreamFactoryInterface $streamFactory;
     private ZipPackageFactory $zipPackageFactory;
+    private QtiPackageVersionUpdater $versionUpdater;
     private ImsGlobalQtiSyntaxValidator $validator;
 
     protected function setUp(): void
@@ -32,6 +34,8 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
         $this->requestFactory = $this->createMock(RequestFactoryInterface::class);
         $this->streamFactory = $this->createMock(StreamFactoryInterface::class);
         $this->zipPackageFactory = $this->createMock(ZipPackageFactory::class);
+        $this->versionUpdater = $this->createMock(QtiPackageVersionUpdater::class);
+        $this->versionUpdater->method('updateVersion')->willReturnArgument(0);
 
         $request = $this->createMock(RequestInterface::class);
         $request->method('withHeader')->willReturnSelf();
@@ -45,6 +49,7 @@ class ImsGlobalQtiSyntaxValidatorTest extends TestCase
             $this->streamFactory,
             $this->zipPackageFactory,
             'http://localhost:8080/api/validate',
+            $this->versionUpdater,
         );
     }
 

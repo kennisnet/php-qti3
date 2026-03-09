@@ -9,6 +9,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Qti3\Package\Filesystem\FileSystemUtils;
+use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Shared\Collection\StringCollection;
@@ -37,6 +38,7 @@ use Qti3\Shared\Collection\StringCollection;
  *           $streamFactory,
  *           new ZipPackageFactory(new ZipArchiveFactory(), new FileSystemUtils()),
  *           'http://localhost:8080/api/validate',
+ *           new QtiPackageVersionUpdater(new FileSystemUtils()),
  *       ),
  *   );
  */
@@ -50,6 +52,7 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
         private readonly StreamFactoryInterface $streamFactory,
         private readonly ZipPackageFactory $zipPackageFactory,
         private readonly string $endpointUrl,
+        private readonly QtiPackageVersionUpdater $versionUpdater,
     ) {}
 
     /**
@@ -61,6 +64,17 @@ final class ImsGlobalQtiSyntaxValidator implements IQtiSyntaxValidator
             return new StringCollection(['Package file does not exist: ' . $qtiPackageFilename]);
         }
 
+        $normalised = $this->versionUpdater->updateVersion($qtiPackageFilename);
+
+        try {
+            return $this->doValidateZipPackage($normalised);
+        } finally {
+            $this->versionUpdater->cleanup($normalised);
+        }
+    }
+
+    private function doValidateZipPackage(string $qtiPackageFilename): StringCollection
+    {
         $boundary = bin2hex(random_bytes(16));
         $filename = basename($qtiPackageFilename);
         $fileContents = file_get_contents($qtiPackageFilename);
