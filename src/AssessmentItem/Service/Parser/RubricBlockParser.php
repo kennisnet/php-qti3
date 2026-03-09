@@ -26,8 +26,10 @@ class RubricBlockParser extends AbstractParser
         $view = View::from($element->getAttribute('view'));
         $class = $element->getAttribute('class') ?: null;
 
+        $contentRoot = $this->unwrapContentBody($element);
+
         $content = new ContentNodeCollection();
-        foreach ($element->childNodes as $child) {
+        foreach ($contentRoot->childNodes as $child) {
             $node = $this->parseContentNode($child);
             if ($node !== null) {
                 $content->add($node);

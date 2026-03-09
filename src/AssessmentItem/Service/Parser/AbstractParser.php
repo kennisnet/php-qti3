@@ -44,4 +44,18 @@ abstract class AbstractParser
 
         return (float) $attributeValue;
     }
+
+    /**
+     * When re-parsing serialized output, content may be wrapped in <qti-content-body>.
+     * Unwrap it so both original QTI XML and serializer output are handled correctly.
+     */
+    protected function unwrapContentBody(DOMElement $element): DOMElement
+    {
+        foreach ($this->getChildren($element) as $child) {
+            if ($child->nodeName === 'qti-content-body') {
+                return $child;
+            }
+        }
+        return $element;
+    }
 }

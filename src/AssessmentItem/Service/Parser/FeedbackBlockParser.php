@@ -26,8 +26,10 @@ class FeedbackBlockParser extends AbstractParser
         $showHide = $element->getAttribute('show-hide') ?: Visibility::SHOW->value;
         $visibility = Visibility::from($showHide);
 
+        $contentRoot = $this->unwrapContentBody($element);
+
         $content = new ContentNodeCollection();
-        foreach ($element->childNodes as $child) {
+        foreach ($contentRoot->childNodes as $child) {
             $node = $this->parseContentNode($child);
             if ($node !== null) {
                 $content->add($node);

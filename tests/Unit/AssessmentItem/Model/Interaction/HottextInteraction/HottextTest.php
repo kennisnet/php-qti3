@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Tests\Unit\AssessmentItem\Model\Interaction\HottextInteraction;
 
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\Hottext;
+use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\TextNode;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -12,11 +13,15 @@ use PHPUnit\Framework\TestCase;
 class HottextTest extends TestCase
 {
     private Hottext $hottext;
+    private TextNode $textNode;
 
     protected function setUp(): void
     {
+        $this->textNode = new TextNode('Example');
+        $content = new ContentNodeCollection();
+        $content->add($this->textNode);
         $this->hottext = new Hottext(
-            content: new TextNode('Example'),
+            content: $content,
             identifier: 'A',
         );
     }
@@ -34,10 +39,6 @@ class HottextTest extends TestCase
     #[Test]
     public function testChildren(): void
     {
-        $expectedChildren = [
-            $this->hottext->content,
-        ];
-
-        $this->assertSame($expectedChildren, $this->hottext->children());
+        $this->assertSame([$this->textNode], $this->hottext->children());
     }
 }

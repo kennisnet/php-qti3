@@ -12,9 +12,12 @@ use Qti3\AssessmentItem\Model\Feedback\Visibility;
 use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
 use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\SimpleChoice;
 use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\Gap;
 use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapMatchInteraction;
+use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapText;
 use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotChoice;
 use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
+use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\Hottext;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\SimpleAssociableChoice;
@@ -153,8 +156,7 @@ class InteractionParser extends AbstractParser
         }
 
         if ($image === null) {
-            // Fallback to an empty img tag to prevent crashes; schema validator will catch this
-            $image = new HTMLTag('img', [], []);
+            throw new ParseError('HotspotInteraction must contain an img element');
         }
 
         return new HotspotInteraction($image, $choices, $maxChoices, $responseIdentifier);
@@ -238,7 +240,7 @@ class InteractionParser extends AbstractParser
         }
 
         if ($image === null) {
-            $image = new HTMLTag('img', [], []);
+            throw new ParseError('SelectPointInteraction must contain an img element');
         }
 
         return new SelectPointInteraction($image, $maxChoices, $prompt, $responseIdentifier);
@@ -278,7 +280,36 @@ class InteractionParser extends AbstractParser
         }
 
         if ($node instanceof DOMElement) {
-            // Only support HTML tags and nested inline elements for content
+            // Recognise known QTI inline elements before falling through to HTMLTag
+            if ($node->nodeName === Hottext::qtiTagName()) {
+                return new Hottext(
+                    $node->getAttribute('identifier'),
+                    $this->parseContentChildren($node),
+                );
+            }
+            if ($node->nodeName === Gap::qtiTagName()) {
+                return new Gap($node->getAttribute('identifier'));
+            }
+            if ($node->nodeName === GapText::qtiTagName()) {
+                $matchMax = (int) ($node->getAttribute('match-max') ?: '0');
+                $matchMin = (int) ($node->getAttribute('match-min') ?: '0');
+                $matchGroup = $node->getAttribute('match-group') ?: null;
+                $templateIdentifier = $node->getAttribute('template-identifier') ?: null;
+                $showHide = $node->getAttribute('show-hide') ?: 'show';
+                return new GapText(
+                    $node->getAttribute('identifier'),
+                    $matchMax,
+                    $this->parseContentChildren($node),
+                    $matchMin,
+                    $matchGroup,
+                    $templateIdentifier,
+                    $showHide,
+                );
+            }
+            if ($node->nodeName === FeedbackInline::qtiTagName()) {
+                return $this->parseFeedbackInline($node);
+            }
+
             $attributes = [];
             foreach ($node->attributes as $attr) {
                 $attributes[$attr->nodeName] = $attr->nodeValue;
