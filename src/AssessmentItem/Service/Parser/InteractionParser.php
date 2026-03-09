@@ -141,7 +141,7 @@ class InteractionParser extends AbstractParser
         $image = null;
         $choices = [];
         foreach ($this->getChildren($element) as $child) {
-            if ($child->nodeName === 'img') {
+            if ($child->nodeName === 'img' || $child->nodeName === 'picture') {
                 $image = $this->parseHtmlElement($child);
             }
             if ($child->nodeName === HotspotChoice::qtiTagName()) {
@@ -153,8 +153,7 @@ class InteractionParser extends AbstractParser
         }
 
         if ($image === null) {
-            // Fallback to an empty img tag to prevent crashes; schema validator will catch this
-            $image = new HTMLTag('img', [], []);
+            throw new ParseError('HotspotInteraction is missing a required <img> or <picture> element.');
         }
 
         return new HotspotInteraction($image, $choices, $maxChoices, $responseIdentifier);
@@ -232,13 +231,13 @@ class InteractionParser extends AbstractParser
 
         $image = null;
         foreach ($this->getChildren($element) as $child) {
-            if ($child->nodeName === 'img') {
+            if ($child->nodeName === 'img' || $child->nodeName === 'picture') {
                 $image = $this->parseHtmlElement($child);
             }
         }
 
         if ($image === null) {
-            $image = new HTMLTag('img', [], []);
+            throw new ParseError('SelectPointInteraction is missing a required <img> or <picture> element.');
         }
 
         return new SelectPointInteraction($image, $maxChoices, $prompt, $responseIdentifier);

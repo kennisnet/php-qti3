@@ -175,14 +175,50 @@ class InteractionParserTest extends TestCase
     #[Test]
     public function parseHotspotInteractionWithoutImage(): void
     {
-        // Blocked by bug #6: the missing-image fallback creates new HTMLTag('img', [], [])
-        // which immediately throws InvalidArgumentException because img requires alt+src.
-        // Once fixed, the fallback should throw a descriptive ParseError instead, and this
-        // test should assert that ParseError is thrown with a meaningful message.
-        $this->markTestIncomplete(
-            'Blocked by bug #6: missing-image fallback crashes with InvalidArgumentException ' .
-            'instead of throwing a descriptive ParseError.'
-        );
+        $element = $this->loadElement('
+            <qti-hotspot-interaction response-identifier="RESPONSE_HS" max-choices="1">
+                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,10,10"/>
+            </qti-hotspot-interaction>
+        ');
+
+        $this->expectException(ParseError::class);
+        $this->expectExceptionMessage('HotspotInteraction is missing a required <img> or <picture> element.');
+
+        $this->parser->parse($element);
+    }
+
+    #[Test]
+    public function parseHotspotInteractionWithPicture(): void
+    {
+        $element = $this->loadElement('
+            <qti-hotspot-interaction response-identifier="RESPONSE_HS" max-choices="1">
+                <picture>
+                    <source srcset="map.webp" type="image/webp"/>
+                    <img src="map.png" alt="A map"/>
+                </picture>
+                <qti-hotspot-choice identifier="hs1" shape="rect" coords="0,0,10,10"/>
+            </qti-hotspot-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(HotspotInteraction::class, $result);
+        $this->assertSame('picture', $result->image->tagName());
+    }
+
+    #[Test]
+    public function parseSelectPointInteractionWithoutImage(): void
+    {
+        $element = $this->loadElement('
+            <qti-select-point-interaction response-identifier="RESPONSE_SP" max-choices="1">
+                <qti-prompt>Select a point</qti-prompt>
+            </qti-select-point-interaction>
+        ');
+
+        $this->expectException(ParseError::class);
+        $this->expectExceptionMessage('SelectPointInteraction is missing a required <img> or <picture> element.');
+
+        $this->parser->parse($element);
     }
 
     #[Test]
