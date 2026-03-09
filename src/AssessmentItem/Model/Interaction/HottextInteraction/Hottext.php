@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
 
+use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\QtiElement;
-use Qti3\Shared\Model\TextNode;
 
 class Hottext extends QtiElement
 {
     public function __construct(
         public string $identifier,
-        public TextNode $content,
+        public ContentNodeCollection $content,
     ) {}
 
     public function attributes(): array
@@ -23,8 +23,6 @@ class Hottext extends QtiElement
 
     public function children(): array
     {
-        return  [
-            $this->content,
-        ];
+        return $this->content->all();
     }
 }

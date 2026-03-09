@@ -284,7 +284,7 @@ class InteractionParser extends AbstractParser
             if ($node->nodeName === Hottext::qtiTagName()) {
                 return new Hottext(
                     $node->getAttribute('identifier'),
-                    new TextNode($node->textContent),
+                    $this->parseContentChildren($node),
                 );
             }
             if ($node->nodeName === Gap::qtiTagName()) {

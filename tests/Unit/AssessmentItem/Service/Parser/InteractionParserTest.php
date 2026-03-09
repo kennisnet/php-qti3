@@ -328,12 +328,12 @@ class InteractionParserTest extends TestCase
         $this->assertSame('The ', $children[0]->content);
         $this->assertInstanceOf(Hottext::class, $children[1]);
         $this->assertSame('ht1', $children[1]->identifier);
-        $this->assertSame('cat', $children[1]->content->content);
+        $this->assertSame('cat', $children[1]->content->all()[0]->content);
         $this->assertInstanceOf(TextNode::class, $children[2]);
         $this->assertSame(' sat on the ', $children[2]->content);
         $this->assertInstanceOf(Hottext::class, $children[3]);
         $this->assertSame('ht2', $children[3]->identifier);
-        $this->assertSame('mat', $children[3]->content->content);
+        $this->assertSame('mat', $children[3]->content->all()[0]->content);
     }
 
     #[Test]
