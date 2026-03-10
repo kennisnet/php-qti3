@@ -229,12 +229,14 @@ class QtiPackageVersionUpdaterTest extends TestCase
         $tmpManifest = tempnam(sys_get_temp_dir(), 'qti_manifest_');
         file_put_contents($tmpManifest, $content);
 
-        $zip = new ZipArchive();
-        $zip->open($tmpZipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        $zip->addFile($tmpManifest, 'imsmanifest.xml');
-        $zip->close();
-
-        unlink($tmpManifest);
+        try {
+            $zip = new ZipArchive();
+            $zip->open($tmpZipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+            $zip->addFile($tmpManifest, 'imsmanifest.xml');
+            $zip->close();
+        } finally {
+            unlink($tmpManifest);
+        }
 
         return $tmpZipPath;
     }

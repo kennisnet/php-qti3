@@ -157,10 +157,13 @@ readonly class QtiPackageVersionUpdater
         if ($newZip->open($tmpFile) !== true) {
             throw new RuntimeException('Could not open new zip file: ' . $tmpFile); // @codeCoverageIgnore
         }
-        $newZip->deleteName('imsmanifest.xml');
-        if ($newZip->addFromString('imsmanifest.xml', $manifestContent) === false) {
-            throw new RuntimeException('Failed to add updated imsmanifest.xml to zip file'); // @codeCoverageIgnore
+        try {
+            $newZip->deleteName('imsmanifest.xml');
+            if ($newZip->addFromString('imsmanifest.xml', $manifestContent) === false) {
+                throw new RuntimeException('Failed to add updated imsmanifest.xml to zip file'); // @codeCoverageIgnore
+            }
+        } finally {
+            $newZip->close();
         }
-        $newZip->close();
     }
 }
