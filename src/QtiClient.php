@@ -26,6 +26,7 @@ use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\Package\Filesystem\FileSystemUtils;
 use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
+use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
@@ -63,6 +64,7 @@ final class QtiClient
     private ?TestResourceBuilder $testResourceBuilder = null;
     private ?ItemResourceBuilder $itemResourceBuilder = null;
 
+    private ?QtiPackageVersionUpdater $qtiPackageVersionUpdater = null;
     private ?AssessmentItemParser $assessmentItemParser = null;
     private ?ItemBodyParser $itemBodyParser = null;
     private ?AssessmentTestParser $assessmentTestParser = null;
@@ -144,6 +146,11 @@ final class QtiClient
         );
     }
 
+    public function getQtiPackageVersionUpdater(): QtiPackageVersionUpdater
+    {
+        return $this->qtiPackageVersionUpdater ??= new QtiPackageVersionUpdater(new FileSystemUtils());
+    }
+
     public function getZipPackageFactory(): IZipPackageFactory
     {
         return $this->zipPackageFactory ??= new ZipPackageFactory(
@@ -200,6 +207,7 @@ final class QtiClient
         return $this->qtiSchemaValidator ??= new QtiSchemaValidator(
             $this->getManifestFactory(),
             $this->getXmlReader(),
+            $this->getQtiPackageVersionUpdater(),
         );
     }
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<manifest xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p1/imscp_v1p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/qti/qtiv3p1/imscp_v1p1 imsqtiv3p1_imscpv1p2_v1p0.xsd imsqti_asiv3p1_v1p0.xsd" identifier="MANIFEST-001">
+    <metadata>
+        <schema>QTI Package</schema>
+        <schemaversion>3.0.1</schemaversion>
+    </metadata>
+    <organizations/>
+    <resources>
+        <resource identifier="ITEM-001" type="imsqti_item_xmlv3p1" href="item.xml">
+            <file href="item.xml"/>
+        </resource>
+    </resources>
+</manifest>
