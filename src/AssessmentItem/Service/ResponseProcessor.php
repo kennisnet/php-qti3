@@ -102,17 +102,12 @@ class ResponseProcessor
     private function validateItem(DOMDocument $document, ItemState $itemState): void
     {
         $isQuestion = $this->assessmentItemDeterminator->determineType($document) === 'question';
-        $hasInteraction = $this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction"]');
-
-        if ($isQuestion && !$hasInteraction) {
-            throw new ParseError('Missing a qti interaction in item-body');
-        }
-
         $hasInteractionNotText = $this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction" and name() != "qti-extended-text-interaction"]');
         $hasProcessingScore = $this->xpathExists($document, '//ns:qti-response-processing//ns:qti-set-outcome-value[@identifier="SCORE"]');
         $processingTemplate = $this->xpathExists($document, '//ns:qti-response-processing[string-length(@template) > 2]');
+        $hasResponseProcessingContent = $this->xpathExists($document, '//ns:qti-response-processing[*]');
 
-        if ($isQuestion && $hasInteractionNotText && !$hasProcessingScore && !$processingTemplate) {
+        if ($isQuestion && $hasInteractionNotText && $hasResponseProcessingContent && !$hasProcessingScore && !$processingTemplate) {
             throw new ParseError('Missing `set-outcome-value` with identifier `SCORE` in `response-processing`');
         }
 

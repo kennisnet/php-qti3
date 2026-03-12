@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qti-assessment-item xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd" title="Match zonder verwerking" time-dependent="false" identifier="QUE_NO_PROCESSING">
+    <qti-response-declaration identifier="RESPONSE" base-type="directedPair" cardinality="multiple"/>
+    <qti-outcome-declaration identifier="SCORE" base-type="float" cardinality="single">
+        <qti-default-value>
+            <qti-value>0</qti-value>
+        </qti-default-value>
+    </qti-outcome-declaration>
+    <qti-outcome-declaration identifier="MAXSCORE" base-type="float" cardinality="single">
+        <qti-default-value>
+            <qti-value>1</qti-value>
+        </qti-default-value>
+    </qti-outcome-declaration>
+    <qti-item-body>
+        <qti-match-interaction response-identifier="RESPONSE" max-associations="2">
+            <qti-simple-match-set>
+                <qti-simple-associable-choice identifier="A1" match-max="1">Item A</qti-simple-associable-choice>
+                <qti-simple-associable-choice identifier="A2" match-max="1">Item B</qti-simple-associable-choice>
+            </qti-simple-match-set>
+            <qti-simple-match-set>
+                <qti-simple-associable-choice identifier="B1" match-max="1">Keuze 1</qti-simple-associable-choice>
+                <qti-simple-associable-choice identifier="B2" match-max="1">Keuze 2</qti-simple-associable-choice>
+            </qti-simple-match-set>
+        </qti-match-interaction>
+    </qti-item-body>
+</qti-assessment-item>

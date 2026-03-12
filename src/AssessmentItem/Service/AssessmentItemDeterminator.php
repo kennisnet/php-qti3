@@ -5,35 +5,29 @@ declare(strict_types=1);
 namespace Qti3\AssessmentItem\Service;
 
 use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
-use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use DOMDocument;
 
 class AssessmentItemDeterminator
 {
     public function determineType(DOMDocument $itemXml): string
     {
-        $hasResponseProcessing = false;
-        $responseProcessingNodes = $itemXml->getElementsByTagName(ResponseProcessing::qtiTagName());
-        foreach ($responseProcessingNodes as $node) {
-            if ($node->hasAttributes()) {
-                $hasResponseProcessing = true;
-                break;
-            }
-            foreach ($node->childNodes as $child) {
-                if ($child->nodeType === XML_ELEMENT_NODE) {
-                    $hasResponseProcessing = true;
-                    break 2;
-                }
-            }
-        }
-
-        $hasExtendedTextInteraction = $itemXml->getElementsByTagName(ExtendedTextInteraction::qtiTagName())->length > 0;
-
-        if ($hasResponseProcessing || $hasExtendedTextInteraction) {
+        if ($this->hasInteraction($itemXml)) {
             return 'question';
         }
 
         return 'info';
+    }
+
+    private function hasInteraction(DOMDocument $itemXml): bool
+    {
+        foreach ($itemXml->getElementsByTagName('*') as $element) {
+            $tagName = $element->localName ?? $element->nodeName;
+            if (str_starts_with($tagName, 'qti-') && str_ends_with($tagName, '-interaction')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function determineManualScoring(DOMDocument $itemXml): bool

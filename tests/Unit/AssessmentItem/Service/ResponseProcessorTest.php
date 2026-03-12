@@ -167,16 +167,6 @@ class ResponseProcessorTest extends TestCase
     }
 
     #[Test]
-    public function typeQuestionMissingInteractionThrowsException(): void
-    {
-        $this->assertExceptionThrown(
-            __DIR__ . '/resources/no-interaction-missing-maxscore.xml',
-            ['RESPONSE' => 'A'],
-            'Missing a qti interaction in item-body',
-        );
-    }
-
-    #[Test]
     public function defaultValueWithEmptyValueTagThrowsException(): void
     {
         // An empty <qti-value> is treated as "no default value" during parsing.
@@ -457,6 +447,20 @@ class ResponseProcessorTest extends TestCase
                 'SCORE' => 0.0,
                 'MAXSCORE' => 1.0,
                 'FEEDBACK' => null,
+            ],
+        );
+    }
+
+    #[Test]
+    public function matchInteractionWithoutResponseProcessingLeavesScoreUnfilled(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/match-interaction-no-processing.xml',
+            ['RESPONSE' => ['A1 B1', 'A2 B2']],
+            [
+                'completionStatus' => 'unknown',
+                'SCORE' => 0.0,
+                'MAXSCORE' => 1.0,
             ],
         );
     }
