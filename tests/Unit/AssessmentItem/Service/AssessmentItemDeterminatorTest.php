@@ -38,37 +38,28 @@ class AssessmentItemDeterminatorTest extends TestCase
     }
 
     #[Test]
-    public function determineTypeReturnsQuestionWhenResponseProcessingPresentAndNotEmpty(): void
+    public function determineTypeReturnsQuestionWhenMatchInteractionPresent(): void
     {
         $xml = new DOMDocument();
-        $xml->loadXML('<qti-assessment-item><qti-response-processing><qti-response-condition/></qti-response-processing></qti-assessment-item>');
+        $xml->loadXML('<qti-assessment-item><qti-item-body><qti-match-interaction response-identifier="RESPONSE"/></qti-item-body></qti-assessment-item>');
 
         $this->assertEquals('question', $this->determinator->determineType($xml));
     }
 
     #[Test]
-    public function determineTypeReturnsInfoWhenResponseProcessingIsEmpty(): void
+    public function determineTypeReturnsQuestionWhenMatchInteractionPresentWithoutResponseProcessing(): void
     {
         $xml = new DOMDocument();
-        $xml->loadXML('<qti-assessment-item><qti-response-processing/></qti-assessment-item>');
+        $xml->loadXML('<qti-assessment-item><qti-item-body><qti-match-interaction response-identifier="RESPONSE"/></qti-item-body></qti-assessment-item>');
 
-        $this->assertEquals('info', $this->determinator->determineType($xml));
+        $this->assertEquals('question', $this->determinator->determineType($xml));
     }
 
     #[Test]
-    public function determineTypeReturnsInfoWhenResponseProcessingContainsOnlyWhitespace(): void
+    public function determineTypeReturnsQuestionWhenMatchInteractionPresentWithEmptyResponseProcessing(): void
     {
         $xml = new DOMDocument();
-        $xml->loadXML("<qti-assessment-item>\n    <qti-response-processing>\n    </qti-response-processing>\n</qti-assessment-item>");
-
-        $this->assertEquals('info', $this->determinator->determineType($xml));
-    }
-
-    #[Test]
-    public function determineTypeReturnsQuestionWhenResponseProcessingContainsTemplate(): void
-    {
-        $xml = new DOMDocument();
-        $xml->loadXML('<qti-assessment-item><qti-response-processing template="https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/match_correct.xml"/></qti-assessment-item>');
+        $xml->loadXML('<qti-assessment-item><qti-item-body><qti-match-interaction response-identifier="RESPONSE"/></qti-item-body><qti-response-processing/></qti-assessment-item>');
 
         $this->assertEquals('question', $this->determinator->determineType($xml));
     }
@@ -77,16 +68,25 @@ class AssessmentItemDeterminatorTest extends TestCase
     public function determineTypeReturnsQuestionWhenExtendedTextInteractionPresent(): void
     {
         $xml = new DOMDocument();
-        $xml->loadXML('<qti-assessment-item><qti-extended-text-interaction response-identifier="RESPONSE"/></qti-assessment-item>');
+        $xml->loadXML('<qti-assessment-item><qti-item-body><qti-extended-text-interaction response-identifier="RESPONSE"/></qti-item-body></qti-assessment-item>');
 
         $this->assertEquals('question', $this->determinator->determineType($xml));
     }
 
     #[Test]
-    public function determineTypeReturnsInfoWhenNeitherPresent(): void
+    public function determineTypeReturnsInfoWhenNoInteractionPresent(): void
     {
         $xml = new DOMDocument();
         $xml->loadXML('<qti-assessment-item><qti-item-body></qti-item-body></qti-assessment-item>');
+
+        $this->assertEquals('info', $this->determinator->determineType($xml));
+    }
+
+    #[Test]
+    public function determineTypeReturnsInfoWhenOnlyResponseProcessingPresent(): void
+    {
+        $xml = new DOMDocument();
+        $xml->loadXML('<qti-assessment-item><qti-response-processing><qti-response-condition/></qti-response-processing></qti-assessment-item>');
 
         $this->assertEquals('info', $this->determinator->determineType($xml));
     }
