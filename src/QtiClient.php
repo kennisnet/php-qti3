@@ -28,6 +28,7 @@ use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
+use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
@@ -162,6 +163,15 @@ final class QtiClient
     public function getFilesystemPackageFactory(): IFilesystemPackageFactory
     {
         return $this->filesystemPackageFactory;
+    }
+
+    /**
+     * Item editor for an already extracted package folder, for adding and
+     * updating assessment items in place.
+     */
+    public function getItemEditor(string $folder): IItemEditor
+    {
+        return $this->filesystemPackageFactory->getItemEditor($folder);
     }
 
     public function getQtiPackageBuilder(): QtiPackageBuilder

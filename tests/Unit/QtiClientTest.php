@@ -5,6 +5,7 @@ namespace Qti3\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
+use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
@@ -72,6 +73,20 @@ class QtiClientTest extends TestCase
         $factory = $this->createMock(IFilesystemPackageFactory::class);
         $container = $this->createClient(filesystemPackageFactory: $factory);
         $this->assertSame($factory, $container->getFilesystemPackageFactory());
+    }
+
+    public function testGetItemEditorDelegatesToFilesystemPackageFactory(): void
+    {
+        $itemEditor = $this->createMock(IItemEditor::class);
+        $factory = $this->createMock(IFilesystemPackageFactory::class);
+        $factory->expects($this->once())
+            ->method('getItemEditor')
+            ->with('qti/v1')
+            ->willReturn($itemEditor);
+
+        $client = $this->createClient(filesystemPackageFactory: $factory);
+
+        $this->assertSame($itemEditor, $client->getItemEditor('qti/v1'));
     }
 
     public function testGetQtiPackageBuilderReturnsInstance(): void
