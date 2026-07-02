@@ -58,18 +58,23 @@ final readonly class FlysystemItemEditor implements IItemEditor
     {
         $this->validator->validate($itemXml);
 
+        // Read and patch everything in memory first, so a structural problem
+        // aborts before any file is written.
         $manifest = $this->readXml($this->base . self::MANIFEST_FILE);
 
         $identifier = $this->identifierGenerator->nextIdentifier($this->existingItemIdentifiers($manifest));
         $href = $identifier . '.xml';
 
-        $itemXml = $this->normaliseIdentifier($itemXml, $identifier);
-        $this->filesystem->write($this->base . $href, $itemXml);
-
         $testHref = $this->registerManifestResource($manifest, $identifier, $href);
-        $this->filesystem->write($this->base . self::MANIFEST_FILE, $this->save($manifest));
+        $test = $this->readXml($this->base . $testHref);
+        $this->appendItemRef($test, $identifier, $href);
 
-        $this->appendItemRef($this->base . $testHref, $identifier, $href);
+        $itemXml = $this->normaliseIdentifier($itemXml, $identifier);
+
+        // Only now write, grouped at the end.
+        $this->filesystem->write($this->base . $href, $itemXml);
+        $this->filesystem->write($this->base . self::MANIFEST_FILE, $this->save($manifest));
+        $this->filesystem->write($this->base . $testHref, $this->save($test));
 
         return new EditedItem($identifier, $itemXml);
     }
@@ -142,10 +147,8 @@ final readonly class FlysystemItemEditor implements IItemEditor
         throw new InvalidQtiPackageException(new StringCollection(['Manifest has no assessment test resource']));
     }
 
-    private function appendItemRef(string $testPath, string $identifier, string $href): void
+    private function appendItemRef(DOMDocument $test, string $identifier, string $href): void
     {
-        $test = $this->readXml($testPath);
-
         $section = $test->getElementsByTagNameNS(self::ASI_NAMESPACE, 'qti-assessment-section')->item(0);
         if (!$section instanceof DOMElement) {
             throw new InvalidQtiPackageException(new StringCollection(['Assessment test has no section']));
@@ -155,8 +158,6 @@ final readonly class FlysystemItemEditor implements IItemEditor
         $itemRef->setAttribute('identifier', $identifier);
         $itemRef->setAttribute('href', $href);
         $section->appendChild($itemRef);
-
-        $this->filesystem->write($testPath, $this->save($test));
     }
 
     private function normaliseIdentifier(string $itemXml, string $identifier): string

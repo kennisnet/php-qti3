@@ -183,6 +183,24 @@ final class FlysystemItemEditorTest extends TestCase
         $this->editor->addItem($this->itemXml('X'));
     }
 
+    #[Test]
+    public function addItemWritesNothingWhenTheAssessmentTestHasNoSection(): void
+    {
+        $this->seedEmptyDraft();
+        $this->filesystem->write(
+            self::FOLDER . '/AssessmentTest.xml',
+            '<qti-assessment-test xmlns="' . self::ASI_NAMESPACE . '" identifier="T" title=""/>',
+        );
+
+        try {
+            $this->editor->addItem($this->itemXml('X'));
+            $this->fail('Expected InvalidQtiPackageException');
+        } catch (InvalidQtiPackageException) {
+            // A structural failure must abort before any file is written.
+            $this->assertFalse($this->filesystem->fileExists(self::FOLDER . '/ITEM001.xml'));
+        }
+    }
+
     private function seedEmptyDraft(string $testHref = 'AssessmentTest.xml'): void
     {
         $manifest = sprintf(
