@@ -9,11 +9,12 @@ use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Model\IPackageReader;
 use Qti3\Package\Model\IPackageWriter;
 use Qti3\Package\Service\IFilesystemPackageFactory;
+use Qti3\Package\Service\IItemEditorFactory;
 use Qti3\Package\Service\ItemIdentifierGenerator;
 use Qti3\Package\Validator\AssessmentItemValidator;
 use Qti3\Shared\Xml\Reader\XmlReader;
 
-readonly class FlysystemPackageFactory implements IFilesystemPackageFactory
+readonly class FlysystemPackageFactory implements IFilesystemPackageFactory, IItemEditorFactory
 {
     public function __construct(
         private FilesystemOperator $filesystem,

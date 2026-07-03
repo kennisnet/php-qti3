@@ -30,6 +30,7 @@ use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
+use Qti3\Package\Service\IItemEditorFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\Package\Service\QtiPackageBuilder;
@@ -49,6 +50,7 @@ use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlReader;
+use RuntimeException;
 
 final class QtiClient
 {
@@ -168,9 +170,16 @@ final class QtiClient
     /**
      * Item editor for an already extracted package folder, for adding and
      * updating assessment items in place.
+     *
+     * Requires the configured filesystem package factory to also implement
+     * {@see IItemEditorFactory} (the shipped {@see FlysystemPackageFactory} does).
      */
     public function getItemEditor(string $folder): IItemEditor
     {
+        if (!$this->filesystemPackageFactory instanceof IItemEditorFactory) {
+            throw new RuntimeException('The configured filesystem package factory does not support item editing.');
+        }
+
         return $this->filesystemPackageFactory->getItemEditor($folder);
     }
 

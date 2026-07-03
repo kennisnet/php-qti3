@@ -85,13 +85,13 @@ final readonly class FlysystemItemEditor implements IItemEditor
      */
     public function updateItem(string $identifier, string $itemXml): EditedItem
     {
-        $this->validator->validate($itemXml);
-
         $path = $this->base . $identifier . '.xml';
 
         if (!$this->filesystem->fileExists($path)) {
             throw new ResourceNotFoundException('AssessmentItem', $identifier);
         }
+
+        $this->validator->validate($itemXml);
 
         $itemXml = $this->normaliseIdentifier($itemXml, $identifier);
         $this->filesystem->write($path, $itemXml);

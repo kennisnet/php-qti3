@@ -134,6 +134,17 @@ final class FlysystemItemEditorTest extends TestCase
     }
 
     #[Test]
+    public function updateItemReportsAMissingItemEvenWhenTheXmlIsInvalid(): void
+    {
+        $this->seedEmptyDraft();
+
+        // Existence is checked before validation, so a missing item wins over malformed XML.
+        $this->expectException(ResourceNotFoundException::class);
+
+        $this->editor->updateItem('ITEM999', '<not-an-item/>');
+    }
+
+    #[Test]
     public function addItemValidatesBeforeTouchingTheFilesystem(): void
     {
         $this->seedEmptyDraft();
