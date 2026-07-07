@@ -114,6 +114,23 @@ if ($errors->count() > 0) {
 
 By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`). To use the official **IMS Global QTI validator** (Docker image) instead, pass a custom `IQtiSyntaxValidator` implementation as the fourth argument to `QtiClient`. See [docs/ims-global-validator.md](docs/ims-global-validator.md) for setup instructions and a ready-to-use skeleton class.
 
+**UC-P6: Add or update an item in an extracted package**
+
+For an already extracted package folder, `getItemEditor()` adds and updates assessment items in place, without reading or rewriting the whole package. Adding an item assigns the next `ITEMnnn` identifier, writes the item file, and registers it in the manifest and the assessment test. Updating an item overwrites a single file, leaving the manifest, test and existing media untouched.
+
+```php
+$editor = $qtiClient->getItemEditor('/tmp/folder');
+
+// Add a new item. $itemXml is a QTI 3 assessment item XML string.
+$added = $editor->addItem($itemXml);
+// $added is Qti3\Package\Model\Item\EditedItem { identifier: 'ITEM001', xml: '...' }
+
+// Update an existing item's content.
+$updated = $editor->updateItem('ITEM001', $itemXml);
+```
+
+The item XML is validated first (`AssessmentItemValidator`, fast structural validation); an invalid item throws `InvalidAssessmentItemException`, and updating a non-existent item throws `ResourceNotFoundException`.
+
 ### Assessment Test Level
 
 **UC-T1: Generate test from package**

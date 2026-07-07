@@ -5,7 +5,9 @@ namespace Qti3\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
+use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
+use Qti3\Package\Service\IItemEditorFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
@@ -18,6 +20,7 @@ use Qti3\QtiClient;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\Tests\Unit\Package\Model\QtiPackageMock;
+use RuntimeException;
 
 class QtiClientTest extends TestCase
 {
@@ -72,6 +75,32 @@ class QtiClientTest extends TestCase
         $factory = $this->createMock(IFilesystemPackageFactory::class);
         $container = $this->createClient(filesystemPackageFactory: $factory);
         $this->assertSame($factory, $container->getFilesystemPackageFactory());
+    }
+
+    public function testGetItemEditorDelegatesWhenTheFactorySupportsItemEditing(): void
+    {
+        $itemEditor = $this->createMock(IItemEditor::class);
+        $factory = $this->createMockForIntersectionOfInterfaces([
+            IFilesystemPackageFactory::class,
+            IItemEditorFactory::class,
+        ]);
+        $factory->expects($this->once())
+            ->method('getItemEditor')
+            ->with('qti/v1')
+            ->willReturn($itemEditor);
+
+        $client = $this->createClient(filesystemPackageFactory: $factory);
+
+        $this->assertSame($itemEditor, $client->getItemEditor('qti/v1'));
+    }
+
+    public function testGetItemEditorThrowsWhenTheFactoryDoesNotSupportItemEditing(): void
+    {
+        $client = $this->createClient(filesystemPackageFactory: $this->createMock(IFilesystemPackageFactory::class));
+
+        $this->expectException(RuntimeException::class);
+
+        $client->getItemEditor('qti/v1');
     }
 
     public function testGetQtiPackageBuilderReturnsInstance(): void
