@@ -11,6 +11,10 @@ namespace Qti3\Package\Service;
  * Gap-safe: the next number is derived from the highest existing `ITEMnnn`
  * number plus one, never from the count, because packages can contain gaps in
  * their item numbering. Counting would otherwise produce a colliding identifier.
+ *
+ * TODO: if an item database/reuse-across-packages feature is built, items will
+ * need identifiers that stay unique outside a single package's `ITEMnnn`
+ * sequence, so this generation scheme will likely need to change.
  */
 final class ItemIdentifierGenerator
 {
