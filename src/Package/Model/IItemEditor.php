@@ -16,4 +16,7 @@ interface IItemEditor
     public function addItem(string $itemXml): EditedItem;
 
     public function updateItem(string $identifier, string $itemXml): EditedItem;
+
+    /** @param list<string> $orderedIdentifiers */
+    public function reorderItems(array $orderedIdentifiers): void;
 }
