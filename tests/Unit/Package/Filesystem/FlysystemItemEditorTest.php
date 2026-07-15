@@ -12,6 +12,7 @@ use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\Package\Exception\InvalidAssessmentItemException;
+use Qti3\Package\Exception\InvalidItemOrderException;
 use Qti3\Package\Exception\InvalidQtiPackageException;
 use Qti3\Package\Filesystem\FlysystemItemEditor;
 use Qti3\Package\Service\ItemIdentifierGenerator;
@@ -210,6 +211,202 @@ final class FlysystemItemEditorTest extends TestCase
             // A structural failure must abort before any file is written.
             $this->assertFalse($this->filesystem->fileExists(self::FOLDER . '/ITEM001.xml'));
         }
+    }
+
+    #[Test]
+    public function reorderItemsRewritesTheSectionInTheGivenOrder(): void
+    {
+        $this->seedDraftWithItems();
+
+        $this->editor->reorderItems(['ITEM003', 'ITEM001', 'ITEM002']);
+
+        $this->assertSame(['ITEM003', 'ITEM001', 'ITEM002'], $this->itemRefIdentifiers('AssessmentTest.xml'));
+    }
+
+    #[Test]
+    public function reorderItemsDiscoversTheAssessmentTestFileFromTheManifestHref(): void
+    {
+        $this->seedEmptyDraft(testHref: 'test/Main.xml');
+        $this->editor->addItem($this->itemXml('X'));
+        $this->editor->addItem($this->itemXml('X'));
+
+        $this->editor->reorderItems(['ITEM002', 'ITEM001']);
+
+        $this->assertSame(['ITEM002', 'ITEM001'], $this->itemRefIdentifiers('test/Main.xml'));
+    }
+
+    #[Test]
+    public function reorderItemsThrowsWhenAnIdentifierIsUnknown(): void
+    {
+        $this->seedDraftWithItems();
+
+        $this->expectException(InvalidItemOrderException::class);
+
+        $this->editor->reorderItems(['ITEM001', 'ITEM002', 'ITEM999']);
+    }
+
+    #[Test]
+    public function reorderItemsThrowsWhenAnItemIsMissingFromTheNewOrder(): void
+    {
+        $this->seedDraftWithItems();
+
+        $this->expectException(InvalidItemOrderException::class);
+
+        $this->editor->reorderItems(['ITEM001', 'ITEM002']);
+    }
+
+    #[Test]
+    public function reorderItemsThrowsWhenAnIdentifierIsListedTwice(): void
+    {
+        $this->seedDraftWithItems();
+
+        $this->expectException(InvalidItemOrderException::class);
+
+        $this->editor->reorderItems(['ITEM001', 'ITEM002', 'ITEM002']);
+    }
+
+    #[Test]
+    public function reorderItemsLeavesTheFileUnchangedWhenTheOrderIsInvalid(): void
+    {
+        $this->seedDraftWithItems();
+        $before = $this->read('AssessmentTest.xml');
+
+        try {
+            $this->editor->reorderItems(['ITEM001', 'ITEM002', 'ITEM999']);
+            $this->fail('Expected InvalidItemOrderException');
+        } catch (InvalidItemOrderException) {
+            $this->assertSame($before, $this->read('AssessmentTest.xml'));
+        }
+    }
+
+    #[Test]
+    public function reorderItemsThrowsWhenTheAssessmentTestHasNoSection(): void
+    {
+        $this->seedEmptyDraft();
+        $this->filesystem->write(
+            self::FOLDER . '/AssessmentTest.xml',
+            '<qti-assessment-test xmlns="' . self::ASI_NAMESPACE . '" identifier="T" title=""/>',
+        );
+
+        $this->expectException(InvalidQtiPackageException::class);
+
+        $this->editor->reorderItems([]);
+    }
+
+    #[Test]
+    public function reorderItemsOnlyTouchesDirectChildrenAndLeavesNestedSectionsIntact(): void
+    {
+        $this->seedEmptyDraft();
+        $this->writeTest(
+            '<qti-assessment-section identifier="outer" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="ITEM_A" href="ITEM_A.xml"/>'
+            . '<qti-assessment-section identifier="inner" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="NESTED" href="NESTED.xml"/>'
+            . '</qti-assessment-section>'
+            . '<qti-assessment-item-ref identifier="ITEM_B" href="ITEM_B.xml"/>'
+            . '</qti-assessment-section>',
+        );
+
+        // Only ITEM_A and ITEM_B (direct children) are ours to reorder; NESTED belongs to
+        // the child section and must be left where it is.
+        $this->editor->reorderItems(['ITEM_B', 'ITEM_A']);
+
+        $this->assertSame(
+            ['ITEM_B', 'ITEM_A'],
+            $this->directChildItemRefIdentifiers('AssessmentTest.xml', 'outer'),
+        );
+        $this->assertContains('NESTED', $this->itemRefIdentifiers('AssessmentTest.xml'));
+    }
+
+    #[Test]
+    public function reorderItemsThrowsWhenTheTestHasADuplicateItemRef(): void
+    {
+        $this->seedEmptyDraft();
+        $this->writeTest(
+            '<qti-assessment-section identifier="s" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="ITEM_A" href="ITEM_A.xml"/>'
+            . '<qti-assessment-item-ref identifier="ITEM_A" href="ITEM_A.xml"/>'
+            . '</qti-assessment-section>',
+        );
+
+        $this->expectException(InvalidQtiPackageException::class);
+
+        $this->editor->reorderItems(['ITEM_A']);
+    }
+
+    #[Test]
+    public function reorderItemsThrowsWhenTheTestHasAnItemRefWithoutIdentifier(): void
+    {
+        $this->seedEmptyDraft();
+        $this->writeTest(
+            '<qti-assessment-section identifier="s" title="" visible="true">'
+            . '<qti-assessment-item-ref href="ITEM_A.xml"/>'
+            . '</qti-assessment-section>',
+        );
+
+        $this->expectException(InvalidQtiPackageException::class);
+
+        $this->editor->reorderItems([]);
+    }
+
+    private function seedDraftWithItems(): void
+    {
+        $this->seedEmptyDraft();
+        $this->editor->addItem($this->itemXml('X'));
+        $this->editor->addItem($this->itemXml('X'));
+        $this->editor->addItem($this->itemXml('X'));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function itemRefIdentifiers(string $path): array
+    {
+        $dom = new DOMDocument();
+        $dom->loadXML($this->read($path));
+
+        $identifiers = [];
+        foreach ($dom->getElementsByTagNameNS(self::ASI_NAMESPACE, 'qti-assessment-item-ref') as $itemRef) {
+            $identifiers[] = $itemRef->getAttribute('identifier');
+        }
+
+        return $identifiers;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function directChildItemRefIdentifiers(string $path, string $sectionIdentifier): array
+    {
+        $section = $this->findElement($this->read($path), self::ASI_NAMESPACE, 'qti-assessment-section', $sectionIdentifier);
+
+        $identifiers = [];
+        foreach ($section?->childNodes ?? [] as $childNode) {
+            if (
+                $childNode instanceof DOMElement
+                && $childNode->namespaceURI === self::ASI_NAMESPACE
+                && $childNode->localName === 'qti-assessment-item-ref'
+            ) {
+                $identifiers[] = $childNode->getAttribute('identifier');
+            }
+        }
+
+        return $identifiers;
+    }
+
+    private function writeTest(string $sectionsXml): void
+    {
+        $this->filesystem->write(
+            self::FOLDER . '/AssessmentTest.xml',
+            sprintf(
+                '<qti-assessment-test xmlns="%s" identifier="T" title="">'
+                . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+                . '%s'
+                . '</qti-test-part></qti-assessment-test>',
+                self::ASI_NAMESPACE,
+                $sectionsXml,
+            ),
+        );
     }
 
     private function seedEmptyDraft(string $testHref = 'AssessmentTest.xml'): void
