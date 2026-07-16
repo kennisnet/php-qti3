@@ -11,6 +11,7 @@ use League\Flysystem\FilesystemOperator;
 use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\Package\Exception\CannotRemoveLastItemException;
 use Qti3\Package\Exception\InvalidAssessmentItemException;
 use Qti3\Package\Exception\InvalidItemOrderException;
 use Qti3\Package\Exception\InvalidQtiPackageException;
@@ -407,6 +408,152 @@ final class FlysystemItemEditorTest extends TestCase
                 $sectionsXml,
             ),
         );
+    }
+
+    #[Test]
+    public function removeItemDeletesTheItemFile(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+
+        $this->editor->removeItem('ITEM001');
+
+        $this->assertFalse($this->filesystem->fileExists(self::FOLDER . '/ITEM001.xml'));
+        $this->assertTrue($this->filesystem->fileExists(self::FOLDER . '/ITEM002.xml'));
+    }
+
+    #[Test]
+    public function removeItemRemovesTheResourceAndDependencyReferencesFromTheManifest(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+
+        $this->editor->removeItem('ITEM001');
+
+        $manifest = $this->read('imsmanifest.xml');
+        $this->assertStringNotContainsString('ITEM001', $manifest);
+        $this->assertStringContainsString('identifier="ITEM002"', $manifest);
+        $this->assertStringContainsString('<dependency identifierref="ITEM002"/>', $manifest);
+    }
+
+    #[Test]
+    public function removeItemRemovesTheItemRefFromTheAssessmentTest(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+
+        $this->editor->removeItem('ITEM001');
+
+        $test = $this->read('AssessmentTest.xml');
+        $this->assertStringNotContainsString('ITEM001', $test);
+        $this->assertNotNull($this->findElement($test, self::ASI_NAMESPACE, 'qti-assessment-item-ref', 'ITEM002'));
+    }
+
+    #[Test]
+    public function removeItemDeletesAssetsOnlyReferencedByTheRemovedItem(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+
+        $this->editor->removeItem('ITEM001');
+
+        $this->assertFalse($this->filesystem->fileExists(self::FOLDER . '/img/only-item001.png'));
+        $this->assertStringNotContainsString('img/only-item001.png', $this->read('imsmanifest.xml'));
+    }
+
+    #[Test]
+    public function removeItemKeepsAssetsSharedWithOtherItems(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+
+        $this->editor->removeItem('ITEM001');
+
+        $this->assertTrue($this->filesystem->fileExists(self::FOLDER . '/img/shared.png'));
+        $this->assertStringContainsString('img/shared.png', $this->read('imsmanifest.xml'));
+    }
+
+    #[Test]
+    public function removeItemSkipsDeletingOrphanedFilesThatAreAlreadyMissing(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+        $this->filesystem->delete(self::FOLDER . '/img/only-item001.png');
+
+        $this->editor->removeItem('ITEM001');
+
+        $this->assertFalse($this->filesystem->fileExists(self::FOLDER . '/ITEM001.xml'));
+    }
+
+    #[Test]
+    public function removeItemThrowsWhenTheItemDoesNotExist(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+
+        $this->expectException(ResourceNotFoundException::class);
+
+        $this->editor->removeItem('ITEM999');
+    }
+
+    #[Test]
+    public function removeItemRefusesToRemoveTheLastItem(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets();
+        $this->editor->removeItem('ITEM001');
+
+        $this->expectException(CannotRemoveLastItemException::class);
+
+        $this->editor->removeItem('ITEM002');
+    }
+
+    #[Test]
+    public function removeItemWritesNothingWhenTheManifestHasNoAssessmentTestResource(): void
+    {
+        $this->seedDraftWithTwoItemsAndAssets(includeTestResource: false);
+        $manifestBefore = $this->read('imsmanifest.xml');
+
+        try {
+            $this->editor->removeItem('ITEM001');
+            $this->fail('Expected InvalidQtiPackageException');
+        } catch (InvalidQtiPackageException) {
+            // A structural failure must abort before any file is written or deleted.
+            $this->assertSame($manifestBefore, $this->read('imsmanifest.xml'));
+            $this->assertTrue($this->filesystem->fileExists(self::FOLDER . '/ITEM001.xml'));
+            $this->assertTrue($this->filesystem->fileExists(self::FOLDER . '/img/only-item001.png'));
+        }
+    }
+
+    private function seedDraftWithTwoItemsAndAssets(bool $includeTestResource = true): void
+    {
+        $testResource = $includeTestResource
+            ? '<resource identifier="test" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/>'
+                . '<dependency identifierref="ITEM001"/><dependency identifierref="ITEM002"/></resource>'
+            : '';
+
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '%s'
+            . '<resource identifier="ITEM001" type="imsqti_item_xmlv3p0" href="ITEM001.xml">'
+            . '<file href="ITEM001.xml"/><file href="img/only-item001.png"/><file href="img/shared.png"/></resource>'
+            . '<resource identifier="ITEM002" type="imsqti_item_xmlv3p0" href="ITEM002.xml">'
+            . '<file href="ITEM002.xml"/><file href="img/shared.png"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            $testResource,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-test-part identifier="testPart-1" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="section-1" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="ITEM001" href="ITEM001.xml"/>'
+            . '<qti-assessment-item-ref identifier="ITEM002" href="ITEM002.xml"/>'
+            . '</qti-assessment-section></qti-test-part></qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+        $this->filesystem->write(self::FOLDER . '/ITEM001.xml', $this->itemXml('ITEM001'));
+        $this->filesystem->write(self::FOLDER . '/ITEM002.xml', $this->itemXml('ITEM002'));
+        $this->filesystem->write(self::FOLDER . '/img/only-item001.png', 'only-item001-image');
+        $this->filesystem->write(self::FOLDER . '/img/shared.png', 'shared-image');
     }
 
     private function seedEmptyDraft(string $testHref = 'AssessmentTest.xml'): void

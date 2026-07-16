@@ -7,6 +7,7 @@ namespace Qti3\Package\Filesystem;
 use DOMDocument;
 use DOMElement;
 use League\Flysystem\FilesystemOperator;
+use Qti3\Package\Exception\CannotRemoveLastItemException;
 use Qti3\Package\Exception\InvalidItemOrderException;
 use Qti3\Package\Exception\InvalidQtiPackageException;
 use Qti3\Package\Model\IItemEditor;
@@ -19,9 +20,9 @@ use Qti3\Shared\Xml\Reader\IXmlReader;
 use RuntimeException;
 
 /**
- * Adds and updates assessment items inside an already extracted QTI package
- * folder, operating directly on the individual files through a
- * {@see FilesystemOperator}.
+ * Adds, updates, reorders and removes assessment items inside an already
+ * extracted QTI package folder, operating directly on the individual files
+ * through a {@see FilesystemOperator}.
  *
  * This is intentionally file-targeted rather than model-based: adding an item
  * touches only the manifest, the assessment test and the new item file, and
@@ -154,6 +155,48 @@ final readonly class FlysystemItemEditor implements IItemEditor
     }
 
     /**
+     * Remove an item: delete its resource entry (plus dependency references)
+     * from the manifest, its item ref from the assessment test, the item file
+     * itself, and any files no longer referenced by the remaining resources.
+     */
+    public function removeItem(string $identifier): void
+    {
+        // Read and patch everything in memory first, so a structural problem
+        // aborts before any file is written.
+        $manifest = $this->readXml($this->base . self::MANIFEST_FILE);
+
+        $itemResource = $this->itemResource($manifest, $identifier);
+        if ($itemResource === null) {
+            throw new ResourceNotFoundException('AssessmentItem', $identifier);
+        }
+
+        if (count($this->itemResources($manifest)) === 1) {
+            throw new CannotRemoveLastItemException($identifier);
+        }
+
+        $removedHrefs = $this->resourceHrefs($itemResource);
+        $itemResource->parentNode?->removeChild($itemResource);
+        $this->removeDependencyReferences($manifest, $identifier);
+
+        $orphanedFiles = array_values(array_diff($removedHrefs, $this->referencedHrefs($manifest)));
+
+        $testHref = $this->testResourceHref($manifest);
+        $test = $this->readXml($this->base . $testHref);
+        $this->removeItemRef($test, $identifier);
+
+        // Only now write, manifest first: if that write fails, nothing else
+        // has been touched yet.
+        $this->filesystem->write($this->base . self::MANIFEST_FILE, $this->save($manifest));
+        $this->filesystem->write($this->base . $testHref, $this->save($test));
+
+        foreach ($orphanedFiles as $orphanedFile) {
+            if ($this->filesystem->fileExists($this->base . $orphanedFile)) {
+                $this->filesystem->delete($this->base . $orphanedFile);
+            }
+        }
+    }
+
+    /**
      * @param list<string> $currentIdentifiers
      * @param list<string> $orderedIdentifiers
      */
@@ -248,6 +291,100 @@ final readonly class FlysystemItemEditor implements IItemEditor
         $itemRef->setAttribute('identifier', $identifier);
         $itemRef->setAttribute('href', $href);
         $section->appendChild($itemRef);
+    }
+
+    private function itemResource(DOMDocument $manifest, string $identifier): ?DOMElement
+    {
+        foreach ($this->itemResources($manifest) as $resource) {
+            if ($resource->getAttribute('identifier') === $identifier) {
+                return $resource;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return list<DOMElement>
+     */
+    private function itemResources(DOMDocument $manifest): array
+    {
+        $resources = [];
+
+        foreach ($manifest->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
+            if ($resource->getAttribute('type') === self::ITEM_RESOURCE_TYPE) {
+                $resources[] = $resource;
+            }
+        }
+
+        return $resources;
+    }
+
+    /**
+     * All files a resource points at: its own href plus the hrefs of its
+     * <file> children.
+     *
+     * @return list<string>
+     */
+    private function resourceHrefs(DOMElement $resource): array
+    {
+        $hrefs = [];
+
+        if ($resource->getAttribute('href') !== '') {
+            $hrefs[] = $resource->getAttribute('href');
+        }
+
+        foreach ($resource->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'file') as $file) {
+            if ($file->getAttribute('href') !== '') {
+                $hrefs[] = $file->getAttribute('href');
+            }
+        }
+
+        return array_values(array_unique($hrefs));
+    }
+
+    private function removeDependencyReferences(DOMDocument $manifest, string $identifier): void
+    {
+        // Collect first: removing while iterating a live DOMNodeList skips nodes.
+        $dependencies = [];
+        foreach ($manifest->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'dependency') as $dependency) {
+            if ($dependency->getAttribute('identifierref') === $identifier) {
+                $dependencies[] = $dependency;
+            }
+        }
+
+        foreach ($dependencies as $dependency) {
+            $dependency->parentNode?->removeChild($dependency);
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function referencedHrefs(DOMDocument $manifest): array
+    {
+        $hrefs = [];
+
+        foreach ($manifest->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
+            $hrefs = [...$hrefs, ...$this->resourceHrefs($resource)];
+        }
+
+        return array_values(array_unique($hrefs));
+    }
+
+    private function removeItemRef(DOMDocument $test, string $identifier): void
+    {
+        // Collect first: removing while iterating a live DOMNodeList skips nodes.
+        $itemRefs = [];
+        foreach ($test->getElementsByTagNameNS(self::ASI_NAMESPACE, 'qti-assessment-item-ref') as $itemRef) {
+            if ($itemRef->getAttribute('identifier') === $identifier) {
+                $itemRefs[] = $itemRef;
+            }
+        }
+
+        foreach ($itemRefs as $itemRef) {
+            $itemRef->parentNode?->removeChild($itemRef);
+        }
     }
 
     private function normaliseIdentifier(string $itemXml, string $identifier): string
