@@ -9,8 +9,8 @@ use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
+use Qti3\Package\Model\PackageFile\AssessmentTestFile;
 use Qti3\Package\Model\PackageFile\PackageFileCollection;
-use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Shared\Xml\Reader\IXmlReader;
@@ -37,7 +37,7 @@ readonly class TestResourceBuilder
             ResourceType::ASSESSMENT_TEST,
             self::ASSESSMENT_TEST_FILE_NAME,
             new PackageFileCollection([
-                new XmlFile(
+                new AssessmentTestFile(
                     self::ASSESSMENT_TEST_FILE_NAME,
                     new MemoryFileContent($xml),
                     $this->xmlReader,

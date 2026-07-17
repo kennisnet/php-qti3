@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Model;
 
-use Qti3\Package\Model\Item\EditedItem;
+use Qti3\Package\Model\Resource\Resource;
 
 /**
- * Adds and updates assessment items inside a single extracted QTI package
- * folder. Obtained per folder from {@see \Qti3\Package\Service\IFilesystemPackageFactory::getItemEditor()},
- * mirroring the reader/writer factory methods.
+ * Adds, updates and reorders assessment items in a single extracted QTI
+ * package folder. Every operation goes through the {@see QtiPackage} domain
+ * model and returns the affected {@see Resource}. Obtain one per folder from
+ * {@see \Qti3\QtiClient::getItemEditor()}.
  */
 interface IItemEditor
 {
-    public function addItem(string $itemXml): EditedItem;
+    public function addItem(string $itemXml): Resource;
 
-    public function updateItem(string $identifier, string $itemXml): EditedItem;
+    public function updateItem(string $identifier, string $itemXml): Resource;
 
     /** @param list<string> $orderedIdentifiers */
     public function reorderItems(array $orderedIdentifiers): void;

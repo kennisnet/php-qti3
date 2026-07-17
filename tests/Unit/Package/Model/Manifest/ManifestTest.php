@@ -92,6 +92,48 @@ class ManifestTest extends TestCase
     }
 
     #[Test]
+    public function addResourceWritesNamespacedElementsInsideTheResourcesElement(): void
+    {
+        $namespace = 'http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1';
+        $manifest = Manifest::fromString(
+            sprintf('<manifest xmlns="%s" identifier="M"><resources/></manifest>', $namespace),
+            new XmlReader(),
+        );
+
+        $manifest->addResource(new ManifestResource(
+            'ITEM001',
+            ResourceType::ASSESSMENT_ITEM,
+            new ManifestResourceFileCollection([new ManifestResourceFile('ITEM001.xml')]),
+            new ManifestResourceDependencyCollection(),
+            'ITEM001.xml',
+        ));
+
+        $resource = $manifest->getXml()->getElementsByTagNameNS($namespace, 'resource')->item(0);
+        $this->assertNotNull($resource);
+        $this->assertSame('resources', $resource->parentNode?->localName);
+
+        $file = $manifest->getXml()->getElementsByTagNameNS($namespace, 'file')->item(0);
+        $this->assertNotNull($file);
+        $this->assertSame('ITEM001.xml', $file->getAttribute('href'));
+    }
+
+    #[Test]
+    public function addResourceSurvivesInTheManifestContent(): void
+    {
+        $manifest = Manifest::fromString('<manifest identifier="M"/>', new XmlReader());
+
+        $manifest->addResource(new ManifestResource(
+            'ITEM001',
+            ResourceType::ASSESSMENT_ITEM,
+            new ManifestResourceFileCollection([new ManifestResourceFile('ITEM001.xml')]),
+            new ManifestResourceDependencyCollection(),
+            'ITEM001.xml',
+        ));
+
+        $this->assertStringContainsString('ITEM001.xml', $manifest->getContent()->getContent());
+    }
+
+    #[Test]
     public function testGetResourcesFromXml(): void
     {
         // Arrange

@@ -2,44 +2,57 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Package\Filesystem;
+namespace Qti3\Tests\Unit\Package\Service;
 
 use DOMDocument;
 use DOMElement;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
-use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use Qti3\Package\Exception\InvalidAssessmentItemException;
 use Qti3\Package\Exception\InvalidItemOrderException;
 use Qti3\Package\Exception\InvalidQtiPackageException;
-use Qti3\Package\Filesystem\FlysystemItemEditor;
+use Qti3\Package\Filesystem\FileSystemUtils;
+use Qti3\Package\Filesystem\FlysystemPackageFactory;
+use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
+use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
+use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Service\ItemIdentifierGenerator;
+use Qti3\Package\Service\PackageItemEditor;
+use Qti3\Package\Service\QtiPackageReader;
 use Qti3\Package\Validator\AssessmentItemValidator;
 use Qti3\Shared\Exception\ResourceNotFoundException;
 use Qti3\Shared\Xml\Reader\XmlReader;
 
-final class FlysystemItemEditorTest extends TestCase
+final class PackageItemEditorTest extends TestCase
 {
     private const string FOLDER = 'qti/v1';
     private const string ASI_NAMESPACE = 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0';
     private const string MANIFEST_NAMESPACE = 'http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1';
 
     private FilesystemOperator $filesystem;
-    private FlysystemItemEditor $editor;
+    private PackageItemEditor $editor;
 
     protected function setUp(): void
     {
         $this->filesystem = new Filesystem(new InMemoryFilesystemAdapter());
 
         $xmlReader = new XmlReader();
-        $this->editor = new FlysystemItemEditor(
+        $packageFactory = new FlysystemPackageFactory($this->filesystem);
+        $this->editor = new PackageItemEditor(
             self::FOLDER,
-            $this->filesystem,
-            $xmlReader,
+            new QtiPackageReader(
+                new ManifestFactory($xmlReader),
+                $xmlReader,
+                new ZipPackageFactory(new ZipArchiveFactory(), new FileSystemUtils()),
+                $packageFactory,
+            ),
+            $packageFactory,
             new AssessmentItemValidator($xmlReader),
             new ItemIdentifierGenerator(),
+            $xmlReader,
         );
     }
 
@@ -48,13 +61,13 @@ final class FlysystemItemEditorTest extends TestCase
     {
         $this->seedEmptyDraft();
 
-        $editedItem = $this->editor->addItem($this->itemXml('PLACEHOLDER'));
+        $item = $this->editor->addItem($this->itemXml('PLACEHOLDER'));
 
-        $this->assertSame('ITEM001', $editedItem->identifier);
+        $this->assertSame('ITEM001', $item->identifier);
         $stored = $this->read('ITEM001.xml');
         $this->assertStringContainsString('identifier="ITEM001"', $stored);
         $this->assertStringNotContainsString('PLACEHOLDER', $stored);
-        $this->assertSame($stored, $editedItem->xml);
+        $this->assertSame($stored, (string) $item->getMainFile());
     }
 
     #[Test]
@@ -120,8 +133,8 @@ final class FlysystemItemEditorTest extends TestCase
         $this->editor->updateItem('ITEM001', $this->itemXml('ITEM001', 'Bijgewerkte vraag'));
 
         $this->assertStringContainsString('Bijgewerkte vraag', $this->read('ITEM001.xml'));
-        $this->assertSame($manifestBefore, $this->read('imsmanifest.xml'));
-        $this->assertSame($testBefore, $this->read('AssessmentTest.xml'));
+        $this->assertXmlStringEqualsXmlString($manifestBefore, $this->read('imsmanifest.xml'));
+        $this->assertXmlStringEqualsXmlString($testBefore, $this->read('AssessmentTest.xml'));
     }
 
     #[Test]
@@ -153,19 +166,6 @@ final class FlysystemItemEditorTest extends TestCase
         $this->expectException(InvalidAssessmentItemException::class);
 
         $this->editor->addItem('<not-an-item xmlns="' . self::ASI_NAMESPACE . '"/>');
-    }
-
-    #[Test]
-    public function addItemThrowsWhenManifestHasNoResourcesElement(): void
-    {
-        $this->filesystem->write(
-            self::FOLDER . '/imsmanifest.xml',
-            '<manifest xmlns="' . self::MANIFEST_NAMESPACE . '" identifier="M"/>',
-        );
-
-        $this->expectException(InvalidQtiPackageException::class);
-
-        $this->editor->addItem($this->itemXml('X'));
     }
 
     #[Test]
@@ -208,7 +208,7 @@ final class FlysystemItemEditorTest extends TestCase
             $this->editor->addItem($this->itemXml('X'));
             $this->fail('Expected InvalidQtiPackageException');
         } catch (InvalidQtiPackageException) {
-            // A structural failure must abort before any file is written.
+            // A structural failure must abort before the package is stored.
             $this->assertFalse($this->filesystem->fileExists(self::FOLDER . '/ITEM001.xml'));
         }
     }

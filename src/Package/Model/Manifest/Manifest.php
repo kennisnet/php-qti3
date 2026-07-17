@@ -60,8 +60,7 @@ class Manifest extends XmlFile
 
     public function addResource(ManifestResource $resource): void
     {
-        /** @var DOMElement $resourceNode */
-        $resourceNode = $this->getXml()->createElement('resource');
+        $resourceNode = $this->createManifestElement('resource');
         $resourceNode->setAttribute('identifier', $resource->identifier);
         $resourceNode->setAttribute('type', $resource->type->value);
         if ($resource->href !== null) {
@@ -69,18 +68,50 @@ class Manifest extends XmlFile
         }
 
         foreach ($resource->files as $file) {
-            $fileNode = $this->getXml()->createElement('file');
-            $fileNode->setAttribute('identifierref', $file->href);
+            $fileNode = $this->createManifestElement('file');
+            $fileNode->setAttribute('href', $file->href);
             $resourceNode->appendChild($fileNode);
         }
 
         foreach ($resource->dependencies as $dependency) {
-            $dependencyNode = $this->getXml()->createElement('dependency');
+            $dependencyNode = $this->createManifestElement('dependency');
             $dependencyNode->setAttribute('identifierref', $dependency->identifierref);
             $resourceNode->appendChild($dependencyNode);
         }
 
-        $this->getDocumentElement()->appendChild($resourceNode);
+        $this->getResourcesElement()->appendChild($resourceNode);
+    }
+
+    /**
+     * New elements must live in the manifest's own namespace, or namespaced
+     * consumers (validators, other QTI tooling) will not see them.
+     */
+    private function createManifestElement(string $name): DOMElement
+    {
+        $namespace = $this->getDocumentElement()->namespaceURI;
+        $element = $namespace === null
+            ? $this->getXml()->createElement($name)
+            : $this->getXml()->createElementNS($namespace, $name);
+
+        if (!$element instanceof DOMElement) {
+            throw new RuntimeException(sprintf('Failed to create manifest element <%s>', $name)); // @codeCoverageIgnore
+        }
+
+        return $element;
+    }
+
+    private function getResourcesElement(): DOMElement
+    {
+        foreach ($this->getDocumentElement()->childNodes as $childNode) {
+            if ($childNode instanceof DOMElement && $childNode->localName === 'resources') {
+                return $childNode;
+            }
+        }
+
+        $resources = $this->createManifestElement('resources');
+        $this->getDocumentElement()->appendChild($resources);
+
+        return $resources;
     }
 
     private function getFiles(DOMElement $resourceNode): ManifestResourceFileCollection

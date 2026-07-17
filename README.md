@@ -114,22 +114,26 @@ if ($errors->count() > 0) {
 
 By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`). To use the official **IMS Global QTI validator** (Docker image) instead, pass a custom `IQtiSyntaxValidator` implementation as the fourth argument to `QtiClient`. See [docs/ims-global-validator.md](docs/ims-global-validator.md) for setup instructions and a ready-to-use skeleton class.
 
-**UC-P6: Add or update an item in an extracted package**
+**UC-P6: Add, update or reorder items in an extracted package**
 
-For an already extracted package folder, `getItemEditor()` adds and updates assessment items in place, without reading or rewriting the whole package. Adding an item assigns the next `ITEMnnn` identifier, writes the item file, and registers it in the manifest and the assessment test. Updating an item overwrites a single file, leaving the manifest, test and existing media untouched.
+For an already extracted package folder, `getItemEditor()` edits assessment items through the domain model: every operation loads the package into a `QtiPackage`, applies the change on the model — which keeps the manifest and the assessment test consistent — and writes the package back through the package writer. Adding an item assigns the next `ITEMnnn` identifier, registers the resource in the manifest and appends an item ref to the assessment test section.
 
 ```php
 $editor = $qtiClient->getItemEditor('/tmp/folder');
 
 // Add a new item. $itemXml is a QTI 3 assessment item XML string.
 $added = $editor->addItem($itemXml);
-// $added is Qti3\Package\Model\Item\EditedItem { identifier: 'ITEM001', xml: '...' }
+// $added is a Qti3\Package\Model\Resource\Resource; $added->identifier is 'ITEM001'
+// and (string) $added->getMainFile() is the item XML as written.
 
 // Update an existing item's content.
 $updated = $editor->updateItem('ITEM001', $itemXml);
+
+// Reorder the items of the assessment test section.
+$editor->reorderItems(['ITEM002', 'ITEM001']);
 ```
 
-The item XML is validated first (`AssessmentItemValidator`, fast structural validation); an invalid item throws `InvalidAssessmentItemException`, and updating a non-existent item throws `ResourceNotFoundException`.
+The item XML is validated first (`IAssessmentItemValidator`; the default `AssessmentItemValidator` does fast structural validation); an invalid item throws `InvalidAssessmentItemException`, updating a non-existent item throws `ResourceNotFoundException`, and an order that does not match the items in the test throws `InvalidItemOrderException`.
 
 ### Assessment Test Level
 

@@ -30,9 +30,10 @@ use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
-use Qti3\Package\Service\IItemEditorFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
+use Qti3\Package\Service\ItemIdentifierGenerator;
+use Qti3\Package\Service\PackageItemEditor;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
@@ -44,13 +45,14 @@ use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
+use Qti3\Package\Validator\AssessmentItemValidator;
+use Qti3\Package\Validator\IAssessmentItemValidator;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlReader;
-use RuntimeException;
 
 final class QtiClient
 {
@@ -75,6 +77,7 @@ final class QtiClient
     private ?AssessmentSectionParser $assessmentSectionParser = null;
     private ?AssessmentItemRefParser $assessmentItemRefParser = null;
     private ?TestBuilder $testBuilder = null;
+    private ?IAssessmentItemValidator $assessmentItemValidator = null;
 
     public function __construct(
         private readonly IFilesystemPackageFactory $filesystemPackageFactory,
@@ -168,19 +171,25 @@ final class QtiClient
     }
 
     /**
-     * Item editor for an already extracted package folder, for adding and
-     * updating assessment items in place.
-     *
-     * Requires the configured filesystem package factory to also implement
-     * {@see IItemEditorFactory} (the shipped {@see FlysystemPackageFactory} does).
+     * Item editor for an already extracted package folder. Every edit loads
+     * the package into the {@see \Qti3\Package\Model\QtiPackage} domain model,
+     * applies the change on the model and writes the package back.
      */
     public function getItemEditor(string $folder): IItemEditor
     {
-        if (!$this->filesystemPackageFactory instanceof IItemEditorFactory) {
-            throw new RuntimeException('The configured filesystem package factory does not support item editing.');
-        }
+        return new PackageItemEditor(
+            $folder,
+            $this->getQtiPackageReader(),
+            $this->filesystemPackageFactory,
+            $this->getAssessmentItemValidator(),
+            new ItemIdentifierGenerator(),
+            $this->getXmlReader(),
+        );
+    }
 
-        return $this->filesystemPackageFactory->getItemEditor($folder);
+    public function getAssessmentItemValidator(): IAssessmentItemValidator
+    {
+        return $this->assessmentItemValidator ??= new AssessmentItemValidator($this->getXmlReader());
     }
 
     public function getQtiPackageBuilder(): QtiPackageBuilder
