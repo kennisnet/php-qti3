@@ -95,6 +95,18 @@ abstract class AbstractCollection implements ArrayAccess, IteratorAggregate, Cou
         $this->items = array_filter($this->items, fn($i): bool => $i !== $item);
     }
 
+    /**
+     * Replace the whole content of the collection, e.g. to reorder it.
+     * @param array<int, T> $items
+     */
+    public function replaceAll(array $items): void
+    {
+        foreach ($items as $item) {
+            $this->validate($item);
+        }
+        $this->items = array_values($items);
+    }
+
     protected function validate(mixed $item): void
     {
         if (!($item instanceof $this->type)) {

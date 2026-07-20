@@ -24,17 +24,20 @@ readonly class ItemResourceBuilder
         string $itemRefIdentifier,
         AssessmentItem $assessmentItem,
         ManifestResourceDependencyCollection $resourceDependencies,
+        ?string $href = null,
     ): Resource {
+        $href ??= $itemRefIdentifier . '.xml';
+
         /** @var string $xml */
         $xml = $this->xmlBuilder->generateXmlFromObject($assessmentItem)->saveXML();
 
         return new Resource(
             $itemRefIdentifier,
             ResourceType::ASSESSMENT_ITEM,
-            $itemRefIdentifier . '.xml',
+            $href,
             new PackageFileCollection(
                 [new XmlFile(
-                    $itemRefIdentifier . '.xml',
+                    $href,
                     new MemoryFileContent($xml),
                     $this->xmlReader,
                 )],

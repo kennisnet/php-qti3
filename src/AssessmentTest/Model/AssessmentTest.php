@@ -9,7 +9,10 @@ use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentTest\Model\Feedback\TestFeedbackCollection;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
+use Qti3\AssessmentTest\Model\Section\AssessmentSection;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeProcessing;
@@ -54,6 +57,50 @@ class AssessmentTest extends QtiElement
             $this->outcomeProcessing,
             ...$this->testFeedback->all(),
         ];
+    }
+
+    /**
+     * Add an item to the test: the item ref is appended to the first section.
+     */
+    public function addItemRef(AssessmentItemRef $itemRef): void
+    {
+        foreach ($this->getItemRefs() as $existingItemRef) {
+            if ($existingItemRef->identifier->equals($itemRef->identifier)) {
+                throw new InvalidQtiPackageException(new StringCollection([sprintf('Test already contains an item with identifier "%s"', $itemRef->identifier)]));
+            }
+        }
+
+        $this->getSection()->addItemRef($itemRef);
+    }
+
+    /**
+     * Reorder the item refs of the first section to match the given order.
+     * @param list<string> $orderedIdentifiers
+     */
+    public function reorderItemRefs(array $orderedIdentifiers): void
+    {
+        $this->getSection()->reorderItemRefs($orderedIdentifiers);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getItemIdentifiers(): array
+    {
+        return array_map(
+            static fn(AssessmentItemRef $itemRef): string => (string) $itemRef->identifier,
+            $this->getItemRefs(),
+        );
+    }
+
+    private function getSection(): AssessmentSection
+    {
+        $section = $this->testParts->first()?->sections->first();
+        if (!$section instanceof AssessmentSection) {
+            throw new InvalidQtiPackageException(new StringCollection(['Assessment test has no section']));
+        }
+
+        return $section;
     }
 
     /**

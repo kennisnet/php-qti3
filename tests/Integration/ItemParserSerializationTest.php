@@ -443,6 +443,41 @@ XML;
         $this->assertInstanceOf(ResponseCondition::class, $second->responseProcessing->elements[0]);
     }
 
+    /**
+     * The time-dependent, adaptive and xml:lang attributes must survive a
+     * parse -> serialize -> re-parse cycle instead of being reset to defaults.
+     */
+    public function testSerializeItemKeepsRootAttributes(): void
+    {
+        $xml = <<<XML
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
+                    identifier="attrs-001"
+                    title="Attribute fidelity"
+                    adaptive="true"
+                    time-dependent="true"
+                    xml:lang="fr-FR">
+    <qti-item-body>
+        <p>Question</p>
+    </qti-item-body>
+</qti-assessment-item>
+XML;
+
+        $item = $this->parseItem($xml);
+        $this->assertTrue($item->timeDependent);
+        $this->assertTrue($item->adaptive);
+        $this->assertSame('fr-FR', $item->language);
+
+        $serialized = $this->serializeItem($item);
+        $this->assertStringContainsString('time-dependent="true"', $serialized);
+        $this->assertStringContainsString('adaptive="true"', $serialized);
+        $this->assertStringContainsString('xml:lang="fr-FR"', $serialized);
+
+        $reparsed = $this->parseItem($serialized);
+        $this->assertTrue($reparsed->timeDependent);
+        $this->assertTrue($reparsed->adaptive);
+        $this->assertSame('fr-FR', $reparsed->language);
+    }
+
     private function parseItem(string $xml): AssessmentItem
     {
         $client = $this->createClient();

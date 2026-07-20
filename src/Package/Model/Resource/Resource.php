@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Model\Resource;
 
-use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\Metadata\Metadata;
 use Qti3\Package\Model\PackageFile\PackageFile;
 use Qti3\Package\Model\PackageFile\PackageFileCollection;
-use Qti3\Package\Model\PackageFile\XmlFile;
-use Qti3\Shared\Xml\Reader\IXmlReader;
 use InvalidArgumentException;
 
 class Resource
@@ -24,25 +21,6 @@ class Resource
         public ?Metadata $metadata = null,
     ) {
         $this->validateHref();
-    }
-
-    /**
-     * An assessment item resource holding a single item XML file named after
-     * its identifier.
-     */
-    public static function assessmentItem(string $identifier, string $itemXml, IXmlReader $xmlReader): self
-    {
-        $href = $identifier . '.xml';
-
-        return new self(
-            $identifier,
-            ResourceType::ASSESSMENT_ITEM,
-            $href,
-            new PackageFileCollection([
-                new XmlFile($href, new MemoryFileContent($itemXml), $xmlReader),
-            ]),
-            new ManifestResourceDependencyCollection(),
-        );
     }
 
     public function getMainFile(): ?PackageFile

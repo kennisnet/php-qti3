@@ -116,7 +116,7 @@ By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`)
 
 **UC-P6: Add, update or reorder items in an extracted package**
 
-For an already extracted package folder, `getItemEditor()` edits assessment items through the domain model: every operation loads the package into a `QtiPackage`, applies the change on the model — which keeps the manifest and the assessment test consistent — and writes the package back through the package writer. Adding an item assigns the next `ITEMnnn` identifier, registers the resource in the manifest and appends an item ref to the assessment test section.
+For an already extracted package folder, `getItemEditor()` edits assessment items through the typed domain models: every operation loads the package into an `AssessmentTest` model plus one `AssessmentItem` model per item, applies the change on those models, and saves by generating a new package from them (`QtiPackageBuilder::buildForTest()`) and storing it through the package writer. Adding an item assigns the next `ITEMnnn` identifier; the manifest is derived from the models on every save, so it never gets out of sync. Media files and metadata resources already present in the package are carried over with their paths and bytes intact.
 
 ```php
 $editor = $qtiClient->getItemEditor('/tmp/folder');
@@ -132,6 +132,8 @@ $updated = $editor->updateItem('ITEM001', $itemXml);
 // Reorder the items of the assessment test section.
 $editor->reorderItems(['ITEM002', 'ITEM001']);
 ```
+
+Because every save regenerates the package from the typed models, the editor only edits packages within the QTI subset those models can represent, and refuses loudly instead of losing data: a package whose test contains outcome processing, test feedback, rubric blocks or nested sections — or whose items use unsupported interaction types (see *Supported interactions* below), template declarations or unrecognized response-processing templates — throws `UnsupportedQtiConstructException`. Untouched items are re-serialized on save, so they stay semantically equivalent but not byte-identical.
 
 The item XML is validated first (`IAssessmentItemValidator`; the default `AssessmentItemValidator` does fast structural validation); an invalid item throws `InvalidAssessmentItemException`, updating a non-existent item throws `ResourceNotFoundException`, and an order that does not match the items in the test throws `InvalidItemOrderException`.
 
@@ -188,7 +190,7 @@ $outcomes = $itemState->outcomeSet->outcomes;
 
 ### Supported interactions
 
-The `AssessmentItem` parser supports all current QTI 3.0 interaction types listed below via the `InteractionParser` used by `ItemBodyParser`:
+The `AssessmentItem` parser supports exactly the interaction types listed below via the `InteractionParser` used by `ItemBodyParser`. Other QTI 3.0 interaction types (e.g. `qti-inline-choice-interaction`, `qti-associate-interaction`, `qti-slider-interaction`, `qti-media-interaction`, the graphic interactions) are **not** supported: parsing such an item throws a `ParseError`, and the item editor (UC-P6) refuses packages containing them.
 
 - `qti-choice-interaction`
 - `qti-text-entry-interaction`

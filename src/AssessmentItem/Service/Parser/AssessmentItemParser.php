@@ -70,6 +70,9 @@ class AssessmentItemParser extends AbstractParser
             $title,
             $stylesheet,
             $modalFeedbacks,
+            timeDependent: $element->getAttribute('time-dependent') === 'true',
+            adaptive: $element->getAttribute('adaptive') === 'true',
+            language: $element->getAttribute('xml:lang') ?: 'nl-NL',
         );
     }
 }

@@ -8,23 +8,19 @@ use DOMDocument;
 use DOMElement;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
+use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
+use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Exception\InvalidAssessmentItemException;
 use Qti3\Package\Exception\InvalidItemOrderException;
 use Qti3\Package\Exception\InvalidQtiPackageException;
-use Qti3\Package\Filesystem\FileSystemUtils;
+use Qti3\Package\Exception\UnsupportedQtiConstructException;
 use Qti3\Package\Filesystem\FlysystemPackageFactory;
-use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
-use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
-use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\Package\Service\ItemIdentifierGenerator;
-use Qti3\Package\Service\PackageItemEditor;
-use Qti3\Package\Service\QtiPackageReader;
-use Qti3\Package\Validator\AssessmentItemValidator;
+use Qti3\Package\Model\IItemEditor;
+use Qti3\Package\Validator\Resource\IResourceValidator;
+use Qti3\QtiClient;
 use Qti3\Shared\Exception\ResourceNotFoundException;
-use Qti3\Shared\Xml\Reader\XmlReader;
 
 final class PackageItemEditorTest extends TestCase
 {
@@ -33,27 +29,18 @@ final class PackageItemEditorTest extends TestCase
     private const string MANIFEST_NAMESPACE = 'http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1';
 
     private FilesystemOperator $filesystem;
-    private PackageItemEditor $editor;
+    private IItemEditor $editor;
 
     protected function setUp(): void
     {
         $this->filesystem = new Filesystem(new InMemoryFilesystemAdapter());
 
-        $xmlReader = new XmlReader();
-        $packageFactory = new FlysystemPackageFactory($this->filesystem);
-        $this->editor = new PackageItemEditor(
-            self::FOLDER,
-            new QtiPackageReader(
-                new ManifestFactory($xmlReader),
-                $xmlReader,
-                new ZipPackageFactory(new ZipArchiveFactory(), new FileSystemUtils()),
-                $packageFactory,
-            ),
-            $packageFactory,
-            new AssessmentItemValidator($xmlReader),
-            new ItemIdentifierGenerator(),
-            $xmlReader,
+        $client = new QtiClient(
+            new FlysystemPackageFactory($this->filesystem),
+            $this->createStub(IResourceValidator::class),
+            $this->createStub(IResourceDownloader::class),
         );
+        $this->editor = $client->getItemEditor(self::FOLDER);
     }
 
     #[Test]
@@ -82,6 +69,18 @@ final class PackageItemEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemKeepsTimeDependentAndLanguage(): void
+    {
+        $this->seedEmptyDraft();
+
+        $this->editor->addItem($this->itemXml('X', timeDependent: 'true', language: 'fr-FR'));
+
+        $stored = $this->read('ITEM001.xml');
+        $this->assertStringContainsString('time-dependent="true"', $stored);
+        $this->assertStringContainsString('xml:lang="fr-FR"', $stored);
+    }
+
+    #[Test]
     public function addItemRegistersTheResourceInsideManifestResources(): void
     {
         $this->seedEmptyDraft();
@@ -94,9 +93,13 @@ final class PackageItemEditorTest extends TestCase
         $this->assertSame('ITEM001.xml', $resource->getAttribute('href'));
         $this->assertSame('resources', $resource->parentNode?->localName);
 
-        $file = $resource->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'file')->item(0);
+        $file = null;
+        foreach ($resource->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'file') as $fileElement) {
+            if ($fileElement->getAttribute('href') === 'ITEM001.xml') {
+                $file = $fileElement;
+            }
+        }
         $this->assertInstanceOf(DOMElement::class, $file);
-        $this->assertSame('ITEM001.xml', $file->getAttribute('href'));
     }
 
     #[Test]
@@ -113,7 +116,7 @@ final class PackageItemEditorTest extends TestCase
     }
 
     #[Test]
-    public function addItemDiscoversTheAssessmentTestFileFromTheManifestHref(): void
+    public function addItemKeepsTheAssessmentTestFileAtTheManifestHref(): void
     {
         $this->seedEmptyDraft(testHref: 'test/Main.xml');
 
@@ -123,7 +126,7 @@ final class PackageItemEditorTest extends TestCase
     }
 
     #[Test]
-    public function updateItemOverwritesOnlyTheItemFile(): void
+    public function updateItemReplacesTheItemAndLeavesManifestAndTestEquivalent(): void
     {
         $this->seedEmptyDraft();
         $this->editor->addItem($this->itemXml('X'));
@@ -156,6 +159,25 @@ final class PackageItemEditorTest extends TestCase
         $this->expectException(ResourceNotFoundException::class);
 
         $this->editor->updateItem('ITEM999', '<not-an-item/>');
+    }
+
+    #[Test]
+    public function updateItemCanReplaceAnItemWithUnsupportedContent(): void
+    {
+        $this->seedEmptyDraft();
+        $this->editor->addItem($this->itemXml('X'));
+        // Corrupt ITEM001 with an interaction type the typed parser does not support.
+        $this->filesystem->write(
+            self::FOLDER . '/ITEM001.xml',
+            $this->unsupportedInteractionItemXml('ITEM001'),
+        );
+
+        // The old content of the item being replaced is never parsed, so the
+        // update repairs the unsupported item instead of refusing.
+        $updated = $this->editor->updateItem('ITEM001', $this->itemXml('ITEM001', 'Hersteld'));
+
+        $this->assertSame('ITEM001', $updated->identifier);
+        $this->assertStringContainsString('Hersteld', $this->read('ITEM001.xml'));
     }
 
     #[Test]
@@ -214,6 +236,106 @@ final class PackageItemEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemRefusesAnItemWithAnUnsupportedInteraction(): void
+    {
+        $this->seedEmptyDraft();
+
+        $this->expectException(UnsupportedQtiConstructException::class);
+
+        $this->editor->addItem($this->unsupportedInteractionItemXml('X'));
+    }
+
+    #[Test]
+    public function addItemRefusesAnItemWithATemplateDeclaration(): void
+    {
+        $this->seedEmptyDraft();
+
+        $this->expectException(UnsupportedQtiConstructException::class);
+
+        $this->editor->addItem(sprintf(
+            '<qti-assessment-item xmlns="%s" identifier="X" title="Vraag" time-dependent="false">'
+            . '<qti-template-declaration identifier="T1" cardinality="single" base-type="integer"/>'
+            . '<qti-item-body><p>Vraag</p></qti-item-body></qti-assessment-item>',
+            self::ASI_NAMESPACE,
+        ));
+    }
+
+    #[Test]
+    public function addItemRefusesAnUnknownResponseProcessingTemplate(): void
+    {
+        $this->seedEmptyDraft();
+
+        $this->expectException(UnsupportedQtiConstructException::class);
+
+        $this->editor->addItem(sprintf(
+            '<qti-assessment-item xmlns="%s" identifier="X" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><p>Vraag</p></qti-item-body>'
+            . '<qti-response-processing template="https://example.com/custom_template.xml"/>'
+            . '</qti-assessment-item>',
+            self::ASI_NAMESPACE,
+        ));
+    }
+
+    #[Test]
+    public function editingRefusesWhenAnExistingItemIsUnsupported(): void
+    {
+        $this->seedEmptyDraft();
+        $this->editor->addItem($this->itemXml('X'));
+        $this->filesystem->write(
+            self::FOLDER . '/ITEM001.xml',
+            $this->unsupportedInteractionItemXml('ITEM001'),
+        );
+
+        // Regenerating would re-serialize ITEM001 and lose the unsupported
+        // interaction, so any other edit is refused.
+        $this->expectException(UnsupportedQtiConstructException::class);
+
+        $this->editor->addItem($this->itemXml('X'));
+    }
+
+    #[Test]
+    public function editingRefusesWhenTheTestContainsOutcomeProcessing(): void
+    {
+        $this->seedEmptyDraft();
+        $this->filesystem->write(
+            self::FOLDER . '/AssessmentTest.xml',
+            sprintf(
+                '<qti-assessment-test xmlns="%s" identifier="T" title="">'
+                . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+                . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+                . '</qti-test-part>'
+                . '<qti-outcome-processing><qti-set-outcome-value identifier="SCORE"/></qti-outcome-processing>'
+                . '</qti-assessment-test>',
+                self::ASI_NAMESPACE,
+            ),
+        );
+
+        $this->expectException(UnsupportedQtiConstructException::class);
+
+        $this->editor->addItem($this->itemXml('X'));
+    }
+
+    #[Test]
+    public function editingRefusesNestedSections(): void
+    {
+        $this->seedEmptyDraft();
+        $this->writeTest(
+            '<qti-assessment-section identifier="outer" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="ITEM_A" href="ITEM_A.xml"/>'
+            . '<qti-assessment-section identifier="inner" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="NESTED" href="NESTED.xml"/>'
+            . '</qti-assessment-section>'
+            . '</qti-assessment-section>',
+        );
+
+        // Nested sections are not representable in the typed model: regenerating
+        // would silently delete them, so the package is refused.
+        $this->expectException(UnsupportedQtiConstructException::class);
+
+        $this->editor->reorderItems(['ITEM_A']);
+    }
+
+    #[Test]
     public function reorderItemsRewritesTheSectionInTheGivenOrder(): void
     {
         $this->seedDraftWithItems();
@@ -224,7 +346,7 @@ final class PackageItemEditorTest extends TestCase
     }
 
     #[Test]
-    public function reorderItemsDiscoversTheAssessmentTestFileFromTheManifestHref(): void
+    public function reorderItemsKeepsTheAssessmentTestFileAtTheManifestHref(): void
     {
         $this->seedEmptyDraft(testHref: 'test/Main.xml');
         $this->editor->addItem($this->itemXml('X'));
@@ -294,31 +416,6 @@ final class PackageItemEditorTest extends TestCase
     }
 
     #[Test]
-    public function reorderItemsOnlyTouchesDirectChildrenAndLeavesNestedSectionsIntact(): void
-    {
-        $this->seedEmptyDraft();
-        $this->writeTest(
-            '<qti-assessment-section identifier="outer" title="" visible="true">'
-            . '<qti-assessment-item-ref identifier="ITEM_A" href="ITEM_A.xml"/>'
-            . '<qti-assessment-section identifier="inner" title="" visible="true">'
-            . '<qti-assessment-item-ref identifier="NESTED" href="NESTED.xml"/>'
-            . '</qti-assessment-section>'
-            . '<qti-assessment-item-ref identifier="ITEM_B" href="ITEM_B.xml"/>'
-            . '</qti-assessment-section>',
-        );
-
-        // Only ITEM_A and ITEM_B (direct children) are ours to reorder; NESTED belongs to
-        // the child section and must be left where it is.
-        $this->editor->reorderItems(['ITEM_B', 'ITEM_A']);
-
-        $this->assertSame(
-            ['ITEM_B', 'ITEM_A'],
-            $this->directChildItemRefIdentifiers('AssessmentTest.xml', 'outer'),
-        );
-        $this->assertContains('NESTED', $this->itemRefIdentifiers('AssessmentTest.xml'));
-    }
-
-    #[Test]
     public function reorderItemsThrowsWhenTheTestHasADuplicateItemRef(): void
     {
         $this->seedEmptyDraft();
@@ -349,12 +446,90 @@ final class PackageItemEditorTest extends TestCase
         $this->editor->reorderItems([]);
     }
 
+    #[Test]
+    public function updateItemCarriesOverMediaMetadataAndOtherItems(): void
+    {
+        $this->seedDraftWithMediaAndMetadata();
+
+        $this->editor->updateItem('ITEM002', $this->itemXml('ITEM002', 'Bijgewerkte vraag'));
+
+        // The edited item changed.
+        $this->assertStringContainsString('Bijgewerkte vraag', $this->read('ITEM002.xml'));
+
+        // The other item survived semantically: same identifier, title and image reference.
+        $item1 = $this->read('ITEM001.xml');
+        $this->assertStringContainsString('identifier="ITEM001"', $item1);
+        $this->assertStringContainsString('title="Vraag met afbeelding"', $item1);
+        $this->assertStringContainsString('resources/pic.png', $item1);
+
+        // Media kept its path and bytes.
+        $this->assertSame('PNGDATA123', $this->read('resources/pic.png'));
+
+        // Metadata resource and its dependency from the test resource survived.
+        $this->assertSame('<lom xmlns="http://ltsc.ieee.org/xsd/LOM"/>', trim(preg_replace('/^<\?xml[^>]*\?>\s*/', '', $this->read('metadata.xml')) ?? ''));
+        $manifest = $this->read('imsmanifest.xml');
+        $metadataResource = $this->findElement($manifest, self::MANIFEST_NAMESPACE, 'resource', 'META1');
+        $this->assertInstanceOf(DOMElement::class, $metadataResource);
+        $this->assertSame('resourcemetadata/xml', $metadataResource->getAttribute('type'));
+        $testResource = $this->findElement($manifest, self::MANIFEST_NAMESPACE, 'resource', 'test');
+        $this->assertInstanceOf(DOMElement::class, $testResource);
+        $this->assertStringContainsString('identifierref="META1"', $this->elementXml($testResource));
+
+        // The media file is still registered as a webcontent resource at its original path.
+        $this->assertStringContainsString('href="resources/pic.png"', $manifest);
+
+        // The item order is untouched.
+        $this->assertSame(['ITEM001', 'ITEM002'], $this->itemRefIdentifiers('AssessmentTest.xml'));
+    }
+
     private function seedDraftWithItems(): void
     {
         $this->seedEmptyDraft();
         $this->editor->addItem($this->itemXml('X'));
         $this->editor->addItem($this->itemXml('X'));
         $this->editor->addItem($this->itemXml('X'));
+    }
+
+    private function seedDraftWithMediaAndMetadata(): void
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="test" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml">'
+            . '<file href="AssessmentTest.xml"/><dependency identifierref="META1"/></resource>'
+            . '<resource identifier="ITEM001" type="imsqti_item_xmlv3p0" href="ITEM001.xml"><file href="ITEM001.xml"/></resource>'
+            . '<resource identifier="ITEM002" type="imsqti_item_xmlv3p0" href="ITEM002.xml"><file href="ITEM002.xml"/></resource>'
+            . '<resource identifier="RES1" type="webcontent" href="resources/pic.png"><file href="resources/pic.png"/></resource>'
+            . '<resource identifier="META1" type="resourcemetadata/xml" href="metadata.xml"><file href="metadata.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true">'
+            . '<qti-assessment-item-ref identifier="ITEM001" href="ITEM001.xml"/>'
+            . '<qti-assessment-item-ref identifier="ITEM002" href="ITEM002.xml"/>'
+            . '</qti-assessment-section></qti-test-part></qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $item1 = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="ITEM001" title="Vraag met afbeelding" time-dependent="false">'
+            . '<qti-item-body><p><img src="resources/pic.png" alt="Afbeelding"/></p></qti-item-body>'
+            . '</qti-assessment-item>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+        $this->filesystem->write(self::FOLDER . '/ITEM001.xml', $item1);
+        $this->filesystem->write(self::FOLDER . '/ITEM002.xml', $this->itemXml('ITEM002'));
+        $this->filesystem->write(self::FOLDER . '/resources/pic.png', 'PNGDATA123');
+        $this->filesystem->write(self::FOLDER . '/metadata.xml', '<lom xmlns="http://ltsc.ieee.org/xsd/LOM"/>');
     }
 
     /**
@@ -368,27 +543,6 @@ final class PackageItemEditorTest extends TestCase
         $identifiers = [];
         foreach ($dom->getElementsByTagNameNS(self::ASI_NAMESPACE, 'qti-assessment-item-ref') as $itemRef) {
             $identifiers[] = $itemRef->getAttribute('identifier');
-        }
-
-        return $identifiers;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function directChildItemRefIdentifiers(string $path, string $sectionIdentifier): array
-    {
-        $section = $this->findElement($this->read($path), self::ASI_NAMESPACE, 'qti-assessment-section', $sectionIdentifier);
-
-        $identifiers = [];
-        foreach ($section?->childNodes ?? [] as $childNode) {
-            if (
-                $childNode instanceof DOMElement
-                && $childNode->namespaceURI === self::ASI_NAMESPACE
-                && $childNode->localName === 'qti-assessment-item-ref'
-            ) {
-                $identifiers[] = $childNode->getAttribute('identifier');
-            }
         }
 
         return $identifiers;
@@ -434,15 +588,33 @@ final class PackageItemEditorTest extends TestCase
         $this->filesystem->write(self::FOLDER . '/' . $testHref, $test);
     }
 
-    private function itemXml(string $identifier, string $title = 'Vraag'): string
-    {
+    private function itemXml(
+        string $identifier,
+        string $title = 'Vraag',
+        string $timeDependent = 'false',
+        ?string $language = null,
+    ): string {
         return sprintf(
             '<?xml version="1.0" encoding="UTF-8"?>'
-            . '<qti-assessment-item xmlns="%s" identifier="%s" title="%s" time-dependent="false">'
-            . '<qti-item-body/></qti-assessment-item>',
+            . '<qti-assessment-item xmlns="%s" identifier="%s" title="%s" time-dependent="%s"%s>'
+            . '<qti-item-body><p>Vraag tekst</p></qti-item-body></qti-assessment-item>',
             self::ASI_NAMESPACE,
             $identifier,
             $title,
+            $timeDependent,
+            $language !== null ? sprintf(' xml:lang="%s"', $language) : '',
+        );
+    }
+
+    private function unsupportedInteractionItemXml(string $identifier): string
+    {
+        return sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="%s" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><qti-slider-interaction response-identifier="RESPONSE" lower-bound="0" upper-bound="10"/></qti-item-body>'
+            . '</qti-assessment-item>',
+            self::ASI_NAMESPACE,
+            $identifier,
         );
     }
 
@@ -463,5 +635,10 @@ final class PackageItemEditorTest extends TestCase
         }
 
         return null;
+    }
+
+    private function elementXml(DOMElement $element): string
+    {
+        return (string) $element->ownerDocument?->saveXML($element);
     }
 }

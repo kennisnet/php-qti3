@@ -10,7 +10,6 @@ use Qti3\Package\Model\Manifest\Manifest;
 use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Model\Manifest\ManifestResource;
 use Qti3\Package\Model\Metadata\Metadata;
-use Qti3\Package\Model\PackageFile\AssessmentTestFile;
 use Qti3\Package\Model\PackageFile\PackageFile;
 use Qti3\Package\Model\PackageFile\PackageFileCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -56,13 +55,7 @@ readonly class QtiPackageReader implements IQtiPackageFactory
                 $fileContent = $reader->getFileContent($manifestFile->href);
 
                 if ($extension === 'xml') {
-                    // The test's main file gets its dedicated model, so the domain
-                    // can edit item refs through it (see QtiPackage::addItem()).
-                    $isAssessmentTestFile = $manifestResource->type === ResourceType::ASSESSMENT_TEST
-                        && $manifestFile->href === $manifestResource->href;
-                    $packageFile = $isAssessmentTestFile
-                        ? new AssessmentTestFile($manifestFile->href, $fileContent, $this->xmlReader)
-                        : new XmlFile($manifestFile->href, $fileContent, $this->xmlReader);
+                    $packageFile = new XmlFile($manifestFile->href, $fileContent, $this->xmlReader);
                 } else {
                     $packageFile = new PackageFile($manifestFile->href, $fileContent);
                 }

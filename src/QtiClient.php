@@ -17,7 +17,9 @@ use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
+use Qti3\AssessmentItem\Service\AssessmentItemSupportValidator;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\AssessmentTest\Service\AssessmentTestSupportValidator;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
@@ -172,8 +174,9 @@ final class QtiClient
 
     /**
      * Item editor for an already extracted package folder. Every edit loads
-     * the package into the {@see \Qti3\Package\Model\QtiPackage} domain model,
-     * applies the change on the model and writes the package back.
+     * the package into the typed {@see \Qti3\AssessmentTest\Model\AssessmentTest}
+     * and {@see \Qti3\AssessmentItem\Model\AssessmentItem} models, applies the
+     * change on those models, and saves by generating a new package from them.
      */
     public function getItemEditor(string $folder): IItemEditor
     {
@@ -183,6 +186,11 @@ final class QtiClient
             $this->filesystemPackageFactory,
             $this->getAssessmentItemValidator(),
             new ItemIdentifierGenerator(),
+            $this->getTestBuilder(),
+            $this->getAssessmentItemParser(),
+            new AssessmentTestSupportValidator(),
+            new AssessmentItemSupportValidator(),
+            $this->getQtiPackageBuilder(),
             $this->getXmlReader(),
         );
     }
