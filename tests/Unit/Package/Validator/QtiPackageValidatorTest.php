@@ -22,7 +22,7 @@ use Qti3\Package\Model\Manifest\ManifestFactory;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
-use Qti3\Package\Validator\ResponseProcessingValidator;
+use Qti3\AssessmentItem\Service\ResponseProcessingValidator;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\Tests\Unit\Package\Model\Manifest\ManifestMock;

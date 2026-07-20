@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Service\AssessmentItemSupportValidator;
-use Qti3\Package\Exception\UnsupportedQtiConstructException;
+use Qti3\Shared\Exception\UnsupportedQtiConstructException;
 
 final class AssessmentItemSupportValidatorTest extends TestCase
 {

@@ -6,7 +6,7 @@ namespace Qti3\AssessmentItem\Service;
 
 use DOMElement;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
-use Qti3\Package\Exception\UnsupportedQtiConstructException;
+use Qti3\Shared\Exception\UnsupportedQtiConstructException;
 use Qti3\Shared\Collection\StringCollection;
 
 /**

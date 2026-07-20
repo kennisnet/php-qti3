@@ -6,8 +6,8 @@ namespace Qti3\AssessmentTest\Model\Section;
 
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
-use Qti3\Package\Exception\InvalidItemOrderException;
-use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
+use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\QtiElement;
@@ -39,7 +39,7 @@ class AssessmentSection extends QtiElement
         foreach ($this->assessmentItemRefs as $itemRef) {
             $identifier = (string) $itemRef->identifier;
             if (isset($itemRefsByIdentifier[$identifier])) {
-                throw new InvalidQtiPackageException(new StringCollection([sprintf('Assessment section has a duplicate item ref "%s"', $identifier)]));
+                throw new InvalidAssessmentTestException(new StringCollection([sprintf('Assessment section has a duplicate item ref "%s"', $identifier)]));
             }
             $itemRefsByIdentifier[$identifier] = $itemRef;
             $currentIdentifiers[] = $identifier;

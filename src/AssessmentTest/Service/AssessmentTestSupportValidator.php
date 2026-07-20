@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Qti3\AssessmentTest\Service;
 
 use DOMElement;
-use Qti3\Package\Exception\UnsupportedQtiConstructException;
+use Qti3\Shared\Exception\UnsupportedQtiConstructException;
 use Qti3\Shared\Collection\StringCollection;
 
 /**

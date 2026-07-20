@@ -11,7 +11,7 @@ use Qti3\AssessmentTest\Model\Feedback\TestFeedbackCollection;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\Section\AssessmentSection;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
-use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
@@ -66,7 +66,7 @@ class AssessmentTest extends QtiElement
     {
         foreach ($this->getItemRefs() as $existingItemRef) {
             if ($existingItemRef->identifier->equals($itemRef->identifier)) {
-                throw new InvalidQtiPackageException(new StringCollection([sprintf('Test already contains an item with identifier "%s"', $itemRef->identifier)]));
+                throw new InvalidAssessmentTestException(new StringCollection([sprintf('Test already contains an item with identifier "%s"', $itemRef->identifier)]));
             }
         }
 
@@ -97,7 +97,7 @@ class AssessmentTest extends QtiElement
     {
         $section = $this->testParts->first()?->sections->first();
         if (!$section instanceof AssessmentSection) {
-            throw new InvalidQtiPackageException(new StringCollection(['Assessment test has no section']));
+            throw new InvalidAssessmentTestException(new StringCollection(['Assessment test has no section']));
         }
 
         return $section;

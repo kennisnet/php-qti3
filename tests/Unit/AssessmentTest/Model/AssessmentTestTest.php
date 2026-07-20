@@ -9,8 +9,8 @@ use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
-use Qti3\Package\Exception\InvalidItemOrderException;
-use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
+use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\Tests\Unit\AssessmentItem\Model\AssessmentItemStub;
 use PHPUnit\Framework\Attributes\Test;
@@ -100,7 +100,7 @@ class AssessmentTestTest extends TestCase
     {
         $assessmentTest = AssessmentTestStub::assessmentTest();
 
-        $this->expectException(InvalidQtiPackageException::class);
+        $this->expectException(InvalidAssessmentTestException::class);
 
         $assessmentTest->addItemRef(new AssessmentItemRef(
             AssessmentItemId::fromString('10fe19b2-8b6e-53fa-8522-1220c67ddce1'),
@@ -117,7 +117,7 @@ class AssessmentTestTest extends TestCase
             new TestPartCollection(),
         );
 
-        $this->expectException(InvalidQtiPackageException::class);
+        $this->expectException(InvalidAssessmentTestException::class);
 
         $assessmentTest->addItemRef(new AssessmentItemRef(AssessmentItemId::fromString('ITEM001'), 'ITEM001.xml'));
     }

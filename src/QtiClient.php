@@ -30,29 +30,29 @@ use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\Package\Model\IItemEditor;
+use Qti3\AssessmentTest\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
-use Qti3\Package\Service\ItemIdentifierGenerator;
-use Qti3\Package\Service\PackageItemEditor;
-use Qti3\Package\Service\QtiPackageBuilder;
+use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
+use Qti3\AssessmentTest\Service\TestItemEditor;
+use Qti3\AssessmentTest\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\Resource\IResourceValidator;
-use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\Manifest\OrganizationsBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
+use Qti3\Shared\Xml\Builder\IXmlBuilder;
+use Qti3\AssessmentItem\Service\ItemResourceBuilder;
+use Qti3\Package\Service\Manifest\ManifestBuilder;
+use Qti3\Package\Service\Manifest\MetadataBuilder;
+use Qti3\Package\Service\Manifest\OrganizationsBuilder;
+use Qti3\Package\Service\Manifest\ResourcesBuilder;
+use Qti3\AssessmentTest\Service\TestResourceBuilder;
+use Qti3\Shared\Xml\Builder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
-use Qti3\Package\Validator\AssessmentItemValidator;
-use Qti3\Package\Validator\IAssessmentItemValidator;
+use Qti3\AssessmentItem\Service\AssessmentItemValidator;
+use Qti3\AssessmentItem\Service\IAssessmentItemValidator;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
-use Qti3\Package\Validator\ResponseProcessingValidator;
+use Qti3\AssessmentItem\Service\ResponseProcessingValidator;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlReader;
 
@@ -180,7 +180,7 @@ final class QtiClient
      */
     public function getItemEditor(string $folder): IItemEditor
     {
-        return new PackageItemEditor(
+        return new TestItemEditor(
             $folder,
             $this->getQtiPackageReader(),
             $this->filesystemPackageFactory,

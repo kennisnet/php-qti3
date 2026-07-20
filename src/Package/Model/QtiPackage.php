@@ -59,22 +59,22 @@ class QtiPackage
         return $assessmentTestFile?->metadata;
     }
 
-    public function getFile(string $itemFilepath): PackageFile
+    public function getFile(string $filepath): PackageFile
     {
         /** @var PackageFile $file */
         foreach ($this->getFiles() as $file) {
-            if ($file->getFilepath() === $itemFilepath) {
+            if ($file->getFilepath() === $filepath) {
                 return $file;
             }
         }
 
-        throw new ResourceNotFoundException(PackageFile::class, $itemFilepath);
+        throw new ResourceNotFoundException(PackageFile::class, $filepath);
     }
 
-    public function hasFile(string $itemFilepath): bool
+    public function hasFile(string $filepath): bool
     {
         try {
-            $this->getFile($itemFilepath);
+            $this->getFile($filepath);
             return true;
         } catch (ResourceNotFoundException) {
             return false;
