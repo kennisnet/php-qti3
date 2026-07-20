@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\AssessmentItem\Service;
+namespace Qti3\Tests\Unit\Package\Service\QtiPackageBuilder;
 
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\Resource\Resource;
-use Qti3\AssessmentItem\Service\ItemResourceBuilder;
-use Qti3\Shared\Xml\Builder\XmlBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\Tests\Unit\AssessmentItem\Model\AssessmentItemStub;
 use PHPUnit\Framework\Attributes\Test;

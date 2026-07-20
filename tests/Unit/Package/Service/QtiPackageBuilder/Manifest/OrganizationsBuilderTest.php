@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Package\Service\Manifest;
+namespace Qti3\Tests\Unit\Package\Service\QtiPackageBuilder\Manifest;
 
-use Qti3\Package\Service\Manifest\OrganizationsBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\OrganizationsBuilder;
 use DOMDocument;
 use DOMElement;
 use PHPUnit\Framework\Attributes\Test;

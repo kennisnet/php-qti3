@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Package\Service\Manifest;
+namespace Qti3\Package\Service\QtiPackageBuilder\Manifest;
 
 use DOMDocument;
 use DOMElement;

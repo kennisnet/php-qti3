@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\AssessmentItem\Service;
+namespace Qti3\Tests\Unit\Package\Validator;
 
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Validator\QtiPackageValidationError;
-use Qti3\AssessmentItem\Service\ResponseProcessingValidator;
+use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Tests\Unit\Package\Model\QtiPackageMock;
 use PHPUnit\Framework\Attributes\Test;

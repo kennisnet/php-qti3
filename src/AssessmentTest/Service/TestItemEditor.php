@@ -22,6 +22,7 @@ use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
 use Qti3\Package\IQtiPackageFactory;
 use Qti3\AssessmentTest\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
+use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;

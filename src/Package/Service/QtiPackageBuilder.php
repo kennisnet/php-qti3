@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\AssessmentTest\Service;
+namespace Qti3\Package\Service;
 
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentTest\Model\AssessmentTest;
@@ -20,9 +20,9 @@ use Qti3\Package\Model\Resource\Webcontent;
 use Qti3\Package\Model\Resource\WebcontentCollection;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Validator\Resource\IResourceValidator;
-use Qti3\AssessmentItem\Service\ItemResourceBuilder;
-use Qti3\Package\Service\Manifest\ManifestBuilder;
-use Qti3\AssessmentTest\Service\TestResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Shared\Model\IQtiResourceProvider;
 use Qti3\Shared\Model\IXmlElement;
 use Qti3\Shared\Model\QtiResource;

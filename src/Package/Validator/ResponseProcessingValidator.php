@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Qti3\AssessmentItem\Service;
+namespace Qti3\Package\Validator;
 
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Model\PackageFile\XmlFile;
-use Qti3\Package\Validator\IQtiPackageValidator;
-use Qti3\Package\Validator\QtiPackageValidationError;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\AssessmentTest\Service;
+namespace Qti3\Tests\Unit\Package\Service;
 
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
@@ -12,11 +12,11 @@ use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
-use Qti3\AssessmentTest\Service\QtiPackageBuilder;
+use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\Resource\IResourceValidator;
-use Qti3\AssessmentItem\Service\ItemResourceBuilder;
-use Qti3\Package\Service\Manifest\ManifestBuilder;
-use Qti3\AssessmentTest\Service\TestResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Tests\Unit\AssessmentItem\Model\AssessmentItemStub;
 use Qti3\Tests\Unit\AssessmentTest\Model\AssessmentTestStub;
 use Qti3\Tests\Unit\Package\Model\Manifest\ManifestMock;

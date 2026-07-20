@@ -11,7 +11,7 @@ readonly class QtiPackageValidator
 {
     public function __construct(
         private IQtiSyntaxValidator $syntaxValidator,
-        private IQtiPackageValidator $contentValidator,
+        private ResponseProcessingValidator $responseProcessingValidator,
     ) {}
 
     public function validate(QtiPackage $qtiPackage): StringCollection
@@ -19,7 +19,7 @@ readonly class QtiPackageValidator
         /** @var array<int, IQtiPackageValidator> $validators */
         $validators = [
             $this->syntaxValidator,
-            $this->contentValidator,
+            $this->responseProcessingValidator,
         ];
 
         $errors = new StringCollection();

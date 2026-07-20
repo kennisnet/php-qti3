@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Shared\Xml\Builder;
+namespace Qti3\Tests\Unit\Package\Service\QtiPackageBuilder;
 
 use DOMDocument;
-use Qti3\Shared\Xml\Builder\RecursiveXMLSerializer;
+use Qti3\Package\Service\QtiPackageBuilder\RecursiveXMLSerializer;
 use Qti3\Shared\Model\Comment;
 use Qti3\Shared\Model\IXmlElement;
 use Qti3\Shared\Model\TextNode;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Package\Service\Manifest;
+namespace Qti3\Tests\Unit\Package\Service\QtiPackageBuilder\Manifest;
 
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\Manifest;
@@ -12,11 +12,11 @@ use Qti3\Package\Model\PackageFile\PackageFileCollection;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\Package\Service\Manifest\ManifestBuilder;
-use Qti3\Package\Service\Manifest\MetadataBuilder;
-use Qti3\Package\Service\Manifest\OrganizationsBuilder;
-use Qti3\Package\Service\Manifest\ResourcesBuilder;
-use Qti3\Shared\Xml\Builder\XmlBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\OrganizationsBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

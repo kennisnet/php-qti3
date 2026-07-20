@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\AssessmentTest\Service;
+namespace Qti3\Package\Service;
 
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
@@ -18,7 +18,7 @@ use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\AssessmentTest\Service\TestResourceBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 
 class QtiPackageEnhancer

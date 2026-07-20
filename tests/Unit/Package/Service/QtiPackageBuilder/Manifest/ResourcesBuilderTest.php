@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Package\Service\Manifest;
+namespace Qti3\Tests\Unit\Package\Service\QtiPackageBuilder\Manifest;
 
 use Qti3\Package\Model\Manifest\ManifestResource;
 use Qti3\Package\Model\Manifest\ManifestResourceCollection;
@@ -11,7 +11,7 @@ use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\Manifest\ManifestResourceFile;
 use Qti3\Package\Model\Manifest\ManifestResourceFileCollection;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\Package\Service\Manifest\ResourcesBuilder;
+use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
 use DOMDocument;
 use DOMElement;
 use PHPUnit\Framework\Attributes\Test;
