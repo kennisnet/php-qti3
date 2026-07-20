@@ -14,6 +14,7 @@ use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\AssessmentTest\Service\TestBuilder;
+use Qti3\AssessmentTest\Service\AssessmentTestSupportValidator;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -30,6 +31,7 @@ class QtiPackageReaderIntegrationTest extends TestCase
         
         $builder = new TestBuilder(
             $assessmentTestParser,
+            new AssessmentTestSupportValidator(),
         );
 
         $testXml = '<qti-assessment-test identifier="test" title="Test Title" xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" />';

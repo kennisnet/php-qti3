@@ -83,6 +83,29 @@ class Manifest extends XmlFile
     }
 
     /**
+     * Append a `<dependency>` to an existing resource node, e.g. to record that
+     * an assessment test now depends on a newly added item resource.
+     */
+    public function addDependency(string $resourceIdentifier, string $dependencyRef): void
+    {
+        $dependencyNode = $this->createManifestElement('dependency');
+        $dependencyNode->setAttribute('identifierref', $dependencyRef);
+
+        $this->findResourceNode($resourceIdentifier)->appendChild($dependencyNode);
+    }
+
+    private function findResourceNode(string $identifier): DOMElement
+    {
+        foreach ($this->getXml()->getElementsByTagName('resource') as $resourceNode) {
+            if ($resourceNode instanceof DOMElement && $resourceNode->getAttribute('identifier') === $identifier) {
+                return $resourceNode;
+            }
+        }
+
+        throw new RuntimeException(sprintf('Manifest has no resource with identifier %s', $identifier));
+    }
+
+    /**
      * New elements must live in the manifest's own namespace, or namespaced
      * consumers (validators, other QTI tooling) will not see them.
      */

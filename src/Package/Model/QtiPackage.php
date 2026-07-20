@@ -27,6 +27,33 @@ class QtiPackage
         $this->manifest->addResource(ManifestResource::fromResource($resource));
     }
 
+    /**
+     * Return the resource with the given identifier, optionally constrained to
+     * a resource type.
+     *
+     * @throws ResourceNotFoundException when no such resource exists
+     */
+    public function getResource(string $identifier, ?ResourceType $type = null): Resource
+    {
+        foreach ($this->resources as $resource) {
+            if ($resource->identifier === $identifier && ($type === null || $resource->type === $type)) {
+                return $resource;
+            }
+        }
+
+        throw new ResourceNotFoundException(Resource::class, $identifier);
+    }
+
+    public function hasResource(string $identifier, ?ResourceType $type = null): bool
+    {
+        try {
+            $this->getResource($identifier, $type);
+            return true;
+        } catch (ResourceNotFoundException) {
+            return false;
+        }
+    }
+
     public function getFiles(): PackageFileCollection
     {
         $files = new PackageFileCollection();

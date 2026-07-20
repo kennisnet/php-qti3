@@ -5,7 +5,7 @@ namespace Qti3\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
-use Qti3\AssessmentTest\Model\IItemEditor;
+use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\AssessmentItem\Service\AssessmentItemValidator;
@@ -76,11 +76,18 @@ class QtiClientTest extends TestCase
         $this->assertSame($factory, $container->getFilesystemPackageFactory());
     }
 
-    public function testGetItemEditorReturnsAnEditorBoundToTheFolder(): void
+    public function testGetPackageEditorReturnsInstance(): void
     {
         $client = $this->createClient();
 
-        $this->assertInstanceOf(IItemEditor::class, $client->getItemEditor('qti/v1'));
+        $this->assertInstanceOf(PackageEditor::class, $client->getPackageEditor());
+    }
+
+    public function testGetPackageEditorReturnsSameInstance(): void
+    {
+        $client = $this->createClient();
+
+        $this->assertSame($client->getPackageEditor(), $client->getPackageEditor());
     }
 
     public function testGetAssessmentItemValidatorReturnsSameInstance(): void

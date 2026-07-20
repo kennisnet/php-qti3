@@ -17,7 +17,6 @@ use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
-use Qti3\AssessmentItem\Service\AssessmentItemSupportValidator;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\AssessmentTest\Service\AssessmentTestSupportValidator;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
@@ -30,13 +29,13 @@ use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\AssessmentTest\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
-use Qti3\AssessmentTest\Service\TestItemEditor;
 use Qti3\Package\Service\QtiPackageBuilder;
+use Qti3\Package\Service\WebcontentProcessor;
+use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
@@ -61,6 +60,8 @@ final class QtiClient
     private ?QtiPackageReader $qtiPackageReader = null;
     private ?IZipPackageFactory $zipPackageFactory = null;
     private ?QtiPackageBuilder $qtiPackageBuilder = null;
+    private ?WebcontentProcessor $webcontentProcessor = null;
+    private ?PackageEditor $packageEditor = null;
     private ?IXmlBuilder $xmlBuilder = null;
     private ?ResponseProcessor $responseProcessor = null;
     private ?QtiPackageValidator $qtiPackageValidator = null;
@@ -108,6 +109,7 @@ final class QtiClient
             new ResponseProcessingParser(new ProcessingElementParser($qtiExpressionParser)),
             new StylesheetParser(),
             new ModalFeedbackParser(new StylesheetParser()),
+            $this->getXmlReader(),
         );
     }
 
@@ -151,6 +153,7 @@ final class QtiClient
     {
         return $this->testBuilder ??= new TestBuilder(
             $this->getAssessmentTestParser(),
+            new AssessmentTestSupportValidator(),
         );
     }
 
@@ -173,25 +176,20 @@ final class QtiClient
     }
 
     /**
-     * Item editor for an already extracted package folder. Every edit loads
-     * the package into the typed {@see \Qti3\AssessmentTest\Model\AssessmentTest}
-     * and {@see \Qti3\AssessmentItem\Model\AssessmentItem} models, applies the
-     * change on those models, and saves by generating a new package from them.
+     * Domain service that edits the assessment items of a {@see \Qti3\Package\Model\QtiPackage}
+     * in place. The caller loads the package and, after editing, saves it
+     * through a package writer; the editor itself does no filesystem I/O. Each
+     * edit is surgical: it touches only the assessment test being edited and
+     * the item that is added or updated.
      */
-    public function getItemEditor(string $folder): IItemEditor
+    public function getPackageEditor(): PackageEditor
     {
-        return new TestItemEditor(
-            $folder,
-            $this->getQtiPackageReader(),
-            $this->filesystemPackageFactory,
-            $this->getAssessmentItemValidator(),
-            new ItemIdentifierGenerator(),
+        return $this->packageEditor ??= new PackageEditor(
             $this->getTestBuilder(),
-            $this->getAssessmentItemParser(),
-            new AssessmentTestSupportValidator(),
-            new AssessmentItemSupportValidator(),
-            $this->getQtiPackageBuilder(),
-            $this->getXmlReader(),
+            new ItemIdentifierGenerator(),
+            $this->getTestResourceBuilder(),
+            $this->getItemResourceBuilder(),
+            $this->getWebcontentProcessor(),
         );
     }
 
@@ -206,6 +204,13 @@ final class QtiClient
             $this->getManifestBuilder(),
             $this->getTestResourceBuilder(),
             $this->getItemResourceBuilder(),
+            $this->getWebcontentProcessor(),
+        );
+    }
+
+    public function getWebcontentProcessor(): WebcontentProcessor
+    {
+        return $this->webcontentProcessor ??= new WebcontentProcessor(
             $this->resourceValidator,
             $this->resourceDownloader,
         );

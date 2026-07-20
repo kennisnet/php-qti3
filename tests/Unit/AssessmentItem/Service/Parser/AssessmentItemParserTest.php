@@ -26,6 +26,7 @@ use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
 use Qti3\AssessmentItem\Service\Parser\StylesheetParser;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
+use Qti3\Shared\Xml\Reader\XmlReader;
 
 class AssessmentItemParserTest extends TestCase
 {
@@ -48,6 +49,7 @@ class AssessmentItemParserTest extends TestCase
             ),
             new StylesheetParser(),
             new ModalFeedbackParser(new StylesheetParser()),
+            new XmlReader(),
         );
     }
 
@@ -165,5 +167,28 @@ class AssessmentItemParserTest extends TestCase
         $this->expectExceptionMessage('Expected tag "qti-assessment-item", got "wrong-tag"');
 
         $this->parser->parse($element);
+    }
+
+    #[Test]
+    public function parseFromStringReadsAndParsesTheDocumentElement(): void
+    {
+        $result = $this->parser->parseFromString(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item identifier="item-from-string" title="Uit string">'
+            . '<qti-item-body><div>Content</div></qti-item-body>'
+            . '</qti-assessment-item>',
+        );
+
+        $this->assertInstanceOf(AssessmentItem::class, $result);
+        $this->assertSame('item-from-string', (string) $result->identifier);
+        $this->assertSame('Uit string', $result->title);
+    }
+
+    #[Test]
+    public function parseFromStringThrowsParseErrorOnMalformedXml(): void
+    {
+        $this->expectException(ParseError::class);
+
+        $this->parser->parseFromString('<qti-assessment-item><unclosed>');
     }
 }

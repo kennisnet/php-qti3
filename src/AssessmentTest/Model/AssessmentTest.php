@@ -60,9 +60,11 @@ class AssessmentTest extends QtiElement
     }
 
     /**
-     * Add an item to the test: the item ref is appended to the first section.
+     * Add an item to the test: the item ref is added to the first section.
+     * With the default position (-1) it is appended; a zero-based position
+     * inserts it at that index within the section.
      */
-    public function addItemRef(AssessmentItemRef $itemRef): void
+    public function addItemRef(AssessmentItemRef $itemRef, int $position = -1): void
     {
         foreach ($this->getItemRefs() as $existingItemRef) {
             if ($existingItemRef->identifier->equals($itemRef->identifier)) {
@@ -70,7 +72,7 @@ class AssessmentTest extends QtiElement
             }
         }
 
-        $this->getSection()->addItemRef($itemRef);
+        $this->getSection()->addItemRef($itemRef, $position);
     }
 
     /**

@@ -13,6 +13,8 @@ use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use Qti3\AssessmentItem\Model\Feedback\ModalFeedback;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Xml\Reader\IXmlReader;
+use Qti3\Shared\Xml\Reader\XmlParsingException;
 use DOMElement;
 
 class AssessmentItemParser extends AbstractParser
@@ -24,7 +26,33 @@ class AssessmentItemParser extends AbstractParser
         private readonly ResponseProcessingParser $responseProcessingParser,
         private readonly StylesheetParser $stylesheetParser,
         private readonly ModalFeedbackParser $modalFeedbackParser,
+        private readonly IXmlReader $xmlReader,
     ) {}
+
+    /**
+     * Parse an assessment item from its XML string. Convenience wrapper around
+     * {@see self::parse()}: it reads the XML and parses the document element.
+     * The identifier is taken from the XML as-is (assigning one is the caller's
+     * concern). A malformed document surfaces as a {@see ParseError}, like every
+     * other parse failure.
+     *
+     * @throws ParseError
+     */
+    public function parseFromString(string $xml): AssessmentItem
+    {
+        try {
+            $document = $this->xmlReader->read($xml);
+        } catch (XmlParsingException $exception) {
+            throw new ParseError('Invalid assessment item XML: ' . $exception->getMessage(), 0, $exception);
+        }
+
+        $element = $document->documentElement;
+        if (!$element instanceof DOMElement) {
+            throw new ParseError('Assessment item XML has no document element'); // @codeCoverageIgnore
+        }
+
+        return $this->parse($element);
+    }
 
     public function parse(DOMElement $element): AssessmentItem
     {
