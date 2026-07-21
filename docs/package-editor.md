@@ -186,5 +186,7 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
   unsupported construct does not block editing.
 - **Media** referenced by an added or updated item is carried over when the file
   is already in the package, or registered as new webcontent otherwise, without
-  duplicating resources.
+  duplicating resources. Only files already in the package, `data:` URIs and
+  `http(s)` URLs are accepted as media sources; a local filesystem path in item
+  content (e.g. `../secret` or `/etc/passwd`) is refused rather than read.
 ```

@@ -31,7 +31,9 @@ class AssessmentItem extends QtiElement
         public readonly bool $adaptive = false,
         public readonly string $language = 'nl-NL',
     ) {
-        $this->stylesheet = $stylesheet ?? new Stylesheet(__DIR__ . '/../Resources/stylesheet.css');
+        // The default stylesheet is a library asset, so it may be read from the
+        // local filesystem; a stylesheet parsed from item content is not.
+        $this->stylesheet = $stylesheet ?? new Stylesheet(__DIR__ . '/../Resources/stylesheet.css', trusted: true);
     }
 
     /**

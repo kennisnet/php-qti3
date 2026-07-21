@@ -14,11 +14,17 @@ class Stylesheet extends QtiElement implements IQtiResourceProvider
 
     public function __construct(
         public readonly string $filePath,
+        private readonly bool $trusted = false,
     ) {}
 
     public function getSource(): ?string
     {
         return $this->filePath;
+    }
+
+    public function isTrustedSource(): bool
+    {
+        return $this->trusted;
     }
 
     public function isBinary(): bool

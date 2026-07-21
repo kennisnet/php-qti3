@@ -376,6 +376,23 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemRefusesLocalFilePathReferencesInItemMedia(): void
+    {
+        $package = $this->emptyDraft();
+
+        $added = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', imageSrc: '/etc/passwd'));
+
+        $manifest = (string) $package->manifest;
+        // The local/traversal path is never registered as a resource...
+        $this->assertStringNotContainsString('passwd', $manifest);
+        // ...while the bundled (trusted) stylesheet still is.
+        $this->assertStringContainsString('type="webcontent"', $manifest);
+        $this->assertStringContainsString('.css', $manifest);
+        // The item itself was still added.
+        $this->assertSame('ITEM001', $added->identifier);
+    }
+
+    #[Test]
     public function updateItemKeepsMediaAlreadyInThePackageWithoutDuplicatingIt(): void
     {
         $package = $this->draftWithMedia();

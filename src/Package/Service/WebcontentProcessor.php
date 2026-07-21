@@ -155,23 +155,36 @@ final readonly class WebcontentProcessor
             return;
         }
 
-        $filename =
-            md5($source) . '.' .
-            pathinfo($source, PATHINFO_EXTENSION);
-
         $resource = new QtiResource(
             type: 'webcontent',
             originalPath: $source,
             relativePath: 'resources/',
-            filename: $filename,
+            filename: md5($source) . '.' . pathinfo($source, PATHINFO_EXTENSION),
             isBinary: $resourceProvider->isBinary(),
         );
-        try {
-            $this->resourceValidator->validate($resource);
-            $resourceProvider->setResource($resource);
-        } catch (Exception $e) {
-            $warnings->add($e->getMessage());
+
+        // A remote reference is validated before it is accepted (and later
+        // downloaded).
+        if (preg_match('~^https?://~i', $source) === 1) {
+            try {
+                $this->resourceValidator->validate($resource);
+                $resourceProvider->setResource($resource);
+            } catch (Exception $e) {
+                $warnings->add($e->getMessage());
+            }
+            return;
         }
+
+        // Any other source is a local filesystem path. Only a library-provided
+        // (trusted) asset such as the default stylesheet may be read from disk;
+        // a local path coming from item content is refused so it can never read
+        // an arbitrary file (e.g. "/etc/passwd" or "../secret") into the package.
+        if (!$resourceProvider->isTrustedSource()) {
+            $warnings->add(sprintf('Refused local file reference "%s": only in-package files, data URIs and http(s) URLs are allowed', $source));
+            return;
+        }
+
+        $resourceProvider->setResource($resource);
     }
 
     private function contentFor(string $originalPath, ?QtiPackage $sourcePackage): IFileContent
