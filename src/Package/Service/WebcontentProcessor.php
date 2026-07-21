@@ -53,7 +53,7 @@ final readonly class WebcontentProcessor
             if (!$webcontentFile) {
                 $webcontentFile = new Webcontent(
                     $qtiResource->originalPath,
-                    sprintf('RESOURCE%03d', $webcontent->count() + 1),
+                    $this->nextWebcontentIdentifier($webcontent, $sourcePackage),
                     $qtiResource->relativePath . $qtiResource->filename,
                     $this->contentFor($qtiResource->originalPath, $sourcePackage),
                     $qtiResource->isBinary,
@@ -95,6 +95,32 @@ final readonly class WebcontentProcessor
         }
 
         return [$dependencies, $newWebcontent];
+    }
+
+    /**
+     * The next free `RESOURCEnnn` identifier. When editing an existing package
+     * the source may already contain webcontent resources, so an identifier is
+     * only accepted once it collides with neither the current collection nor a
+     * resource already in the source package — otherwise a new media file could
+     * be handed an identifier that is already taken (e.g. RESOURCE001), yielding
+     * a duplicate resource and an invalid manifest.
+     */
+    private function nextWebcontentIdentifier(WebcontentCollection $webcontent, ?QtiPackage $sourcePackage): string
+    {
+        $used = [];
+        foreach ($webcontent as $existing) {
+            $used[$existing->identifier] = true;
+        }
+        foreach ($sourcePackage?->resources ?? [] as $resource) {
+            $used[$resource->identifier] = true;
+        }
+
+        $index = 1;
+        while (isset($used[$identifier = sprintf('RESOURCE%03d', $index)])) {
+            $index++;
+        }
+
+        return $identifier;
     }
 
     private function resourceByHref(QtiPackage $package, ?string $href): ?Resource

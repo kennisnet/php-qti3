@@ -188,6 +188,7 @@ final class QtiClient
             $this->getTestResourceBuilder(),
             $this->getItemResourceBuilder(),
             $this->getWebcontentProcessor(),
+            $this->getAssessmentItemParser(),
         );
     }
 

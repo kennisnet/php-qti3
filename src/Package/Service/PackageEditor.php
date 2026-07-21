@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
+use Qti3\AssessmentItem\Service\Parser\AssessmentItemParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\AssessmentTest\Model\AssessmentTest;
@@ -47,6 +48,7 @@ final readonly class PackageEditor
         private TestResourceBuilder $testResourceBuilder,
         private ItemResourceBuilder $itemResourceBuilder,
         private WebcontentProcessor $webcontentProcessor,
+        private AssessmentItemParser $assessmentItemParser,
     ) {}
 
     /** Next free item identifier for the package (`ITEMnnn`, package-unique). */
@@ -97,13 +99,19 @@ final readonly class PackageEditor
         $identifier = (string) $item->identifier();
         $itemResource = $package->getResource($identifier, ResourceType::ASSESSMENT_ITEM);
 
+        // Which media the item referenced *before* this edit, derived from the
+        // current content by the same scan that produces the new dependencies.
+        // A dependency to a non-media resource (e.g. a metadata resource) never
+        // shows up here, so the reconcile below leaves it untouched.
+        $previousMediaDependencies = $this->mediaDependenciesOf($package, $itemResource);
+
         [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item);
 
         $rebuilt = $this->itemResourceBuilder->build($identifier, $item, $dependencies, $itemResource->href);
         $this->getXmlFileFromResource($itemResource)->replaceContent((string) $rebuilt->getMainFile());
 
         $this->registerWebcontent($package, $newWebcontent);
-        $this->linkNewDependencies($package, $itemResource, $dependencies);
+        $this->reconcileMediaDependencies($package, $itemResource, $previousMediaDependencies, $dependencies);
 
         return new EditResult($itemResource, new StringCollection());
     }
@@ -193,6 +201,60 @@ final readonly class PackageEditor
             $package->manifest->addDependency($itemResource->identifier, $dependency->identifierref);
             $itemResource->resourceDependencies->add($dependency);
         }
+    }
+
+    /**
+     * Sync the item's media dependencies to the rebuilt content: retire the ones
+     * the item no longer references and link the ones it now does. Only media
+     * dependencies are considered on the removal side (those the content scan
+     * produced for the previous item), so a dependency to a non-media resource
+     * such as a metadata resource is never removed.
+     */
+    private function reconcileMediaDependencies(
+        QtiPackage $package,
+        Resource $itemResource,
+        ManifestResourceDependencyCollection $previous,
+        ManifestResourceDependencyCollection $current,
+    ): void {
+        $currentRefs = $this->identifierRefs($current);
+        foreach ($this->identifierRefs($previous) as $ref) {
+            if (!in_array($ref, $currentRefs, true)) {
+                $package->manifest->removeDependency($itemResource->identifier, $ref);
+                $this->unlinkDependency($itemResource, $ref);
+            }
+        }
+
+        $this->linkNewDependencies($package, $itemResource, $current);
+    }
+
+    /**
+     * The media dependencies of a resource's current content, resolved against
+     * the package so their identifiers match the package's own resources.
+     * Returns an empty collection when the content cannot be parsed, degrading
+     * to add-only linking rather than removing dependencies on a guess.
+     */
+    private function mediaDependenciesOf(QtiPackage $package, Resource $itemResource): ManifestResourceDependencyCollection
+    {
+        try {
+            $item = $this->assessmentItemParser->parse($this->getXmlFileFromResource($itemResource)->getDocumentElement())->item;
+        } catch (ParseError | InvalidArgumentException | ValueError) {
+            return new ManifestResourceDependencyCollection();
+        }
+
+        [$dependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $item);
+
+        return $dependencies;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function identifierRefs(ManifestResourceDependencyCollection $dependencies): array
+    {
+        return array_map(
+            static fn(ManifestResourceDependency $dependency): string => $dependency->identifierref,
+            $dependencies->all(),
+        );
     }
 
     /**

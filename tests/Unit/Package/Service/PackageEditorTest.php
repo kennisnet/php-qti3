@@ -392,6 +392,29 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemWithNewMediaSkipsIdentifiersAlreadyUsedInThePackage(): void
+    {
+        // The package already owns RESOURCE001, so a new media file must not be
+        // handed that same identifier (which would duplicate the resource and
+        // invalidate the manifest).
+        $package = $this->draftWithExistingWebcontent();
+
+        $item = $this->editor->addItemToTest(
+            $package,
+            self::TEST_ID,
+            $this->item('ITEM001', imageSrc: 'https://example.com/new.png'),
+        )->resource;
+
+        $itemResourceXml = $this->elementXml(
+            $this->findElement((string) $package->manifest, self::MANIFEST_NAMESPACE, 'resource', $item->identifier)
+                ?? self::fail('Item resource missing'),
+        );
+        $this->assertStringContainsString('identifierref="RESOURCE002"', $itemResourceXml);
+        $this->assertSame(1, $this->countResourcesWithIdentifier($package, 'RESOURCE001'));
+        $this->assertSame(1, $this->countResourcesWithIdentifier($package, 'RESOURCE002'));
+    }
+
+    #[Test]
     public function addItemRefusesLocalFilePathReferencesInItemMedia(): void
     {
         $package = $this->emptyDraft();
@@ -417,6 +440,21 @@ final class PackageEditorTest extends TestCase
 
         $this->assertSame('PNGDATA123', $package->getFile('resources/pic.png')->getContent()->getContent());
         $this->assertSame(1, $this->countResourcesWithHref($package, 'resources/pic.png'));
+    }
+
+    #[Test]
+    public function updateItemRetiresMediaItNoLongerReferencesButKeepsOtherDependencies(): void
+    {
+        $package = $this->draftWithMediaAndMetadata();
+
+        // The updated item drops the image but keeps everything else.
+        $this->editor->updateItem($package, $this->item('ITEM001', 'Zonder afbeelding'));
+
+        $dependencies = $this->dependencyRefsOf($package, 'ITEM001');
+        // The media dependency is gone now the item no longer references it...
+        $this->assertNotContains('RES1', $dependencies);
+        // ...while the metadata dependency (not a media reference) is untouched.
+        $this->assertContains('META1', $dependencies);
     }
 
     // --- editor convenience --------------------------------------------------
@@ -591,6 +629,52 @@ final class PackageEditorTest extends TestCase
         return $this->readPackage();
     }
 
+    private function draftWithExistingWebcontent(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '<resource identifier="RESOURCE001" type="webcontent" href="resources/existing.png"><file href="resources/existing.png"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $this->testXml('test-1'));
+        $this->filesystem->write(self::FOLDER . '/resources/existing.png', 'EXISTING');
+
+        return $this->readPackage();
+    }
+
+    private function draftWithMediaAndMetadata(): QtiPackage
+    {
+        // ITEM001 depends on a media resource (RES1, referenced from its body)
+        // and a metadata resource (META1, not referenced from the body). META1
+        // is deliberately typed "webcontent" too, so a naive type filter would
+        // wrongly retire it — the reconcile must key off the content scan only.
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/><dependency identifierref="ITEM001"/></resource>'
+            . '<resource identifier="ITEM001" type="imsqti_item_xmlv3p0" href="ITEM001.xml"><file href="ITEM001.xml"/><dependency identifierref="RES1"/><dependency identifierref="META1"/></resource>'
+            . '<resource identifier="RES1" type="webcontent" href="resources/pic.png"><file href="resources/pic.png"/></resource>'
+            . '<resource identifier="META1" type="webcontent" href="metadata/item001-meta.xml"><file href="metadata/item001-meta.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $this->testXml('test-1', 'ITEM001'));
+        $this->filesystem->write(self::FOLDER . '/ITEM001.xml', $this->itemXmlWithImage('ITEM001', 'resources/pic.png'));
+        $this->filesystem->write(self::FOLDER . '/resources/pic.png', 'PNGDATA123');
+        $this->filesystem->write(self::FOLDER . '/metadata/item001-meta.xml', '<lom/>');
+
+        return $this->readPackage();
+    }
+
     private function draftWithUnsupportedItem(): QtiPackage
     {
         $manifest = sprintf(
@@ -698,6 +782,30 @@ final class PackageEditorTest extends TestCase
         return $identifiers;
     }
 
+    /**
+     * @return list<string>
+     */
+    private function dependencyRefsOf(QtiPackage $package, string $resourceIdentifier): array
+    {
+        $dom = new DOMDocument();
+        $dom->loadXML((string) $package->manifest);
+
+        foreach ($dom->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
+            if ($resource->getAttribute('identifier') !== $resourceIdentifier) {
+                continue;
+            }
+
+            $refs = [];
+            foreach ($resource->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'dependency') as $dependency) {
+                $refs[] = $dependency->getAttribute('identifierref');
+            }
+
+            return $refs;
+        }
+
+        return [];
+    }
+
     private function countResourcesWithHref(QtiPackage $package, string $href): int
     {
         $dom = new DOMDocument();
@@ -706,6 +814,21 @@ final class PackageEditorTest extends TestCase
         $count = 0;
         foreach ($dom->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
             if ($resource->getAttribute('href') === $href) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    private function countResourcesWithIdentifier(QtiPackage $package, string $identifier): int
+    {
+        $dom = new DOMDocument();
+        $dom->loadXML((string) $package->manifest);
+
+        $count = 0;
+        foreach ($dom->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
+            if ($resource->getAttribute('identifier') === $identifier) {
                 $count++;
             }
         }
