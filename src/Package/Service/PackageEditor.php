@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Qti3\Package\Service;
 
+use DOMElement;
 use InvalidArgumentException;
 use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
@@ -23,6 +25,7 @@ use Qti3\Package\Model\Resource\Webcontent;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Exception\ResourceNotFoundException;
 use ValueError;
 
 /**
@@ -95,6 +98,32 @@ final readonly class PackageEditor
         $this->linkNewDependencies($package, $itemResource, $dependencies);
 
         return $itemResource;
+    }
+
+    /**
+     * Remove an item from the test `$testId`: drop its item ref and rewrite the
+     * test. The item resource and its file are removed too, unless another test
+     * still references them. Any media the item introduced is left in place.
+     */
+    public function removeItemFromTest(QtiPackage $package, string $testId, string $identifier): void
+    {
+        $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
+        $test = $this->buildTest($package, $testId);
+
+        $itemId = AssessmentItemId::fromString($identifier);
+        if (!$this->testContainsItem($test, $itemId)) {
+            throw new ResourceNotFoundException(AssessmentItem::class, $identifier);
+        }
+
+        $test->removeItemRef($itemId);
+        $this->rewriteTestXml($test, $testResource);
+
+        $package->manifest->removeDependency($testResource->identifier, $identifier);
+        $this->unlinkDependency($testResource, $identifier);
+
+        if (!$this->itemReferencedByOtherTest($package, $identifier, $testId)) {
+            $package->removeResource($identifier);
+        }
     }
 
     /** @param list<string> $orderedIdentifiers */
@@ -175,6 +204,50 @@ final readonly class PackageEditor
         foreach ($resource->resourceDependencies as $dependency) {
             if ($dependency->identifierref === $dependencyRef) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function testContainsItem(AssessmentTest $test, AssessmentItemId $itemId): bool
+    {
+        foreach ($test->getItemRefs() as $itemRef) {
+            if ($itemRef->identifier->equals($itemId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function unlinkDependency(Resource $resource, string $dependencyRef): void
+    {
+        $resource->resourceDependencies->replaceAll(array_values(array_filter(
+            $resource->resourceDependencies->all(),
+            static fn(ManifestResourceDependency $dependency): bool => $dependency->identifierref !== $dependencyRef,
+        )));
+    }
+
+    /**
+     * Read the item refs of the other tests straight from their XML (not through
+     * the model, to avoid the support check), so a shared item is never removed
+     * while another test still references it.
+     */
+    private function itemReferencedByOtherTest(QtiPackage $package, string $identifier, string $exceptTestId): bool
+    {
+        foreach ($package->resources->filterByType(ResourceType::ASSESSMENT_TEST) as $testResource) {
+            if ($testResource->identifier === $exceptTestId) {
+                continue;
+            }
+            $file = $testResource->getMainFile();
+            if (!$file instanceof XmlFile) {
+                continue;
+            }
+            foreach ($file->getDocumentElement()->getElementsByTagNameNS('*', 'qti-assessment-item-ref') as $itemRef) {
+                if ($itemRef instanceof DOMElement && $itemRef->getAttribute('identifier') === $identifier) {
+                    return true;
+                }
             }
         }
 

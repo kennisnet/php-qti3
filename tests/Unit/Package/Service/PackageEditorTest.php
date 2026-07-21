@@ -277,6 +277,59 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function removeItemDropsTheRefResourceFileAndManifestEntries(): void
+    {
+        $package = $this->draftWithItems(2);
+
+        $this->editor->removeItemFromTest($package, self::TEST_ID, 'ITEM001');
+
+        $this->assertSame(['ITEM002'], $this->itemRefIdentifiers($package));
+        $this->assertFalse($package->hasFile('ITEM001.xml'));
+        $this->assertFalse($package->hasResource('ITEM001'));
+
+        $manifest = (string) $package->manifest;
+        $this->assertNull($this->findElement($manifest, self::MANIFEST_NAMESPACE, 'resource', 'ITEM001'));
+        $testResource = $this->findElement($manifest, self::MANIFEST_NAMESPACE, 'resource', self::TEST_ID);
+        $this->assertInstanceOf(DOMElement::class, $testResource);
+        $this->assertStringNotContainsString('identifierref="ITEM001"', $this->elementXml($testResource));
+    }
+
+    #[Test]
+    public function removeItemThrowsWhenTheItemIsNotInTheTest(): void
+    {
+        $package = $this->draftWithItems(1);
+
+        $this->expectException(ResourceNotFoundException::class);
+
+        $this->editor->removeItemFromTest($package, self::TEST_ID, 'ITEM999');
+    }
+
+    #[Test]
+    public function removeItemThrowsWhenTheTestDoesNotExist(): void
+    {
+        $package = $this->draftWithItems(1);
+
+        $this->expectException(ResourceNotFoundException::class);
+
+        $this->editor->removeItemFromTest($package, 'does-not-exist', 'ITEM001');
+    }
+
+    #[Test]
+    public function removeItemKeepsTheResourceWhenAnotherTestStillReferencesIt(): void
+    {
+        $package = $this->twoTestDraftSharingItem();
+
+        $this->editor->removeItemFromTest($package, 'testA', 'ITEM_SHARED');
+
+        // The ref is gone from test A, but test B still uses the item, so the
+        // resource and its file survive.
+        $this->assertSame([], $this->itemRefIdentifiers($package, 'TestA.xml'));
+        $this->assertSame(['ITEM_SHARED'], $this->itemRefIdentifiers($package, 'TestB.xml'));
+        $this->assertTrue($package->hasResource('ITEM_SHARED'));
+        $this->assertTrue($package->hasFile('ITEM_SHARED.xml'));
+    }
+
+    #[Test]
     public function editsTargetOnlyTheGivenTestInAMultiTestPackage(): void
     {
         $package = $this->twoTestDraft();
@@ -418,6 +471,26 @@ final class PackageEditorTest extends TestCase
         $this->filesystem->write(self::FOLDER . '/TestB.xml', $this->testXml('testB-1', 'ITEM_B'));
         $this->filesystem->write(self::FOLDER . '/ITEM_A.xml', $this->itemXml('ITEM_A'));
         $this->filesystem->write(self::FOLDER . '/ITEM_B.xml', $this->itemXml('ITEM_B'));
+
+        return $this->readPackage();
+    }
+
+    private function twoTestDraftSharingItem(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="testA" type="imsqti_test_xmlv3p0" href="TestA.xml"><file href="TestA.xml"/><dependency identifierref="ITEM_SHARED"/></resource>'
+            . '<resource identifier="testB" type="imsqti_test_xmlv3p0" href="TestB.xml"><file href="TestB.xml"/><dependency identifierref="ITEM_SHARED"/></resource>'
+            . '<resource identifier="ITEM_SHARED" type="imsqti_item_xmlv3p0" href="ITEM_SHARED.xml"><file href="ITEM_SHARED.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/TestA.xml', $this->testXml('testA-1', 'ITEM_SHARED'));
+        $this->filesystem->write(self::FOLDER . '/TestB.xml', $this->testXml('testB-1', 'ITEM_SHARED'));
+        $this->filesystem->write(self::FOLDER . '/ITEM_SHARED.xml', $this->itemXml('ITEM_SHARED'));
 
         return $this->readPackage();
     }

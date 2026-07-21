@@ -141,6 +141,9 @@ $editor->addItemToTest($package, $testId, $item, position: 0);
 // Update an existing item's content (identified by the model's own identifier).
 $editor->updateItem($package, $item);
 
+// Remove an item from the test.
+$editor->removeItemFromTest($package, $testId, 'ITEM001');
+
 // Reorder the items of the assessment test section.
 $editor->reorderItemsInTest($package, $testId, ['ITEM002', 'ITEM001']);
 
@@ -148,7 +151,7 @@ $editor->reorderItemsInTest($package, $testId, ['ITEM002', 'ITEM001']);
 $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/folder')->write($package);
 ```
 
-Because editing is surgical, untouched items, media and metadata are left as they are — an unrelated item that uses a construct the typed models cannot represent no longer blocks editing, and updating an item works even when its surrounding test does. A test that is *rewritten* (add, reorder) must fit the subset the `AssessmentTest` model can represent: a test containing outcome processing, test feedback, rubric blocks or nested sections is refused with `UnsupportedQtiConstructException` (see UC-T1). Items are supplied as models, so they are representable by construction — parsing item XML that uses an unsupported interaction type (see *Supported interactions* below), a template declaration or an unrecognized response-processing template fails earlier, in the parser.
+Removing an item drops its ref from the named test and, unless another test still references it, deletes the item resource and its file; media the item introduced is left in place. Because editing is surgical, untouched items, media and metadata are left as they are — an unrelated item that uses a construct the typed models cannot represent no longer blocks editing, and updating an item works even when its surrounding test does. A test that is *rewritten* (add, reorder) must fit the subset the `AssessmentTest` model can represent: a test containing outcome processing, test feedback, rubric blocks or nested sections is refused with `UnsupportedQtiConstructException` (see UC-T1). Items are supplied as models, so they are representable by construction — parsing item XML that uses an unsupported interaction type (see *Supported interactions* below), a template declaration or an unrecognized response-processing template fails earlier, in the parser.
 
 Adding an item whose identifier already exists in the package throws `InvalidAssessmentTestException`; editing a non-existent test or updating a non-existent item throws `ResourceNotFoundException`; an order that does not match the items in the test throws `InvalidItemOrderException`. Media that the added or updated item references is carried over (files already in the package) or registered as new webcontent, without duplicating resources.
 

@@ -74,6 +74,19 @@ class AssessmentTest extends QtiElement
         $this->getSection()->addItemRef($itemRef, $position);
     }
 
+    public function removeItemRef(AssessmentItemId $identifier): void
+    {
+        foreach ($this->testParts as $testPart) {
+            foreach ($testPart->sections as $section) {
+                if ($section->removeItemRef($identifier)) {
+                    return;
+                }
+            }
+        }
+
+        throw new InvalidAssessmentTestException(new StringCollection([sprintf('Test does not contain an item with identifier "%s"', $identifier)]));
+    }
+
     /**
      * Reorder the item refs of the first section to match the given order.
      * @param list<string> $orderedIdentifiers

@@ -41,6 +41,15 @@ class QtiPackage
         throw new ResourceNotFoundException(Resource::class, $identifier);
     }
 
+    /**
+     * @throws ResourceNotFoundException when no such resource exists
+     */
+    public function removeResource(string $identifier): void
+    {
+        $this->resources->remove($this->getResource($identifier));
+        $this->manifest->removeResource($identifier);
+    }
+
     public function hasResource(string $identifier, ?ResourceType $type = null): bool
     {
         try {

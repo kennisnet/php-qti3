@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentTest\Model\Section;
 
+use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRefCollection;
 use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
@@ -34,6 +35,26 @@ class AssessmentSection extends QtiElement
 
         array_splice($itemRefs, $position, 0, [$itemRef]);
         $this->assessmentItemRefs->replaceAll($itemRefs);
+    }
+
+    /** @return bool whether an item ref was removed */
+    public function removeItemRef(AssessmentItemId $identifier): bool
+    {
+        $remaining = [];
+        $removed = false;
+        foreach ($this->assessmentItemRefs as $itemRef) {
+            if ($itemRef->identifier->equals($identifier)) {
+                $removed = true;
+                continue;
+            }
+            $remaining[] = $itemRef;
+        }
+
+        if ($removed) {
+            $this->assessmentItemRefs->replaceAll($remaining);
+        }
+
+        return $removed;
     }
 
     /**

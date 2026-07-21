@@ -91,6 +91,22 @@ class Manifest extends XmlFile
         $this->findResourceNode($resourceIdentifier)->appendChild($dependencyNode);
     }
 
+    public function removeResource(string $identifier): void
+    {
+        $resourceNode = $this->findResourceNode($identifier);
+        $resourceNode->parentNode?->removeChild($resourceNode);
+    }
+
+    public function removeDependency(string $resourceIdentifier, string $dependencyRef): void
+    {
+        $resourceNode = $this->findResourceNode($resourceIdentifier);
+        foreach (iterator_to_array($resourceNode->getElementsByTagName('dependency')) as $dependencyNode) {
+            if ($dependencyNode instanceof DOMElement && $dependencyNode->getAttribute('identifierref') === $dependencyRef) {
+                $dependencyNode->parentNode?->removeChild($dependencyNode);
+            }
+        }
+    }
+
     private function findResourceNode(string $identifier): DOMElement
     {
         foreach ($this->getXml()->getElementsByTagName('resource') as $resourceNode) {
