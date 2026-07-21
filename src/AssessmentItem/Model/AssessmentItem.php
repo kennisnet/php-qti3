@@ -63,6 +63,23 @@ class AssessmentItem extends QtiElement
         ];
     }
 
+    public function withIdentifier(AssessmentItemId $identifier): self
+    {
+        return new self(
+            $identifier,
+            $this->itemBody,
+            $this->responseDeclarations,
+            $this->outcomeDeclarations,
+            $this->responseProcessing,
+            $this->title,
+            $this->stylesheet,
+            $this->modalFeedbacks,
+            $this->timeDependent,
+            $this->adaptive,
+            $this->language,
+        );
+    }
+
     public function identifier(): AssessmentItemId
     {
         return $this->identifier;

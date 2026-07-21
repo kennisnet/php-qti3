@@ -6,9 +6,24 @@ namespace Qti3\Tests\Unit\AssessmentItem\Model;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\AssessmentItem\Model\AssessmentItemId;
 
 class AssessmentItemTest extends TestCase
 {
+    #[Test]
+    public function withIdentifierReturnsACopyAndLeavesTheOriginalUnchanged(): void
+    {
+        $original = AssessmentItemStub::assessmentItem();
+
+        $copy = $original->withIdentifier(AssessmentItemId::fromString('ITEM042'));
+
+        $this->assertNotSame($original, $copy);
+        $this->assertSame('ITEM042', (string) $copy->identifier());
+        $this->assertSame('10fe19b2-8b6e-53fa-8522-1220c67ddce1', (string) $original->identifier());
+        // The rest of the item is carried over.
+        $this->assertSame($original->itemBody(), $copy->itemBody());
+    }
+
     #[Test]
     public function aValidIdCanBeGiven(): void
     {

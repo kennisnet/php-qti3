@@ -55,16 +55,19 @@ final readonly class PackageEditor
     }
 
     /**
-     * Add an item to the test `$testId`. Position -1 appends; a zero-based
+     * Add an item to the test `$testId`. By default the item is given the next
+     * free identifier ({@see self::getAvailableItemIdentifier()}); pass
+     * `$identifier` to assign one yourself. Position -1 appends; a zero-based
      * position inserts at that index in the section.
      */
-    public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, int $position = -1): Resource
+    public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, ?string $identifier = null, int $position = -1): Resource
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
         $test = $this->buildTest($package, $testId);
 
-        $identifier = (string) $item->identifier();
+        $identifier ??= $this->getAvailableItemIdentifier($package);
         $this->assertIdentifierAvailable($package, $identifier);
+        $item = $item->withIdentifier(AssessmentItemId::fromString($identifier));
 
         [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item);
         $itemResource = $this->itemResourceBuilder->build($identifier, $item, $dependencies, $identifier . '.xml');

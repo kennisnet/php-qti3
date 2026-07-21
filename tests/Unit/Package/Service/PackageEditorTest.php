@@ -59,29 +59,40 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
-    public function addItemUsesTheItemsOwnIdentifierAndReturnsTheResource(): void
+    public function addItemAssignsTheNextFreeIdentifierByDefault(): void
     {
         $package = $this->emptyDraft();
 
-        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001', 'Mijn vraag'));
+        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', 'Mijn vraag'));
 
         $this->assertSame('ITEM001', $item->identifier);
         $stored = (string) $package->getFile('ITEM001.xml');
         $this->assertStringContainsString('identifier="ITEM001"', $stored);
+        $this->assertStringNotContainsString('PLACEHOLDER', $stored);
         $this->assertStringContainsString('Mijn vraag', $stored);
         $this->assertSame($stored, (string) $item->getMainFile());
     }
 
     #[Test]
-    public function addItemFromAnXmlStringParsesItAndAddsItToTheTest(): void
+    public function addItemUsesAnExplicitIdentifierWhenGiven(): void
     {
-        // Use case: a raw item XML string (e.g. from a UI) is parsed and added.
         $package = $this->emptyDraft();
 
-        $identifier = $this->editor->getAvailableItemIdentifier($package);
-        $item = $this->client->getAssessmentItemParser()->parseFromString(
-            $this->itemXml($identifier, 'Vraag uit XML'),
-        );
+        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'VRAAG_A');
+
+        $this->assertSame('VRAAG_A', $item->identifier);
+        $this->assertSame(['VRAAG_A'], $this->itemRefIdentifiers($package));
+        $this->assertStringContainsString('identifier="VRAAG_A"', (string) $package->getFile('VRAAG_A.xml'));
+    }
+
+    #[Test]
+    public function addItemFromAnXmlStringParsesItAndAddsItToTheTest(): void
+    {
+        // Use case: a raw item XML string (e.g. from a UI) is parsed and added;
+        // the editor assigns the identifier.
+        $package = $this->emptyDraft();
+
+        $item = $this->client->getAssessmentItemParser()->parseFromString($this->itemXml('PLACEHOLDER', 'Vraag uit XML'));
 
         $added = $this->editor->addItemToTest($package, self::TEST_ID, $item);
 
@@ -110,7 +121,7 @@ final class PackageEditorTest extends TestCase
         $this->addItem($package);
         $this->addItem($package);
 
-        $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM003'), position: 1);
+        $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), position: 1);
 
         $this->assertSame(['ITEM001', 'ITEM003', 'ITEM002'], $this->itemRefIdentifiers($package));
     }
@@ -147,10 +158,10 @@ final class PackageEditorTest extends TestCase
     public function addItemThrowsWhenTheIdentifierAlreadyExists(): void
     {
         $package = $this->emptyDraft();
-        $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001'));
+        $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'ITEM001');
 
         try {
-            $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001'));
+            $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'ITEM001');
             $this->fail('Expected InvalidAssessmentTestException');
         } catch (InvalidAssessmentTestException) {
             // The section still has just one ref: nothing was added twice.
@@ -377,11 +388,9 @@ final class PackageEditorTest extends TestCase
 
     // --- editor convenience --------------------------------------------------
 
-    private function addItem(QtiPackage $package, string $testId = self::TEST_ID, int $position = -1): Resource
+    private function addItem(QtiPackage $package, string $testId = self::TEST_ID): Resource
     {
-        $identifier = $this->editor->getAvailableItemIdentifier($package);
-
-        return $this->editor->addItemToTest($package, $testId, $this->item($identifier), $position);
+        return $this->editor->addItemToTest($package, $testId, $this->item('PLACEHOLDER'));
     }
 
     private function item(string $identifier, string $title = 'Vraag', ?string $imageSrc = null): AssessmentItem

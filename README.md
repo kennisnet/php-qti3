@@ -116,7 +116,7 @@ By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`)
 
 **UC-P6: Add, update or reorder items in a package**
 
-`getPackageEditor()` returns a `PackageEditor` that edits the assessment items of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1) and own their identifiers; `getAvailableItemIdentifier()` vends a free one. Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are.
+`getPackageEditor()` returns a `PackageEditor` that edits the assessment items of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1). Adding an item assigns it the next free `ITEMnnn` identifier by default (or one you pass). Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are.
 
 > **See [docs/package-editor.md](docs/package-editor.md)** for worked examples of adding an item from an XML string, updating, removing and reordering items, an errors table and notes.
 
@@ -128,20 +128,19 @@ $parser  = $qtiClient->getAssessmentItemParser();
 // The resource identifier of the test to edit. For a single-test package:
 $testId = $package->getAssessmentTestIdentifier();
 
-// Build the item model from your QTI 3 item XML string. Give it a free,
-// package-unique identifier (the item carries its own id into the package).
-$identifier = $editor->getAvailableItemIdentifier($package); // e.g. 'ITEM001'
-$item = $parser->parseFromString($itemXml); // $itemXml carries identifier="ITEM001"
+// Build the item model from your QTI 3 item XML string.
+$item = $parser->parseFromString($itemXml);
 
-// Add the item; the item's own identifier is used. Returns the item Resource.
+// Add it; the editor assigns the next free identifier. Returns the item Resource.
 $added = $editor->addItemToTest($package, $testId, $item);
 // $added->identifier is 'ITEM001'; (string) $added->getMainFile() is the item XML as written.
 
-// Insert at a specific zero-based position in the section (default: append).
-$editor->addItemToTest($package, $testId, $item, position: 0);
+// Pass your own identifier and/or a zero-based position (default: next id, append).
+$editor->addItemToTest($package, $testId, $item, identifier: 'ITEM042', position: 0);
 
-// Update an existing item's content (identified by the model's own identifier).
-$editor->updateItem($package, $item);
+// Update an existing item's content. The model's own identifier selects the
+// item to replace, so parse XML that carries identifier="ITEM001".
+$editor->updateItem($package, $parser->parseFromString($updatedItemXml));
 
 // Remove an item from the test.
 $editor->removeItemFromTest($package, $testId, 'ITEM001');

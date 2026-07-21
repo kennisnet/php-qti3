@@ -44,8 +44,9 @@ $testId = $package->getAssessmentTestIdentifier();
 ## Adding an item from an XML string
 
 Items are passed to the editor as typed `AssessmentItem` models, so a raw XML
-string is parsed first. The item carries its own identifier into the package;
-`getAvailableItemIdentifier()` gives you a free, package-unique `ITEMnnn`.
+string is parsed first. By default the editor assigns the item the next free
+`ITEMnnn` identifier — whatever identifier the XML carries is overwritten — and
+returns the created resource.
 
 ```php
 $itemXml = <<<XML
@@ -59,18 +60,22 @@ $itemXml = <<<XML
 </qti-assessment-item>
 XML;
 
-// 1. Reserve a free identifier and put it in the XML.
-$identifier = $editor->getAvailableItemIdentifier($package);        // e.g. 'ITEM001'
-$itemXml = str_replace('identifier="PLACEHOLDER"', "identifier=\"$identifier\"", $itemXml);
-
-// 2. Parse the string into a model (throws ParseError on malformed XML).
+// Parse the string into a model (throws ParseError on malformed XML).
 $item = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
 
-// 3. Add it to the test. Returns the created item Resource.
+// Add it; the editor assigns the identifier.
 $added = $editor->addItemToTest($package, $testId, $item);
 
 echo $added->identifier;              // 'ITEM001'
 echo (string) $added->getMainFile();  // the item XML as written into the package
+```
+
+To choose the identifier yourself, pass `$identifier` (it must be unique within
+the package). `getAvailableItemIdentifier()` returns the next free `ITEMnnn` if
+you want to know it up front.
+
+```php
+$editor->addItemToTest($package, $testId, $item, identifier: 'VRAAG_1');
 ```
 
 By default the item is appended to the section. Pass a zero-based `$position`
@@ -80,11 +85,6 @@ to insert it at a specific index instead:
 // Insert as the first item of the section.
 $editor->addItemToTest($package, $testId, $item, position: 0);
 ```
-
-> If the item's XML already contains the identifier you want, you can skip
-> steps 1–2 and simply call `parseFromString()` — the editor uses whatever
-> identifier the model carries, and refuses one that already exists in the
-> package.
 
 ## Updating an item
 
@@ -140,15 +140,13 @@ $editor = $qtiClient->getPackageEditor();
 $package = $qtiClient->getQtiPackageReader()->fromFilesystem('/tmp/my-package');
 $testId  = $package->getAssessmentTestIdentifier();
 
-// Add two items.
+// Add two items; the editor assigns ITEM001 and ITEM002.
 foreach (['Vraag 1', 'Vraag 2'] as $title) {
-    $identifier = $editor->getAvailableItemIdentifier($package);
     $itemXml = sprintf(
         '<?xml version="1.0" encoding="UTF-8"?>'
         . '<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" '
-        . 'identifier="%s" title="%s" time-dependent="false">'
+        . 'identifier="new" title="%s" time-dependent="false">'
         . '<qti-item-body><p>%s</p></qti-item-body></qti-assessment-item>',
-        $identifier,
         $title,
         $title,
     );
@@ -175,10 +173,10 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 
 ## Notes
 
-- **Identifiers are yours.** The editor uses the identifier the `AssessmentItem`
-  model carries. `getAvailableItemIdentifier()` vends the next free `ITEMnnn`;
-  you may also assign your own scheme, as long as it is unique within the
-  package.
+- **Identifiers.** By default `addItemToTest()` assigns the next free `ITEMnnn`,
+  overwriting whatever the item carries. Pass `$identifier` to use your own
+  scheme (must be unique within the package); `getAvailableItemIdentifier()`
+  returns the next free one if you want it up front.
 - **Items are validated by parsing.** There is no separate validation step in
   the editor: an item that parses into a model is representable. Item XML that
   uses an unsupported interaction type, a template declaration or an
