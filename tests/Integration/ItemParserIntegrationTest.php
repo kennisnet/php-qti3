@@ -34,7 +34,7 @@ class ItemParserIntegrationTest extends TestCase
         $xml = file_get_contents(__DIR__ . '/../Unit/AssessmentItem/Service/resources/' . $filename);
         $client = $this->createClient();
         $dom = $client->getXmlReader()->read($xml);
-        return $client->getAssessmentItemParser()->parse($dom->documentElement);
+        return $client->getAssessmentItemParser()->parse($dom->documentElement)->item;
     }
 
     /**

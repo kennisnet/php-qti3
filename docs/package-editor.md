@@ -10,6 +10,13 @@ the single item that changes. Other items, media and metadata are left exactly
 as they are, and packages with more than one assessment test are supported (you
 select the test by its resource identifier).
 
+Editing never refuses a less-than-perfect package. Instead, any construct the
+typed models cannot hold — and would therefore drop when the XML is regenerated
+— is reported as a **warning**. Parsing an item returns an `ItemParseResult`
+(`item` + `warnings`); each editor operation returns an `EditResult` (`resource`
++ `warnings`, `resource` is null for reorder). Inspect the warnings to decide
+whether the (partial) data loss is acceptable.
+
 Obtain the editor from the `QtiClient` (see the main README for how to construct
 the client):
 
@@ -60,14 +67,21 @@ $itemXml = <<<XML
 </qti-assessment-item>
 XML;
 
-// Parse the string into a model (throws ParseError on malformed XML).
-$item = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
+// Parse the string into a model (throws ParseError on malformed XML or an
+// unsupported interaction type). $parsed->warnings lists anything the model
+// could not keep from the source item.
+$parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
 
-// Add it; the editor assigns the identifier.
-$added = $editor->addItemToTest($package, $testId, $item);
+// Add it; the editor assigns the identifier. $result->warnings covers the test
+// being edited.
+$result = $editor->addItemToTest($package, $testId, $parsed->item);
 
-echo $added->identifier;              // 'ITEM001'
-echo (string) $added->getMainFile();  // the item XML as written into the package
+echo $result->resource->identifier;              // 'ITEM001'
+echo (string) $result->resource->getMainFile();  // the item XML as written into the package
+
+if (!$parsed->warnings->isEmpty() || !$result->warnings->isEmpty()) {
+    // ... report data loss to the user ...
+}
 ```
 
 To choose the identifier yourself, pass `$identifier` (it must be unique within
@@ -75,7 +89,7 @@ the package). `getAvailableItemIdentifier()` returns the next free `ITEMnnn` if
 you want to know it up front.
 
 ```php
-$editor->addItemToTest($package, $testId, $item, identifier: 'VRAAG_1');
+$editor->addItemToTest($package, $testId, $parsed->item, identifier: 'VRAAG_1');
 ```
 
 By default the item is appended to the section. Pass a zero-based `$position`
@@ -83,7 +97,7 @@ to insert it at a specific index instead:
 
 ```php
 // Insert as the first item of the section.
-$editor->addItemToTest($package, $testId, $item, position: 0);
+$editor->addItemToTest($package, $testId, $parsed->item, position: 0);
 ```
 
 ## Updating an item
@@ -105,9 +119,9 @@ $itemXml = <<<XML
 </qti-assessment-item>
 XML;
 
-$item = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
+$parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
 
-$editor->updateItem($package, $item);   // returns the updated item Resource
+$result = $editor->updateItem($package, $parsed->item); // $result->resource is the updated item
 ```
 
 ## Removing an item
@@ -150,7 +164,7 @@ foreach (['Vraag 1', 'Vraag 2'] as $title) {
         $title,
         $title,
     );
-    $editor->addItemToTest($package, $testId, $qtiClient->getAssessmentItemParser()->parseFromString($itemXml));
+    $editor->addItemToTest($package, $testId, $qtiClient->getAssessmentItemParser()->parseFromString($itemXml)->item);
 }
 
 // Reorder, then remove the first one.
@@ -165,11 +179,15 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 
 | Situation | Exception |
 |---|---|
-| Malformed item XML passed to `parseFromString()` | `Qti3\AssessmentItem\Service\Parser\ParseError` |
+| Malformed item XML, or an unsupported interaction type, passed to `parseFromString()` | `Qti3\AssessmentItem\Service\Parser\ParseError` |
 | Unknown `$testId`, or updating/removing a non-existent item | `Qti3\Shared\Exception\ResourceNotFoundException` |
 | Adding an item whose identifier already exists in the package | `Qti3\AssessmentTest\Exception\InvalidAssessmentTestException` |
 | Reorder list that does not match the items in the test | `Qti3\AssessmentTest\Exception\InvalidItemOrderException` |
-| Rewriting a test (add, remove, reorder) that contains constructs the model cannot represent (outcome processing, test feedback, rubric blocks, nested sections, ...) | `Qti3\Shared\Exception\UnsupportedQtiConstructException` |
+
+A construct the model cannot hold (outcome processing, test feedback, rubric
+blocks, nested sections, a template declaration, an unconsumed attribute, ...)
+is **not** an error: it is dropped on regeneration and reported through the
+`warnings` on `ItemParseResult` / `EditResult`.
 
 ## Notes
 
@@ -177,13 +195,13 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
   overwriting whatever the item carries. Pass `$identifier` to use your own
   scheme (must be unique within the package); `getAvailableItemIdentifier()`
   returns the next free one if you want it up front.
-- **Items are validated by parsing.** There is no separate validation step in
-  the editor: an item that parses into a model is representable. Item XML that
-  uses an unsupported interaction type, a template declaration or an
-  unrecognized response-processing template fails in the parser (see
-  *Supported interactions* in the main README).
+- **Data loss is reported, not refused.** The parsers surface every construct
+  they cannot faithfully round-trip as a warning, so editing an imperfect
+  package succeeds while making the loss visible. (An unsupported *interaction
+  type* still fails in the parser with a `ParseError`; see *Supported
+  interactions* in the main README.)
 - **Untouched items are never re-serialized**, so an unrelated item that uses an
-  unsupported construct does not block editing.
+  unsupported construct does not affect editing.
 - **Media** referenced by an added or updated item is carried over when the file
   is already in the package, or registered as new webcontent otherwise, without
   duplicating resources. Only files already in the package, `data:` URIs and

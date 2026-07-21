@@ -484,7 +484,7 @@ XML;
         $dom = $client->getXmlReader()->read($xml);
         $parser = $client->getAssessmentItemParser();
 
-        return $parser->parse($dom->documentElement);
+        return $parser->parse($dom->documentElement)->item;
     }
 
     private function serializeItem(AssessmentItem $item): string

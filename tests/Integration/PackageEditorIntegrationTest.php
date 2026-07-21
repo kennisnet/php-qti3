@@ -42,8 +42,8 @@ class PackageEditorIntegrationTest extends TestCase
         $added = $editor->addItemToTest(
             $package,
             self::TEST_ID,
-            $client->getAssessmentItemParser()->parseFromString($this->itemXml('new', 'Nieuwe vraag')),
-        );
+            $client->getAssessmentItemParser()->parseFromString($this->itemXml('new', 'Nieuwe vraag'))->item,
+        )->resource;
         $this->assertSame('ITEM003', $added->identifier);
 
         $editor->reorderItemsInTest($package, self::TEST_ID, ['ITEM003', 'ITEM001', 'ITEM002']);
@@ -54,7 +54,7 @@ class PackageEditorIntegrationTest extends TestCase
 
         // Reload a fresh package and verify the edits persisted.
         $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
-        $test = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID);
+        $test = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID)->test;
 
         $this->assertSame(['ITEM003', 'ITEM002'], $test->getItemIdentifiers());
         $this->assertStringContainsString('Nieuwe vraag', (string) $reloaded->getFile('ITEM003.xml'));

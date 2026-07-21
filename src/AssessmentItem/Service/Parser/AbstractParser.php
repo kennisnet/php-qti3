@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service\Parser;
 
-use Qti3\Shared\Model\IXmlElement;
+use Qti3\Shared\Collection\StringCollection;
+use DOMAttr;
 use DOMElement;
 use DOMNode;
 
 abstract class AbstractParser
 {
-    abstract public function parse(DOMElement $element): IXmlElement;
-
     protected function validateTag(DOMElement|DOMNode|null $element, string $tagName): void
     {
         if (!$element instanceof DOMElement) {
@@ -34,6 +33,45 @@ abstract class AbstractParser
         }
 
         return $children;
+    }
+
+    /**
+     * Record a warning for every attribute and child element of `$element` the
+     * parser did not consume: the model cannot hold them, so they are silently
+     * dropped when it is serialized again. Surfacing them turns silent data
+     * loss into a visible warning. Namespace declarations and the XML-schema
+     * bookkeeping attributes are ignored — they are re-emitted, not lost.
+     *
+     * @param list<string> $consumedAttributes attribute names the parser read
+     * @param list<string> $consumedChildren   child element local names it read
+     */
+    protected function warnUnconsumed(
+        DOMElement $element,
+        array $consumedAttributes,
+        array $consumedChildren,
+        StringCollection $warnings,
+    ): void {
+        foreach ($element->attributes as $attribute) {
+            if (!$attribute instanceof DOMAttr || $this->isNamespaceAttribute($attribute)) {
+                continue;
+            }
+            if (!in_array($attribute->nodeName, $consumedAttributes, true)) {
+                $warnings->add(sprintf('<%s> drops unsupported attribute "%s"', $element->nodeName, $attribute->nodeName));
+            }
+        }
+
+        foreach ($this->getChildren($element) as $child) {
+            if (!in_array($child->localName, $consumedChildren, true)) {
+                $warnings->add(sprintf('<%s> drops unsupported element "<%s>"', $element->nodeName, $child->localName));
+            }
+        }
+    }
+
+    private function isNamespaceAttribute(DOMAttr $attribute): bool
+    {
+        return $attribute->nodeName === 'xmlns'
+            || str_starts_with($attribute->nodeName, 'xmlns:')
+            || $attribute->namespaceURI === 'http://www.w3.org/2001/XMLSchema-instance';
     }
 
     protected function parseFloat(string $attributeValue): ?float

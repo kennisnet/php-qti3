@@ -14,6 +14,7 @@ use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Service\TestBuilder;
+use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidQtiPackageException;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
@@ -58,12 +59,14 @@ final readonly class PackageEditor
      * Add an item to the test `$testId`. By default the item is given the next
      * free identifier ({@see self::getAvailableItemIdentifier()}); pass
      * `$identifier` to assign one yourself. Position -1 appends; a zero-based
-     * position inserts at that index in the section.
+     * position inserts at that index in the section. The result carries any
+     * warnings raised while re-parsing the test being edited.
      */
-    public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, ?string $identifier = null, int $position = -1): Resource
+    public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, ?string $identifier = null, int $position = -1): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
-        $test = $this->buildTest($package, $testId);
+        $parsed = $this->buildTest($package, $testId);
+        $test = $parsed->test;
 
         $identifier ??= $this->getAvailableItemIdentifier($package);
         $this->assertIdentifierAvailable($package, $identifier);
@@ -80,14 +83,16 @@ final readonly class PackageEditor
         $package->manifest->addDependency($testResource->identifier, $identifier);
         $testResource->resourceDependencies->add(new ManifestResourceDependency($identifier));
 
-        return $itemResource;
+        return new EditResult($itemResource, $parsed->warnings);
     }
 
     /**
-     * Replace an existing item's content. Rewrites only the item resource, so it
-     * works even when the surrounding test uses unsupported constructs.
+     * Replace an existing item's content. Rewrites only the item resource, not
+     * any test, so it works even when the surrounding test uses unsupported
+     * constructs. (Warnings about the new item's own content, if any, come from
+     * parsing it — see {@see \Qti3\AssessmentItem\Service\Parser\ItemParseResult}.)
      */
-    public function updateItem(QtiPackage $package, AssessmentItem $item): Resource
+    public function updateItem(QtiPackage $package, AssessmentItem $item): EditResult
     {
         $identifier = (string) $item->identifier();
         $itemResource = $package->getResource($identifier, ResourceType::ASSESSMENT_ITEM);
@@ -100,7 +105,7 @@ final readonly class PackageEditor
         $this->registerWebcontent($package, $newWebcontent);
         $this->linkNewDependencies($package, $itemResource, $dependencies);
 
-        return $itemResource;
+        return new EditResult($itemResource, new StringCollection());
     }
 
     /**
@@ -108,10 +113,11 @@ final readonly class PackageEditor
      * test. The item resource and its file are removed too, unless another test
      * still references them. Any media the item introduced is left in place.
      */
-    public function removeItemFromTest(QtiPackage $package, string $testId, string $identifier): void
+    public function removeItemFromTest(QtiPackage $package, string $testId, string $identifier): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
-        $test = $this->buildTest($package, $testId);
+        $parsed = $this->buildTest($package, $testId);
+        $test = $parsed->test;
 
         $itemId = AssessmentItemId::fromString($identifier);
         if (!$this->testContainsItem($test, $itemId)) {
@@ -127,20 +133,25 @@ final readonly class PackageEditor
         if (!$this->itemReferencedByOtherTest($package, $identifier, $testId)) {
             $package->removeResource($identifier);
         }
+
+        return new EditResult(null, $parsed->warnings);
     }
 
     /** @param list<string> $orderedIdentifiers */
-    public function reorderItemsInTest(QtiPackage $package, string $testId, array $orderedIdentifiers): void
+    public function reorderItemsInTest(QtiPackage $package, string $testId, array $orderedIdentifiers): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
-        $test = $this->buildTest($package, $testId);
+        $parsed = $this->buildTest($package, $testId);
+        $test = $parsed->test;
 
         $test->reorderItemRefs($orderedIdentifiers);
 
         $this->rewriteTestXml($test, $testResource);
+
+        return new EditResult(null, $parsed->warnings);
     }
 
-    private function buildTest(QtiPackage $package, string $testId): AssessmentTest
+    private function buildTest(QtiPackage $package, string $testId): TestParseResult
     {
         try {
             return $this->testBuilder->buildFromPackage($package, $testId);

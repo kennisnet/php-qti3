@@ -11,6 +11,8 @@ use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use Qti3\AssessmentItem\Model\Feedback\ModalFeedback;
+use Qti3\AssessmentItem\Model\Stylesheet\Stylesheet;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\Shared\Xml\Reader\IXmlReader;
@@ -35,7 +37,14 @@ class AssessmentItemParser extends AbstractParser
      *
      * @throws ParseError
      */
-    public function parseFromString(string $xml): AssessmentItem
+    /**
+     * Parse an assessment item from its XML string; malformed XML surfaces as a
+     * {@see ParseError}, like every other parse failure. Constructs the model
+     * cannot hold are not refused but reported through the result's warnings.
+     *
+     * @throws ParseError
+     */
+    public function parseFromString(string $xml): ItemParseResult
     {
         try {
             $document = $this->xmlReader->read($xml);
@@ -51,9 +60,14 @@ class AssessmentItemParser extends AbstractParser
         return $this->parse($element);
     }
 
-    public function parse(DOMElement $element): AssessmentItem
+    /**
+     * Parse an assessment item element into its model plus the warnings for any
+     * construct that could not be represented (see {@see ItemParseResult}).
+     */
+    public function parse(DOMElement $element): ItemParseResult
     {
         $this->validateTag($element, AssessmentItem::qtiTagName());
+        $warnings = new StringCollection();
 
         $identifierValue = $element->getAttribute('identifier');
         $identifier = AssessmentItemId::fromString($identifierValue ?: 'item-' . uniqid());
@@ -64,6 +78,7 @@ class AssessmentItemParser extends AbstractParser
         $itemBody = null;
         $responseProcessing = null;
         $stylesheet = null;
+        $stylesheetCount = 0;
         $modalFeedbacks = [];
 
         foreach ($this->getChildren($element) as $child) {
@@ -75,8 +90,9 @@ class AssessmentItemParser extends AbstractParser
                 $itemBody = $this->itemBodyParser->parse($child);
             } elseif ($child->nodeName === ResponseProcessing::qtiTagName()) {
                 $responseProcessing = $this->responseProcessingParser->parse($child);
-            } elseif ($child->nodeName === \Qti3\AssessmentItem\Model\Stylesheet\Stylesheet::qtiTagName()) {
+            } elseif ($child->nodeName === Stylesheet::qtiTagName()) {
                 $stylesheet = $this->stylesheetParser->parse($child);
+                $stylesheetCount++;
             } elseif ($child->nodeName === ModalFeedback::qtiTagName()) {
                 $modalFeedbacks[] = $this->modalFeedbackParser->parse($child);
             }
@@ -86,7 +102,25 @@ class AssessmentItemParser extends AbstractParser
             throw new ParseError('AssessmentItem must contain an itemBody');
         }
 
-        return new AssessmentItem(
+        if ($stylesheetCount > 1) {
+            $warnings->add('Assessment item keeps only one <qti-stylesheet>; the others are dropped');
+        }
+
+        $this->warnUnconsumed(
+            $element,
+            ['identifier', 'title', 'adaptive', 'time-dependent', 'xml:lang'],
+            [
+                ResponseDeclaration::qtiTagName(),
+                OutcomeDeclaration::qtiTagName(),
+                ItemBody::qtiTagName(),
+                ResponseProcessing::qtiTagName(),
+                Stylesheet::qtiTagName(),
+                ModalFeedback::qtiTagName(),
+            ],
+            $warnings,
+        );
+
+        $item = new AssessmentItem(
             $identifier,
             $itemBody,
             $responseDeclarations,
@@ -99,5 +133,7 @@ class AssessmentItemParser extends AbstractParser
             adaptive: $element->getAttribute('adaptive') === 'true',
             language: $element->getAttribute('xml:lang') ?: 'nl-NL',
         );
+
+        return new ItemParseResult($item, $warnings);
     }
 }

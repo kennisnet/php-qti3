@@ -63,7 +63,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', 'Mijn vraag'));
+        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', 'Mijn vraag'))->resource;
 
         $this->assertSame('ITEM001', $item->identifier);
         $stored = (string) $package->getFile('ITEM001.xml');
@@ -78,7 +78,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'VRAAG_A');
+        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'VRAAG_A')->resource;
 
         $this->assertSame('VRAAG_A', $item->identifier);
         $this->assertSame(['VRAAG_A'], $this->itemRefIdentifiers($package));
@@ -92,9 +92,9 @@ final class PackageEditorTest extends TestCase
         // the editor assigns the identifier.
         $package = $this->emptyDraft();
 
-        $item = $this->client->getAssessmentItemParser()->parseFromString($this->itemXml('PLACEHOLDER', 'Vraag uit XML'));
+        $item = $this->client->getAssessmentItemParser()->parseFromString($this->itemXml('PLACEHOLDER', 'Vraag uit XML'))->item;
 
-        $added = $this->editor->addItemToTest($package, self::TEST_ID, $item);
+        $added = $this->editor->addItemToTest($package, self::TEST_ID, $item)->resource;
 
         $this->assertSame('ITEM001', $added->identifier);
         $this->assertSame(['ITEM001'], $this->itemRefIdentifiers($package));
@@ -237,7 +237,7 @@ final class PackageEditorTest extends TestCase
         // The old content is never parsed, so an unsupported item can be repaired.
         $this->overwriteItemFile($package, 'ITEM001', $this->unsupportedInteractionItemXml('ITEM001'));
 
-        $updated = $this->editor->updateItem($package, $this->item('ITEM001', 'Hersteld'));
+        $updated = $this->editor->updateItem($package, $this->item('ITEM001', 'Hersteld'))->resource;
 
         $this->assertSame('ITEM001', $updated->identifier);
         $this->assertStringContainsString('Hersteld', (string) $package->getFile('ITEM001.xml'));
@@ -362,7 +362,7 @@ final class PackageEditorTest extends TestCase
             $package,
             self::TEST_ID,
             $this->item('ITEM001', imageSrc: 'https://example.com/pic.png'),
-        );
+        )->resource;
 
         $itemResourceXml = $this->elementXml(
             $this->findElement((string) $package->manifest, self::MANIFEST_NAMESPACE, 'resource', $item->identifier)
@@ -380,7 +380,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $added = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', imageSrc: '/etc/passwd'));
+        $added = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', imageSrc: '/etc/passwd'))->resource;
 
         $manifest = (string) $package->manifest;
         // The local/traversal path is never registered as a resource...
@@ -407,7 +407,7 @@ final class PackageEditorTest extends TestCase
 
     private function addItem(QtiPackage $package, string $testId = self::TEST_ID): Resource
     {
-        return $this->editor->addItemToTest($package, $testId, $this->item('PLACEHOLDER'));
+        return $this->editor->addItemToTest($package, $testId, $this->item('PLACEHOLDER'))->resource;
     }
 
     private function item(string $identifier, string $title = 'Vraag', ?string $imageSrc = null): AssessmentItem
@@ -418,7 +418,7 @@ final class PackageEditorTest extends TestCase
         self::assertInstanceOf(DOMElement::class, $element);
         $element->setAttribute('identifier', $identifier);
 
-        return $this->client->getAssessmentItemParser()->parse($element);
+        return $this->client->getAssessmentItemParser()->parse($element)->item;
     }
 
     // --- seeding helpers -----------------------------------------------------
