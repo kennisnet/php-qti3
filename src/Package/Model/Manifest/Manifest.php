@@ -82,10 +82,7 @@ class Manifest extends XmlFile
         $this->getResourcesElement()->appendChild($resourceNode);
     }
 
-    /**
-     * Append a `<dependency>` to an existing resource node, e.g. to record that
-     * an assessment test now depends on a newly added item resource.
-     */
+    /** Append a `<dependency>` to an existing resource node. */
     public function addDependency(string $resourceIdentifier, string $dependencyRef): void
     {
         $dependencyNode = $this->createManifestElement('dependency');

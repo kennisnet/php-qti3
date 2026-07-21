@@ -60,9 +60,8 @@ class AssessmentTest extends QtiElement
     }
 
     /**
-     * Add an item to the test: the item ref is added to the first section.
-     * With the default position (-1) it is appended; a zero-based position
-     * inserts it at that index within the section.
+     * Add an item ref to the first section. Position -1 appends; a zero-based
+     * position inserts at that index.
      */
     public function addItemRef(AssessmentItemRef $itemRef, int $position = -1): void
     {

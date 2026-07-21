@@ -22,14 +22,10 @@ use Qti3\Shared\Collection\StringCollection;
 use Exception;
 
 /**
- * Resolves the external files (images, audio, ...) referenced by a QTI element
- * into {@see Webcontent} resources and the manifest dependencies pointing at
- * them. A file that already lives in the package being edited is carried over
- * as-is (path and bytes kept); a brand new reference is validated and, when
- * needed, downloaded.
- *
- * Extracted from {@see QtiPackageBuilder} so the same logic can be reused by
- * {@see PackageEditor} when a single added or updated item introduces media.
+ * Resolves the external files (images, audio, stylesheets, ...) referenced by a
+ * QTI element into {@see Webcontent} resources and their manifest dependencies.
+ * A file already in the package is carried over as-is; a new reference is
+ * validated and, when needed, downloaded.
  */
 final readonly class WebcontentProcessor
 {
@@ -40,9 +36,8 @@ final readonly class WebcontentProcessor
 
     /**
      * Collect the webcontent referenced by `$element` into `$webcontent` and
-     * return the dependencies on those webcontent resources. Webcontent already
-     * present in `$webcontent` (matched by original path) is reused, so callers
-     * can seed the collection to deduplicate across elements.
+     * return the dependencies on them. Entries already in `$webcontent` (matched
+     * by original path) are reused.
      */
     public function process(
         WebcontentCollection $webcontent,
@@ -71,15 +66,10 @@ final readonly class WebcontentProcessor
     }
 
     /**
-     * Resolve the media of a single element (an item being added or updated)
-     * against an existing package: return the dependencies to declare on that
-     * element's resource plus the webcontent resources that are new to the
-     * package.
-     *
-     * A referenced file ends up at a path derived deterministically from its
-     * source. When a resource with that path already exists — media added by an
-     * earlier edit, or the shared item stylesheet — the dependency is remapped
-     * onto the existing resource so it is never duplicated.
+     * Resolve the media of a single item against an existing package: return the
+     * dependencies for the item's resource plus the webcontent that is new. A
+     * file whose derived path already exists is reused (its dependency remapped)
+     * instead of duplicated — e.g. shared media or the item stylesheet.
      *
      * @return array{0: ManifestResourceDependencyCollection, 1: list<Webcontent>}
      */

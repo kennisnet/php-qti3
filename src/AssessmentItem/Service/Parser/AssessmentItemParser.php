@@ -30,11 +30,8 @@ class AssessmentItemParser extends AbstractParser
     ) {}
 
     /**
-     * Parse an assessment item from its XML string. Convenience wrapper around
-     * {@see self::parse()}: it reads the XML and parses the document element.
-     * The identifier is taken from the XML as-is (assigning one is the caller's
-     * concern). A malformed document surfaces as a {@see ParseError}, like every
-     * other parse failure.
+     * Parse an assessment item from its XML string; malformed XML surfaces as a
+     * {@see ParseError}, like every other parse failure.
      *
      * @throws ParseError
      */

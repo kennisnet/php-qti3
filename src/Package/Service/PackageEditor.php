@@ -26,28 +26,14 @@ use Qti3\Shared\Collection\StringCollection;
 use ValueError;
 
 /**
- * Domain service that edits the assessment items of a QTI package in place.
+ * Edits the assessment items of a {@see QtiPackage} in place, without doing any
+ * filesystem I/O: the caller loads the package and saves it afterwards.
  *
- * Items are handed in as typed {@see AssessmentItem} models — the caller builds
- * or parses them (e.g. through {@see \Qti3\QtiClient::getAssessmentItemParser()})
- * and owns their identifiers; {@see self::getAvailableItemIdentifier()} vends a
- * free one. Because a model is by definition representable, no XML validation
- * or support check happens here for items.
- *
- * Every operation is surgical: it touches only the resource(s) it must. Adding
- * or reordering rewrites a single assessment test (named by `$testId`, so
- * packages with more than one test are supported) and, for an add, appends one
- * item resource. Updating replaces a single item resource. Untouched items,
- * media and metadata are left exactly as they are.
- *
- * The service does no filesystem I/O: the caller loads the {@see QtiPackage}
- * and, after the edit, saves it through a package writer. The passed package is
- * mutated directly; add and update return the affected {@see Resource}.
- *
- * A test that is rewritten (add, reorder) must stay within the subset the
- * {@see AssessmentTest} model can represent; {@see TestBuilder} refuses the rest
- * with {@see \Qti3\Shared\Exception\UnsupportedQtiConstructException}. Updating
- * an item does not rewrite the test, so it is not bound by that constraint.
+ * Every operation is surgical — it touches only the test it must (selected by
+ * `$testId`, so multi-test packages are supported) and the single item added or
+ * updated; everything else is left untouched. Items are passed as typed
+ * {@see AssessmentItem} models and carry their own identifier (see
+ * {@see self::getAvailableItemIdentifier()}).
  */
 final readonly class PackageEditor
 {
@@ -59,20 +45,15 @@ final readonly class PackageEditor
         private WebcontentProcessor $webcontentProcessor,
     ) {}
 
-    /**
-     * Return the next free item identifier for the package (`ITEMnnn`, unique
-     * across the package). Use it to stamp a self-built item before adding it.
-     */
+    /** Next free item identifier for the package (`ITEMnnn`, package-unique). */
     public function getAvailableItemIdentifier(QtiPackage $package): string
     {
         return $this->identifierGenerator->nextIdentifier($this->itemIdentifiers($package));
     }
 
     /**
-     * Add an item to the test identified by `$testId`, using the item's own
-     * identifier. With the default position (-1) it is appended to the section;
-     * a zero-based position inserts it at that index. Returns the added item
-     * resource.
+     * Add an item to the test `$testId`. Position -1 appends; a zero-based
+     * position inserts at that index in the section.
      */
     public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, int $position = -1): Resource
     {
@@ -97,10 +78,8 @@ final readonly class PackageEditor
     }
 
     /**
-     * Replace the content of an existing item, identified by the item's own
-     * identifier. This rewrites only the item resource, not any test, so it is
-     * allowed even when the surrounding test uses unsupported constructs.
-     * Returns the updated item resource.
+     * Replace an existing item's content. Rewrites only the item resource, so it
+     * works even when the surrounding test uses unsupported constructs.
      */
     public function updateItem(QtiPackage $package, AssessmentItem $item): Resource
     {
@@ -118,11 +97,7 @@ final readonly class PackageEditor
         return $itemResource;
     }
 
-    /**
-     * Rewrite the item order of the section of the test identified by `$testId`.
-     *
-     * @param list<string> $orderedIdentifiers
-     */
+    /** @param list<string> $orderedIdentifiers */
     public function reorderItemsInTest(QtiPackage $package, string $testId, array $orderedIdentifiers): void
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);

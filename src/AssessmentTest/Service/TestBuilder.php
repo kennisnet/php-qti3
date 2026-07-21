@@ -19,12 +19,11 @@ final readonly class TestBuilder
     ) {}
 
     /**
-     * Build the typed {@see AssessmentTest} model for a test resource in the
-     * package. The test is first checked against the subset the model can
-     * represent: a construct the model would drop on regeneration (outcome
-     * processing, test feedback, rubric blocks, nested sections, ...) is
-     * refused with {@see \Qti3\Shared\Exception\UnsupportedQtiConstructException}
-     * rather than silently lost.
+     * Build the {@see AssessmentTest} model for a test resource. Constructs the
+     * model cannot represent (outcome processing, test feedback, rubric blocks,
+     * nested sections, ...) are refused with
+     * {@see \Qti3\Shared\Exception\UnsupportedQtiConstructException} rather than
+     * silently dropped.
      */
     public function buildFromPackage(QtiPackage $package, ?string $testIdentifier = null): AssessmentTest
     {

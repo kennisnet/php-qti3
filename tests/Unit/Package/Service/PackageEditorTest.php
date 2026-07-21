@@ -75,10 +75,7 @@ final class PackageEditorTest extends TestCase
     #[Test]
     public function addItemFromAnXmlStringParsesItAndAddsItToTheTest(): void
     {
-        // The documented use case: an item arrives as a raw QTI 3 XML string
-        // (e.g. from a UI or API). The caller obtains a free identifier, builds
-        // the XML with it, parses it via parseFromString() and hands the model
-        // to the editor.
+        // Use case: a raw item XML string (e.g. from a UI) is parsed and added.
         $package = $this->emptyDraft();
 
         $identifier = $this->editor->getAvailableItemIdentifier($package);
@@ -187,8 +184,7 @@ final class PackageEditorTest extends TestCase
     #[Test]
     public function addItemSucceedsEvenWhenAnUnrelatedItemUsesAnUnsupportedConstruct(): void
     {
-        // Surgical editing never re-serializes untouched items, so an
-        // unsupported interaction in another item does not block the edit.
+        // Untouched items are never re-serialized, so an unsupported one elsewhere does not block the edit.
         $package = $this->draftWithUnsupportedItem();
 
         $item = $this->addItem($package);
@@ -227,8 +223,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
         $this->addItem($package);
-        // Corrupt ITEM001 with an unsupported interaction; its old content is
-        // never parsed, so the update repairs it.
+        // The old content is never parsed, so an unsupported item can be repaired.
         $this->overwriteItemFile($package, 'ITEM001', $this->unsupportedInteractionItemXml('ITEM001'));
 
         $updated = $this->editor->updateItem($package, $this->item('ITEM001', 'Hersteld'));

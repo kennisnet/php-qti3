@@ -23,11 +23,7 @@ class AssessmentSection extends QtiElement
         public readonly bool $visible = true,
     ) {}
 
-    /**
-     * Add an item ref to this section. With the default position (-1) the ref
-     * is appended; a zero-based position within the current range inserts it
-     * before the ref currently at that index, so callers can control ordering.
-     */
+    /** Position -1 appends; a zero-based position inserts at that index. */
     public function addItemRef(AssessmentItemRef $itemRef, int $position = -1): void
     {
         $itemRefs = $this->assessmentItemRefs->all();

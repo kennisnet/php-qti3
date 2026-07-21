@@ -28,10 +28,7 @@ class QtiPackage
     }
 
     /**
-     * Return the resource with the given identifier, optionally constrained to
-     * a resource type.
-     *
-     * @throws ResourceNotFoundException when no such resource exists
+     * @throws ResourceNotFoundException when no matching resource exists
      */
     public function getResource(string $identifier, ?ResourceType $type = null): Resource
     {
