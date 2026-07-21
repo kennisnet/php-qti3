@@ -82,7 +82,7 @@ class AssessmentItemParserTest extends TestCase
             </qti-assessment-item>
         ');
 
-        $result = $this->parser->parse($element);
+        $result = $this->parser->parse($element)->item;
 
         $this->assertInstanceOf(AssessmentItem::class, $result);
         $this->assertSame('item-full', (string) $result->identifier);
@@ -130,7 +130,7 @@ class AssessmentItemParserTest extends TestCase
             </qti-assessment-item>
         ');
 
-        $result = $this->parser->parse($element);
+        $result = $this->parser->parse($element)->item;
 
         $this->assertInstanceOf(AssessmentItem::class, $result);
         $this->assertSame('item-minimal', (string) $result->identifier);
@@ -152,7 +152,7 @@ class AssessmentItemParserTest extends TestCase
             </qti-assessment-item>
         ');
 
-        $result = $this->parser->parse($element);
+        $result = $this->parser->parse($element)->item;
 
         $this->assertInstanceOf(AssessmentItem::class, $result);
         $this->assertStringStartsWith('item-', (string) $result->identifier);
@@ -179,9 +179,10 @@ class AssessmentItemParserTest extends TestCase
             . '</qti-assessment-item>',
         );
 
-        $this->assertInstanceOf(AssessmentItem::class, $result);
-        $this->assertSame('item-from-string', (string) $result->identifier);
-        $this->assertSame('Uit string', $result->title);
+        $this->assertInstanceOf(AssessmentItem::class, $result->item);
+        $this->assertSame('item-from-string', (string) $result->item->identifier);
+        $this->assertSame('Uit string', $result->item->title);
+        $this->assertTrue($result->warnings->isEmpty());
     }
 
     #[Test]

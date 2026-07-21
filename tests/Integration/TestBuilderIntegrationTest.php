@@ -76,7 +76,7 @@ XML;
         );
 
         $testBuilder = $client->getTestBuilder();
-        $assessmentTest = $testBuilder->buildFromPackage($package);
+        $assessmentTest = $testBuilder->buildFromPackage($package)->test;
 
         $this->assertInstanceOf(AssessmentTest::class, $assessmentTest);
         $this->assertSame('integration-test-001', (string) $assessmentTest->identifier);

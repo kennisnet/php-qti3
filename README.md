@@ -116,7 +116,7 @@ By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`)
 
 **UC-P6: Add, update or reorder items in a package**
 
-`getPackageEditor()` returns a `PackageEditor` that edits the assessment items of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1). Adding an item assigns it the next free `ITEMnnn` identifier by default (or one you pass). Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are.
+`getPackageEditor()` returns a `PackageEditor` that edits the assessment items of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1). Adding an item assigns it the next free `ITEMnnn` identifier by default (or one you pass). Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are. Editing never refuses an imperfect package: a construct the model cannot hold is dropped on regeneration and reported through the returned `EditResult`'s `warnings` (parsing an item likewise returns an `ItemParseResult` with `item` + `warnings`).
 
 > **See [docs/package-editor.md](docs/package-editor.md)** for worked examples of adding an item from an XML string, updating, removing and reordering items, an errors table and notes.
 
@@ -128,19 +128,20 @@ $parser  = $qtiClient->getAssessmentItemParser();
 // The resource identifier of the test to edit. For a single-test package:
 $testId = $package->getAssessmentTestIdentifier();
 
-// Build the item model from your QTI 3 item XML string.
-$item = $parser->parseFromString($itemXml);
+// Build the item model from your QTI 3 item XML string ($parsed->item), and
+// inspect $parsed->warnings for anything the model could not keep.
+$parsed = $parser->parseFromString($itemXml);
 
-// Add it; the editor assigns the next free identifier. Returns the item Resource.
-$added = $editor->addItemToTest($package, $testId, $item);
-// $added->identifier is 'ITEM001'; (string) $added->getMainFile() is the item XML as written.
+// Add it; the editor assigns the next free identifier. Returns an EditResult.
+$added = $editor->addItemToTest($package, $testId, $parsed->item);
+// $added->resource->identifier is 'ITEM001'; $added->warnings covers the edited test.
 
 // Pass your own identifier and/or a zero-based position (default: next id, append).
-$editor->addItemToTest($package, $testId, $item, identifier: 'ITEM042', position: 0);
+$editor->addItemToTest($package, $testId, $parsed->item, identifier: 'ITEM042', position: 0);
 
 // Update an existing item's content. The model's own identifier selects the
 // item to replace, so parse XML that carries identifier="ITEM001".
-$editor->updateItem($package, $parser->parseFromString($updatedItemXml));
+$editor->updateItem($package, $parser->parseFromString($updatedItemXml)->item);
 
 // Remove an item from the test.
 $editor->removeItemFromTest($package, $testId, 'ITEM001');
@@ -152,7 +153,7 @@ $editor->reorderItemsInTest($package, $testId, ['ITEM002', 'ITEM001']);
 $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/folder')->write($package);
 ```
 
-Removing an item drops its ref from the named test and, unless another test still references it, deletes the item resource and its file; media the item introduced is left in place. Because editing is surgical, untouched items, media and metadata are left as they are — an unrelated item that uses a construct the typed models cannot represent no longer blocks editing, and updating an item works even when its surrounding test does. A test that is *rewritten* (add, reorder) must fit the subset the `AssessmentTest` model can represent: a test containing outcome processing, test feedback, rubric blocks or nested sections is refused with `UnsupportedQtiConstructException` (see UC-T1). Items are supplied as models, so they are representable by construction — parsing item XML that uses an unsupported interaction type (see *Supported interactions* below), a template declaration or an unrecognized response-processing template fails earlier, in the parser.
+Removing an item drops its ref from the named test and, unless another test still references it, deletes the item resource and its file; media the item introduced is left in place. Because editing is surgical, untouched items, media and metadata are left as they are — an unrelated item that uses a construct the typed models cannot represent does not affect editing. A construct the model cannot hold (outcome processing, test feedback, rubric blocks, nested sections, a template declaration, an unconsumed attribute, ...) is not refused: it is dropped when the XML is regenerated and reported via the `warnings` on `EditResult`/`ItemParseResult`. An unsupported *interaction type* still fails earlier, in the parser, with a `ParseError` (see *Supported interactions* below).
 
 Adding an item whose identifier already exists in the package throws `InvalidAssessmentTestException`; editing a non-existent test or updating a non-existent item throws `ResourceNotFoundException`; an order that does not match the items in the test throws `InvalidItemOrderException`. Media that the added or updated item references is carried over (files already in the package) or registered as new webcontent, without duplicating resources.
 
@@ -162,13 +163,14 @@ Adding an item whose identifier already exists in the package throws `InvalidAss
 
 ```php
 $testBuilder = $qtiClient->getTestBuilder();
-$test = $testBuilder->buildFromPackage($qtiPackage);
-// $test is now of type Qti3\AssessmentTest\Model\AssessmentTest
+$result = $testBuilder->buildFromPackage($qtiPackage);
+$test = $result->test;          // Qti3\AssessmentTest\Model\AssessmentTest
+$warnings = $result->warnings;  // constructs the model could not keep
 // Pass a test resource identifier as the second argument to select one test
 // in a multi-test package: buildFromPackage($qtiPackage, $testId).
 ```
 
-`buildFromPackage()` refuses a test that contains constructs the model cannot represent losslessly (outcome processing, test feedback, rubric blocks, nested sections, ...) with `UnsupportedQtiConstructException`, rather than silently dropping them on the round-trip.
+`buildFromPackage()` returns a `TestParseResult` (`test` + `warnings`). A construct the model cannot represent losslessly (outcome processing, test feedback, rubric blocks, nested sections, ...) is not refused: it is dropped on the round-trip and reported in `warnings`.
 
 **UC-T2: Generate package from test**
 
@@ -188,12 +190,16 @@ $package = $packageBuilder->buildForTest($test, $items);
 $assessmentItemParser = $qtiClient->getAssessmentItemParser();
 
 // From a DOMElement:
-$item = $assessmentItemParser->parse($itemElement);
+$result = $assessmentItemParser->parse($itemElement);
 
 // Or directly from an XML string (throws ParseError on malformed XML):
-$item = $assessmentItemParser->parseFromString($itemXml);
-// $item is now of type Qti3\AssessmentItem\Model\AssessmentItem
+$result = $assessmentItemParser->parseFromString($itemXml);
+
+$item = $result->item;          // Qti3\AssessmentItem\Model\AssessmentItem
+$warnings = $result->warnings;  // constructs the model could not keep from the source
 ```
+
+Each warning locates the offending element (line number + identifier-based selector); pass a source label to `parseFromString($xml, $source)` to prefix them with a filename.
 
 **UC-I2: Generate XML from item**
 

@@ -18,7 +18,6 @@ use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
-use Qti3\AssessmentTest\Service\AssessmentTestSupportValidator;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
@@ -153,7 +152,6 @@ final class QtiClient
     {
         return $this->testBuilder ??= new TestBuilder(
             $this->getAssessmentTestParser(),
-            new AssessmentTestSupportValidator(),
         );
     }
 

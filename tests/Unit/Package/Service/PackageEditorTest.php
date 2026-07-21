@@ -18,6 +18,7 @@ use Qti3\Package\Filesystem\FlysystemPackageFactory;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Service\EditResult;
 use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Validator\Resource\IResourceValidator;
@@ -63,7 +64,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', 'Mijn vraag'));
+        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', 'Mijn vraag'))->resource;
 
         $this->assertSame('ITEM001', $item->identifier);
         $stored = (string) $package->getFile('ITEM001.xml');
@@ -78,7 +79,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'VRAAG_A');
+        $item = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'), identifier: 'VRAAG_A')->resource;
 
         $this->assertSame('VRAAG_A', $item->identifier);
         $this->assertSame(['VRAAG_A'], $this->itemRefIdentifiers($package));
@@ -92,9 +93,9 @@ final class PackageEditorTest extends TestCase
         // the editor assigns the identifier.
         $package = $this->emptyDraft();
 
-        $item = $this->client->getAssessmentItemParser()->parseFromString($this->itemXml('PLACEHOLDER', 'Vraag uit XML'));
+        $item = $this->client->getAssessmentItemParser()->parseFromString($this->itemXml('PLACEHOLDER', 'Vraag uit XML'))->item;
 
-        $added = $this->editor->addItemToTest($package, self::TEST_ID, $item);
+        $added = $this->editor->addItemToTest($package, self::TEST_ID, $item)->resource;
 
         $this->assertSame('ITEM001', $added->identifier);
         $this->assertSame(['ITEM001'], $this->itemRefIdentifiers($package));
@@ -205,6 +206,21 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function editingATestWithUnsupportedConstructsSurfacesTraceableWarnings(): void
+    {
+        // The test carries outcome processing the model cannot hold: editing
+        // succeeds, but the loss is reported with file + line + selector.
+        $package = $this->draftWithUnsupportedTestConstruct();
+
+        $result = $this->addItemResult($package);
+
+        $this->assertNotSame([], $result->warnings->all());
+        $warning = $result->warnings->all()[0];
+        $this->assertStringStartsWith('AssessmentTest.xml: line ', $warning);
+        $this->assertStringContainsString('qti-outcome-processing', $warning);
+    }
+
+    #[Test]
     public function updateItemReplacesTheContentAndLeavesManifestAndTestEquivalent(): void
     {
         $package = $this->emptyDraft();
@@ -237,7 +253,7 @@ final class PackageEditorTest extends TestCase
         // The old content is never parsed, so an unsupported item can be repaired.
         $this->overwriteItemFile($package, 'ITEM001', $this->unsupportedInteractionItemXml('ITEM001'));
 
-        $updated = $this->editor->updateItem($package, $this->item('ITEM001', 'Hersteld'));
+        $updated = $this->editor->updateItem($package, $this->item('ITEM001', 'Hersteld'))->resource;
 
         $this->assertSame('ITEM001', $updated->identifier);
         $this->assertStringContainsString('Hersteld', (string) $package->getFile('ITEM001.xml'));
@@ -362,7 +378,7 @@ final class PackageEditorTest extends TestCase
             $package,
             self::TEST_ID,
             $this->item('ITEM001', imageSrc: 'https://example.com/pic.png'),
-        );
+        )->resource;
 
         $itemResourceXml = $this->elementXml(
             $this->findElement((string) $package->manifest, self::MANIFEST_NAMESPACE, 'resource', $item->identifier)
@@ -380,7 +396,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $added = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', imageSrc: '/etc/passwd'));
+        $added = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', imageSrc: '/etc/passwd'))->resource;
 
         $manifest = (string) $package->manifest;
         // The local/traversal path is never registered as a resource...
@@ -407,6 +423,11 @@ final class PackageEditorTest extends TestCase
 
     private function addItem(QtiPackage $package, string $testId = self::TEST_ID): Resource
     {
+        return $this->addItemResult($package, $testId)->resource;
+    }
+
+    private function addItemResult(QtiPackage $package, string $testId = self::TEST_ID): EditResult
+    {
         return $this->editor->addItemToTest($package, $testId, $this->item('PLACEHOLDER'));
     }
 
@@ -418,7 +439,7 @@ final class PackageEditorTest extends TestCase
         self::assertInstanceOf(DOMElement::class, $element);
         $element->setAttribute('identifier', $identifier);
 
-        return $this->client->getAssessmentItemParser()->parse($element);
+        return $this->client->getAssessmentItemParser()->parse($element)->item;
     }
 
     // --- seeding helpers -----------------------------------------------------
@@ -459,6 +480,34 @@ final class PackageEditorTest extends TestCase
         }
 
         return $package;
+    }
+
+    private function draftWithUnsupportedTestConstruct(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part>'
+            . '<qti-outcome-processing/>'
+            . '</qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+
+        return $this->readPackage();
     }
 
     private function draftWithoutSection(): QtiPackage

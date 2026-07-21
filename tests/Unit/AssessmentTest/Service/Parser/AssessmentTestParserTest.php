@@ -57,7 +57,7 @@ XML;
         $dom = new DOMDocument();
         $dom->loadXML($xml);
 
-        $assessmentTest = $this->parser->parse($dom->documentElement);
+        $assessmentTest = $this->parser->parse($dom->documentElement)->test;
 
         $this->assertInstanceOf(AssessmentTest::class, $assessmentTest);
         $this->assertEquals('f36d8995-1234-5678-1234-567812345678', (string) $assessmentTest->identifier);

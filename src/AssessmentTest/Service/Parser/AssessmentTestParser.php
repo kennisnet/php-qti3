@@ -10,6 +10,8 @@ use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\TestPart\TestPart;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\AssessmentTest\Service\TestParseResult;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use DOMElement;
@@ -21,9 +23,14 @@ class AssessmentTestParser extends AbstractParser
         private readonly TestPartParser $testPartParser
     ) {}
 
-    public function parse(DOMElement $element): AssessmentTest
+    /**
+     * Parse an assessment test element into its model plus the warnings for any
+     * construct that could not be represented (see {@see TestParseResult}).
+     */
+    public function parse(DOMElement $element): TestParseResult
     {
         $this->validateTag($element, AssessmentTest::qtiTagName());
+        $warnings = new StringCollection();
 
         $identifierValue = $element->getAttribute('identifier');
 
@@ -38,16 +45,24 @@ class AssessmentTestParser extends AbstractParser
             if ($child->nodeName === OutcomeDeclaration::qtiTagName()) {
                 $outcomeDeclarations->add($this->outcomeDeclarationParser->parse($child));
             } elseif ($child->nodeName === TestPart::qtiTagName()) {
-                $testParts->add($this->testPartParser->parse($child));
+                $testParts->add($this->testPartParser->parse($child, $warnings));
             }
-            // TODO: OutcomeProcessing, TestFeedback, RubricBlock
         }
 
-        return new AssessmentTest(
+        $this->warnUnconsumed(
+            $element,
+            ['identifier', 'title'],
+            [OutcomeDeclaration::qtiTagName(), TestPart::qtiTagName()],
+            $warnings,
+        );
+
+        $test = new AssessmentTest(
             $identifier,
             $outcomeDeclarations,
             $testParts,
             $title
         );
+
+        return new TestParseResult($test, $warnings);
     }
 }
