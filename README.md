@@ -199,6 +199,8 @@ $item = $result->item;          // Qti3\AssessmentItem\Model\AssessmentItem
 $warnings = $result->warnings;  // constructs the model could not keep from the source
 ```
 
+Each warning locates the offending element (line number + identifier-based selector); pass a source label to `parseFromString($xml, $source)` to prefix them with a filename.
+
 **UC-I2: Generate XML from item**
 
 ```php

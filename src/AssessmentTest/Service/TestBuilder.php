@@ -8,6 +8,7 @@ use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Shared\Collection\StringCollection;
 use RuntimeException;
 
 final readonly class TestBuilder
@@ -34,6 +35,15 @@ final readonly class TestBuilder
             throw new RuntimeException(sprintf('Main file of resource %s is not an XML file', $testIdentifier));
         }
 
-        return $this->assessmentTestParser->parse($xmlFile->getDocumentElement());
+        $parsed = $this->assessmentTestParser->parse($xmlFile->getDocumentElement());
+
+        // Prefix each warning with the test file so it can be traced to its source.
+        $source = $resource->href ?? (string) $testIdentifier;
+        $warnings = new StringCollection();
+        foreach ($parsed->warnings as $warning) {
+            $warnings->add($source . ': ' . $warning);
+        }
+
+        return new TestParseResult($parsed->test, $warnings);
     }
 }

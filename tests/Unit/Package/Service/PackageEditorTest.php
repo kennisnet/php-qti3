@@ -18,6 +18,7 @@ use Qti3\Package\Filesystem\FlysystemPackageFactory;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
+use Qti3\Package\Service\EditResult;
 use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Validator\Resource\IResourceValidator;
@@ -202,6 +203,21 @@ final class PackageEditorTest extends TestCase
 
         $this->assertSame('ITEM002', $item->identifier);
         $this->assertSame(['ITEM001', 'ITEM002'], $this->itemRefIdentifiers($package));
+    }
+
+    #[Test]
+    public function editingATestWithUnsupportedConstructsSurfacesTraceableWarnings(): void
+    {
+        // The test carries outcome processing the model cannot hold: editing
+        // succeeds, but the loss is reported with file + line + selector.
+        $package = $this->draftWithUnsupportedTestConstruct();
+
+        $result = $this->addItemResult($package);
+
+        $this->assertNotSame([], $result->warnings->all());
+        $warning = $result->warnings->all()[0];
+        $this->assertStringStartsWith('AssessmentTest.xml: line ', $warning);
+        $this->assertStringContainsString('qti-outcome-processing', $warning);
     }
 
     #[Test]
@@ -407,7 +423,12 @@ final class PackageEditorTest extends TestCase
 
     private function addItem(QtiPackage $package, string $testId = self::TEST_ID): Resource
     {
-        return $this->editor->addItemToTest($package, $testId, $this->item('PLACEHOLDER'))->resource;
+        return $this->addItemResult($package, $testId)->resource;
+    }
+
+    private function addItemResult(QtiPackage $package, string $testId = self::TEST_ID): EditResult
+    {
+        return $this->editor->addItemToTest($package, $testId, $this->item('PLACEHOLDER'));
     }
 
     private function item(string $identifier, string $title = 'Vraag', ?string $imageSrc = null): AssessmentItem
@@ -459,6 +480,34 @@ final class PackageEditorTest extends TestCase
         }
 
         return $package;
+    }
+
+    private function draftWithUnsupportedTestConstruct(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part>'
+            . '<qti-outcome-processing/>'
+            . '</qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+
+        return $this->readPackage();
     }
 
     private function draftWithoutSection(): QtiPackage

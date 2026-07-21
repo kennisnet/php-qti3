@@ -41,10 +41,12 @@ class AssessmentItemParser extends AbstractParser
      * Parse an assessment item from its XML string; malformed XML surfaces as a
      * {@see ParseError}, like every other parse failure. Constructs the model
      * cannot hold are not refused but reported through the result's warnings.
+     * Pass `$source` (e.g. a filename) to prefix those warnings so they can be
+     * traced back to their origin.
      *
      * @throws ParseError
      */
-    public function parseFromString(string $xml): ItemParseResult
+    public function parseFromString(string $xml, ?string $source = null): ItemParseResult
     {
         try {
             $document = $this->xmlReader->read($xml);
@@ -57,7 +59,22 @@ class AssessmentItemParser extends AbstractParser
             throw new ParseError('Assessment item XML has no document element'); // @codeCoverageIgnore
         }
 
-        return $this->parse($element);
+        $result = $this->parse($element);
+        if ($source === null) {
+            return $result;
+        }
+
+        return new ItemParseResult($result->item, $this->prefixWarnings($result->warnings, $source));
+    }
+
+    private function prefixWarnings(StringCollection $warnings, string $source): StringCollection
+    {
+        $prefixed = new StringCollection();
+        foreach ($warnings as $warning) {
+            $prefixed->add($source . ': ' . $warning);
+        }
+
+        return $prefixed;
     }
 
     /**
@@ -103,7 +120,7 @@ class AssessmentItemParser extends AbstractParser
         }
 
         if ($stylesheetCount > 1) {
-            $warnings->add('Assessment item keeps only one <qti-stylesheet>; the others are dropped');
+            $warnings->add(sprintf('%s: keeps only one <qti-stylesheet>, the others are dropped', $this->locate($element)));
         }
 
         $this->warnUnconsumed(

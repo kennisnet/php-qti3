@@ -17,6 +17,17 @@ typed models cannot hold — and would therefore drop when the XML is regenerate
 + `warnings`, `resource` is null for reorder). Inspect the warnings to decide
 whether the (partial) data loss is acceptable.
 
+Each warning locates the offending element — source file, line number and an
+identifier-based selector — so it can be traced back, e.g.:
+
+```
+AssessmentTest.xml: line 12 at /qti-assessment-test[@identifier='T']/qti-test-part[@identifier='tp']/qti-assessment-section[@identifier='s']: drops unsupported element <qti-selection>
+```
+
+The file name is added where it is known: `TestBuilder`/the editor prefix it for
+the test being edited, and `parseFromString($xml, $source)` takes an optional
+source label (e.g. a filename) for item warnings.
+
 Obtain the editor from the `QtiClient` (see the main README for how to construct
 the client):
 

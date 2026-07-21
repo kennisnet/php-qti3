@@ -56,15 +56,36 @@ abstract class AbstractParser
                 continue;
             }
             if (!in_array($attribute->nodeName, $consumedAttributes, true)) {
-                $warnings->add(sprintf('<%s> drops unsupported attribute "%s"', $element->nodeName, $attribute->nodeName));
+                $warnings->add(sprintf('%s: drops unsupported attribute "%s"', $this->locate($element), $attribute->nodeName));
             }
         }
 
         foreach ($this->getChildren($element) as $child) {
             if (!in_array($child->localName, $consumedChildren, true)) {
-                $warnings->add(sprintf('<%s> drops unsupported element "<%s>"', $element->nodeName, $child->localName));
+                $warnings->add(sprintf('%s: drops unsupported element <%s>', $this->locate($child), $child->localName));
             }
         }
+    }
+
+    /**
+     * A locator for `$node` so a warning can be traced back to the offending
+     * element: its source line plus an identifier-based path from the document
+     * root, e.g. `line 4 at /qti-assessment-test[@identifier='T']/.../qti-selection`.
+     */
+    protected function locate(DOMNode $node): string
+    {
+        return sprintf('line %d at %s', $node->getLineNo(), $this->selector($node));
+    }
+
+    private function selector(DOMNode $node): string
+    {
+        $segments = [];
+        for ($current = $node; $current instanceof DOMElement; $current = $current->parentNode) {
+            $identifier = $current->getAttribute('identifier');
+            $segments[] = $current->nodeName . ($identifier !== '' ? sprintf("[@identifier='%s']", $identifier) : '');
+        }
+
+        return '/' . implode('/', array_reverse($segments));
     }
 
     private function isNamespaceAttribute(DOMAttr $attribute): bool

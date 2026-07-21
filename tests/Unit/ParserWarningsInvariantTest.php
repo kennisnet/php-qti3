@@ -122,6 +122,33 @@ final class ParserWarningsInvariantTest extends TestCase
         ];
     }
 
+    #[Test]
+    public function warningLocatesTheOffendingElementByLineAndSelector(): void
+    {
+        $result = $this->client->getAssessmentTestParser()->parse(
+            $this->element(self::testWithSection('<qti-selection select="2"/>', extraSectionAttribute: 'keep-together="true"')),
+        );
+
+        $warning = $result->warnings->all()[0];
+        $this->assertMatchesRegularExpression('/^line \d+ at \//', $warning);
+        $this->assertStringContainsString("/qti-assessment-section[@identifier='s']", $warning);
+        $this->assertStringContainsString('keep-together', $warning);
+    }
+
+    #[Test]
+    public function parseFromStringPrefixesWarningsWithTheGivenSource(): void
+    {
+        $result = $this->client->getAssessmentItemParser()->parseFromString(
+            self::item('<qti-template-declaration identifier="T" cardinality="single" base-type="integer"/><qti-item-body><p>x</p></qti-item-body>'),
+            'ITEM001.xml',
+        );
+
+        $this->assertNotSame([], $result->warnings->all());
+        foreach ($result->warnings as $warning) {
+            $this->assertStringStartsWith('ITEM001.xml: line ', $warning);
+        }
+    }
+
     // --- assessment item ----------------------------------------------------
 
     #[Test]
