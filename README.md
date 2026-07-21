@@ -155,6 +155,8 @@ Removing an item drops its ref from the named test and, unless another test stil
 
 Adding an item whose identifier already exists in the package throws `InvalidAssessmentTestException`; editing a non-existent test or updating a non-existent item throws `ResourceNotFoundException`; an order that does not match the items in the test throws `InvalidItemOrderException`. Media that the added or updated item references is carried over (files already in the package) or registered as new webcontent, without duplicating resources.
 
+See [docs/package-editor.md](docs/package-editor.md) for worked examples of adding, updating, removing and reordering items.
+
 ### Assessment Test Level
 
 **UC-T1: Generate test from package**
