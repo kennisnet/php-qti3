@@ -96,7 +96,7 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
             'tags' => ['source'],
             'type' => self::BLOCK,
             'allowedAttributes' => ['media', 'sizes', 'src', 'srcset', 'type'],
-            'requiredAttributes' => ['src'],
+            'requiredAttributes' => [],
         ],
         [
             'tags' => ['table'],
@@ -158,7 +158,16 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
     {
         $attributes = $this->attributes;
         if ($this->resource !== null) {
-            $attributes['src'] = $this->resource->relativePath . $this->resource->filename;
+            $resolvedPath = $this->resource->relativePath . $this->resource->filename;
+            // Rewrite the attribute the reference came from: <img>/<source src>
+            // use `src`, while a <source> inside <picture> carries its URL in
+            // `srcset`. Otherwise the resolved file would be written under the
+            // wrong attribute and the original (unbundled) reference kept.
+            if (!isset($attributes['src']) && isset($attributes['srcset'])) {
+                $attributes['srcset'] = $this->rewriteFirstSrcsetUrl($attributes['srcset'], $resolvedPath);
+            } else {
+                $attributes['src'] = $resolvedPath;
+            }
         }
         return $attributes;
     }
@@ -170,7 +179,40 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
 
     public function getSource(): ?string
     {
-        return $this->attributes['src'] ?? null;
+        if (isset($this->attributes['src'])) {
+            return $this->attributes['src'];
+        }
+
+        // A <source> inside <picture> references its image through `srcset`
+        // rather than `src`; resolve the first candidate's URL so the media is
+        // still bundled instead of silently left dangling.
+        return $this->firstSrcsetUrl();
+    }
+
+    private function firstSrcsetUrl(): ?string
+    {
+        $srcset = $this->attributes['srcset'] ?? null;
+        if ($srcset === null || trim($srcset) === '') {
+            return null;
+        }
+
+        // srcset is "url [descriptor][, url [descriptor]]...". The resource
+        // model holds a single file, so the first candidate's URL is resolved;
+        // any further candidates are left untouched.
+        $firstCandidate = trim(explode(',', $srcset)[0]);
+        $url = preg_split('/\s+/', $firstCandidate)[0] ?? '';
+
+        return $url !== '' ? $url : null;
+    }
+
+    private function rewriteFirstSrcsetUrl(string $srcset, string $resolvedPath): string
+    {
+        $candidates = explode(',', $srcset);
+        $firstParts = preg_split('/\s+/', trim($candidates[0]), 2) ?: [];
+        $descriptor = isset($firstParts[1]) ? ' ' . $firstParts[1] : '';
+        $candidates[0] = $resolvedPath . $descriptor;
+
+        return implode(',', $candidates);
     }
 
     public function isTrustedSource(): bool
@@ -217,6 +259,17 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
             }
         }
         $this->validateRequiredAttributes($this->tagName, $this->attributes);
+
+        // <source> is valid with either `src` (audio/video) or `srcset`
+        // (picture), but not neither — a source that references nothing is
+        // meaningless. This "at least one of" rule is not expressible via the
+        // flat requiredAttributes list, so it is checked explicitly.
+        if ($this->tagName === 'source'
+            && ($this->attributes['src'] ?? null) === null
+            && ($this->attributes['srcset'] ?? null) === null
+        ) {
+            throw new InvalidArgumentException('A <source> element must have a src or srcset attribute');
+        }
     }
 
     /**

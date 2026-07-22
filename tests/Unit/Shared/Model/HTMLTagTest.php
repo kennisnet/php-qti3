@@ -143,4 +143,41 @@ class HTMLTagTest extends TestCase
         $tag = new HTMLTag('div');
         $this->assertNull($tag->getResource());
     }
+
+    #[Test]
+    public function getSourceReturnsSrcsetUrlForASourceWithoutSrc(): void
+    {
+        $tag = new HTMLTag('source', ['srcset' => 'map.webp', 'type' => 'image/webp']);
+
+        $this->assertSame('map.webp', $tag->getSource());
+    }
+
+    #[Test]
+    public function getSourceReturnsTheFirstSrcsetUrlStrippingItsDescriptor(): void
+    {
+        $tag = new HTMLTag('source', ['srcset' => 'map.webp 2x, map-1x.webp 1x']);
+
+        $this->assertSame('map.webp', $tag->getSource());
+    }
+
+    #[Test]
+    public function aResolvedResourceRewritesTheSrcsetOfASourceElement(): void
+    {
+        $tag = new HTMLTag('source', ['srcset' => 'map.webp 2x', 'type' => 'image/webp']);
+
+        $tag->setResource(new QtiResource('webcontent', 'map.webp', 'resources/', 'abc.webp'));
+
+        // The srcset URL is replaced with the bundled path; the descriptor is
+        // preserved, and no stray `src` attribute is introduced.
+        $this->assertSame('resources/abc.webp 2x', $tag->attributes()['srcset']);
+        $this->assertArrayNotHasKey('src', $tag->attributes());
+    }
+
+    #[Test]
+    public function aSourceElementWithoutSrcOrSrcsetThrows(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new HTMLTag('source', ['type' => 'image/webp']);
+    }
 }
