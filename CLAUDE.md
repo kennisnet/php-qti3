@@ -20,8 +20,8 @@ vendor/bin/phpunit --testsuite Unit
 # Run only integration tests
 vendor/bin/phpunit --testsuite Integration
 
-# Static analysis
-vendor/bin/phpstan analyse
+# Static analysis (same invocation as CI)
+vendor/bin/phpstan analyse src --level=0
 
 # Install dependencies
 composer install
