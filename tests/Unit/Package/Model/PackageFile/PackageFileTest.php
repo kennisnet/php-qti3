@@ -33,24 +33,26 @@ class PackageFileTest extends TestCase
     }
 
     #[Test]
-    public function aFileIsNotModifiedByDefault(): void
+    public function aFileIsModifiedByDefaultSoNewContentIsAlwaysWritten(): void
     {
-        $this->assertFalse($this->packageFile->isModified());
+        $this->assertTrue($this->packageFile->isModified());
     }
 
     #[Test]
-    public function aFileCanBeConstructedAsModified(): void
+    public function aFileCanBeConstructedAsUnmodifiedForSourcePassthrough(): void
     {
-        $file = new PackageFile('test.tst', $this->testContent, false, modified: true);
+        $file = new PackageFile('test.tst', $this->testContent, false, modified: false);
+
+        $this->assertFalse($file->isModified());
+    }
+
+    #[Test]
+    public function markModifiedFlagsAnUnmodifiedFileAsModified(): void
+    {
+        $file = new PackageFile('test.tst', $this->testContent, false, modified: false);
+
+        $file->markModified();
 
         $this->assertTrue($file->isModified());
-    }
-
-    #[Test]
-    public function markModifiedFlagsTheFileAsModified(): void
-    {
-        $this->packageFile->markModified();
-
-        $this->assertTrue($this->packageFile->isModified());
     }
 }

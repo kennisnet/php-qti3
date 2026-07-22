@@ -21,7 +21,7 @@ class XmlFile extends PackageFile implements Stringable
         string $name,
         IFileContent $content,
         private readonly IXmlReader $xmlReader,
-        bool $modified = false,
+        bool $modified = true,
     ) {
         if (!str_ends_with($name, '.xml')) {
             throw new InvalidArgumentException('XML file name must end with .xml');

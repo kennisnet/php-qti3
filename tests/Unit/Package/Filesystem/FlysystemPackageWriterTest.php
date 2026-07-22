@@ -67,8 +67,8 @@ class FlysystemPackageWriterTest extends TestCase
                 $this->assertSame('<changed/>', stream_get_contents($stream));
             });
 
-        $unchanged = new PackageFile('media.png', new MemoryFileContent('BINARY'));
-        $changed = new PackageFile('changed.xml', new MemoryFileContent('<changed/>'), false, modified: true);
+        $unchanged = new PackageFile('media.png', new MemoryFileContent('BINARY'), modified: false);
+        $changed = new PackageFile('changed.xml', new MemoryFileContent('<changed/>'));
 
         $qtiPackage = $this->createMock(QtiPackage::class);
         $qtiPackage->method('getFiles')
@@ -86,8 +86,8 @@ class FlysystemPackageWriterTest extends TestCase
         // Both files are written when the flag is not set (default behaviour).
         $dataStorage->expects($this->exactly(2))->method('writeStream');
 
-        $unchanged = new PackageFile('media.png', new MemoryFileContent('BINARY'));
-        $changed = new PackageFile('changed.xml', new MemoryFileContent('<changed/>'), false, modified: true);
+        $unchanged = new PackageFile('media.png', new MemoryFileContent('BINARY'), modified: false);
+        $changed = new PackageFile('changed.xml', new MemoryFileContent('<changed/>'));
 
         $qtiPackage = $this->createMock(QtiPackage::class);
         $qtiPackage->method('getFiles')

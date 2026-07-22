@@ -22,9 +22,10 @@ class Manifest extends XmlFile
         IFileContent $fileContent,
         private readonly IXmlReader $xmlReader,
     ) {
-        // The manifest is the package index and is rebuilt/mutated on every
-        // edit, so it is always treated as modified and written afresh.
-        parent::__construct(self::MANIFEST_FILE_NAME, $fileContent, $this->xmlReader, modified: true);
+        // The manifest is the package index, rebuilt/mutated on every edit and
+        // never a verbatim passthrough, so it keeps the default modified state
+        // and is always written afresh.
+        parent::__construct(self::MANIFEST_FILE_NAME, $fileContent, $this->xmlReader);
 
         $this->xpath = new DOMXPath($this->getXml());
         $this->xpath->registerNamespace('lom', 'http://ltsc.ieee.org/xsd/LOM');

@@ -54,10 +54,14 @@ readonly class QtiPackageReader implements IQtiPackageFactory
                 $extension = pathinfo($manifestFile->href, PATHINFO_EXTENSION);
                 $fileContent = $reader->getFileContent($manifestFile->href);
 
+                // Loaded verbatim from the source package: not modified, so a
+                // writer may leave it in place. This is the single boundary that
+                // produces unmodified files; everything constructed elsewhere is
+                // new content and defaults to modified.
                 if ($extension === 'xml') {
-                    $packageFile = new XmlFile($manifestFile->href, $fileContent, $this->xmlReader);
+                    $packageFile = new XmlFile($manifestFile->href, $fileContent, $this->xmlReader, modified: false);
                 } else {
-                    $packageFile = new PackageFile($manifestFile->href, $fileContent);
+                    $packageFile = new PackageFile($manifestFile->href, $fileContent, modified: false);
                 }
                 $files->add($packageFile);
             }
