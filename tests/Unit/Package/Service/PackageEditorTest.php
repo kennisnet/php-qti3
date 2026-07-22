@@ -454,6 +454,30 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemBundlesBothTheImgFallbackAndTheSrcsetMediaOfAPicture(): void
+    {
+        $package = $this->emptyDraft();
+
+        $xml = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="PLACEHOLDER" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><p><picture>'
+            . '<source srcset="https://example.com/alt.webp" type="image/webp"/>'
+            . '<img src="https://example.com/main.png" alt="Afbeelding"/>'
+            . '</picture></p></qti-item-body></qti-assessment-item>',
+            self::ASI_NAMESPACE,
+        );
+        $item = $this->client->getAssessmentItemParser()->parseFromString($xml)->item;
+
+        $this->editor->addItemToTest($package, self::TEST_ID, $item);
+
+        // The <source srcset> alternate is bundled just like the <img src>
+        // fallback, instead of being silently dropped.
+        $this->assertSame(1, $this->countResourcesWithHrefSuffix($package, '.webp'));
+        $this->assertSame(1, $this->countResourcesWithHrefSuffix($package, '.png'));
+    }
+
+    #[Test]
     public function filesLoadedFromTheSourcePackageAreNotModifiedButTheManifestIs(): void
     {
         // Locks the reader boundary the skip-on-write optimization relies on:
@@ -863,6 +887,21 @@ final class PackageEditorTest extends TestCase
         $count = 0;
         foreach ($dom->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
             if ($resource->getAttribute('href') === $href) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    private function countResourcesWithHrefSuffix(QtiPackage $package, string $suffix): int
+    {
+        $dom = new DOMDocument();
+        $dom->loadXML((string) $package->manifest);
+
+        $count = 0;
+        foreach ($dom->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
+            if (str_ends_with($resource->getAttribute('href'), $suffix)) {
                 $count++;
             }
         }
