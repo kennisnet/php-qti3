@@ -17,6 +17,7 @@ use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -49,6 +50,7 @@ final readonly class PackageEditor
         private ItemResourceBuilder $itemResourceBuilder,
         private WebcontentProcessor $webcontentProcessor,
         private AssessmentItemParser $assessmentItemParser,
+        private WebcontentIdentifierGenerator $webcontentIdentifierGenerator,
     ) {}
 
     /** Next free item identifier for the package (`ITEMnnn`, package-unique). */
@@ -164,6 +166,41 @@ final readonly class PackageEditor
         $this->rewriteTestXml($test, $testResource);
 
         return new EditResult(null, $parsed->warnings);
+    }
+
+    public function addResource(
+        QtiPackage $package,
+        string $filepath,
+        string $contents,
+        ?string $identifier = null,
+        bool $isBinary = true,
+    ): EditResult {
+        if ($package->hasFile($filepath)) {
+            return new EditResult($this->existingWebcontentFor($package, $filepath, $contents), new StringCollection());
+        }
+
+        $identifier ??= $this->webcontentIdentifierGenerator->next($package);
+        $this->assertIdentifierAvailable($package, $identifier);
+
+        $resource = new Webcontent($filepath, $identifier, $filepath, new MemoryFileContent($contents), $isBinary);
+        $package->addResource($resource);
+
+        return new EditResult($resource, new StringCollection());
+    }
+
+    private function existingWebcontentFor(QtiPackage $package, string $filepath, string $contents): Webcontent
+    {
+        $owner = $package->resources
+            ->filter(static fn(Resource $resource): bool => $resource->href === $filepath)
+            ->first();
+
+        if ($owner instanceof Webcontent && $owner->getMainFile()?->getContent()->getContent() === $contents) {
+            return $owner;
+        }
+
+        throw new InvalidQtiPackageException(new StringCollection([
+            sprintf('Package already contains a different file at "%s"', $filepath),
+        ]));
     }
 
     private function buildTest(QtiPackage $package, string $testId): TestParseResult

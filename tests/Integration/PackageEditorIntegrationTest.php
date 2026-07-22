@@ -91,6 +91,77 @@ class PackageEditorIntegrationTest extends TestCase
         $this->assertSame(['ITEM001', 'ITEM002'], $test->getItemIdentifiers());
     }
 
+    #[Test]
+    public function anAddedImageResourceReferencedFromAnItemSurvivesAWriteAndReload(): void
+    {
+        // The editor use case: upload an image into the package, reference it
+        // from an item, then persist. updateItem wires the manifest dependency
+        // on the in-package file automatically.
+        $this->seedPackageOnDisk();
+        $client = $this->createClient();
+        $editor = $client->getPackageEditor();
+
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+
+        $pngBytes = "\x89PNG\r\n\x1a\nfake-image-bytes";
+        $resource = $editor->addResource($package, 'resources/logo.png', $pngBytes)->resource;
+        $this->assertSame('RESOURCE001', $resource->identifier);
+
+        $editor->updateItem(
+            $package,
+            $client->getAssessmentItemParser()->parseFromString(
+                $this->itemXmlWithImage('ITEM001', 'resources/logo.png'),
+            )->item,
+        );
+
+        // Write back over the source, skipping unchanged files: the freshly
+        // added image must still be written (it is modified by default).
+        $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package, skipUnmodifiedFiles: true);
+
+        $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+
+        $this->assertTrue($reloaded->hasFile('resources/logo.png'));
+        $this->assertSame($pngBytes, $reloaded->getFile('resources/logo.png')->getContent()->getContent());
+        $this->assertTrue($reloaded->hasResource('RESOURCE001'));
+        $this->assertContains('RESOURCE001', $this->dependencyRefsOf($reloaded, 'ITEM001'));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function dependencyRefsOf(\Qti3\Package\Model\QtiPackage $package, string $resourceIdentifier): array
+    {
+        $dom = new \DOMDocument();
+        $dom->loadXML((string) $package->manifest);
+
+        foreach ($dom->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'resource') as $resource) {
+            if ($resource->getAttribute('identifier') !== $resourceIdentifier) {
+                continue;
+            }
+
+            $refs = [];
+            foreach ($resource->getElementsByTagNameNS(self::MANIFEST_NAMESPACE, 'dependency') as $dependency) {
+                $refs[] = $dependency->getAttribute('identifierref');
+            }
+
+            return $refs;
+        }
+
+        return [];
+    }
+
+    private function itemXmlWithImage(string $identifier, string $src): string
+    {
+        return sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="%s" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><p><img src="%s" alt="Logo"/></p></qti-item-body></qti-assessment-item>',
+            self::ASI_NAMESPACE,
+            $identifier,
+            $src,
+        );
+    }
+
     private function seedPackageOnDisk(): void
     {
         $dir = $this->tempDataDir . '/' . self::PACKAGE_DIR;

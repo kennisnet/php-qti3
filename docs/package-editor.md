@@ -155,6 +155,37 @@ exactly the items currently in the test's section.
 $editor->reorderItemsInTest($package, $testId, ['ITEM003', 'ITEM001', 'ITEM002']);
 ```
 
+## Adding a media resource (image, audio, ...)
+
+To bring a file into the package from raw bytes — e.g. an image uploaded through
+your editor — use `addResource()`. It adds the file as a webcontent resource and
+registers it in the manifest, and returns the created resource so you can read
+its identifier and in-package path. By default the editor assigns the next free
+`RESOURCEnnn` identifier; pass `$identifier` to choose your own.
+
+```php
+$result = $editor->addResource($package, 'resources/logo.png', $imageBytes);
+
+echo $result->resource->identifier;  // 'RESOURCE001'
+echo $result->resource->href;        // 'resources/logo.png'
+```
+
+`addResource()` only adds the file. To *reference* it from an item, put its path
+in the item XML (e.g. `<img src="resources/logo.png" alt="..."/>`) and call
+`updateItem()` — the editor then links the manifest dependency on the in-package
+file for you (the same handling that carries over media already in the package):
+
+```php
+$editor->addResource($package, 'resources/logo.png', $imageBytes);
+$editor->updateItem($package, $parsedItemThatReferencesTheImage);
+```
+
+Pass `isBinary: false` for text assets such as CSS or SVG. Adding the same path
+again is idempotent when the bytes are identical (it returns the existing
+resource); a differing file, or a path already used by another kind of resource,
+is refused with `InvalidQtiPackageException` so an in-use file is never
+clobbered.
+
 ## A complete example
 
 ```php
@@ -194,6 +225,7 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 | Unknown `$testId`, or updating/removing a non-existent item | `Qti3\Shared\Exception\ResourceNotFoundException` |
 | Adding an item whose identifier already exists in the package | `Qti3\AssessmentTest\Exception\InvalidAssessmentTestException` |
 | Reorder list that does not match the items in the test | `Qti3\AssessmentTest\Exception\InvalidItemOrderException` |
+| `addResource()` for a path already holding different bytes, or owned by a non-webcontent resource | `Qti3\Package\Exception\InvalidQtiPackageException` |
 
 A construct the model cannot hold (outcome processing, test feedback, rubric
 blocks, nested sections, a template declaration, an unconsumed attribute, ...)

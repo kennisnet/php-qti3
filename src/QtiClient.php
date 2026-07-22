@@ -34,6 +34,7 @@ use Qti3\Package\Service\IZipPackageFactory;
 use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Service\WebcontentProcessor;
+use Qti3\Package\Service\WebcontentIdentifierGenerator;
 use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
@@ -189,6 +190,7 @@ final class QtiClient
             $this->getItemResourceBuilder(),
             $this->getWebcontentProcessor(),
             $this->getAssessmentItemParser(),
+            new WebcontentIdentifierGenerator(),
         );
     }
 
@@ -212,6 +214,7 @@ final class QtiClient
         return $this->webcontentProcessor ??= new WebcontentProcessor(
             $this->resourceValidator,
             $this->resourceDownloader,
+            new WebcontentIdentifierGenerator(),
         );
     }
 

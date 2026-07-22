@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
+use Qti3\Package\Exception\InvalidQtiPackageException;
 use Qti3\Package\Filesystem\FlysystemPackageFactory;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
@@ -504,6 +505,92 @@ final class PackageEditorTest extends TestCase
         $this->assertNotContains('RES1', $dependencies);
         // ...while the metadata dependency (not a media reference) is untouched.
         $this->assertContains('META1', $dependencies);
+    }
+
+    #[Test]
+    public function addResourceRegistersAWebcontentResourceFromRawBytes(): void
+    {
+        $package = $this->emptyDraft();
+
+        $resource = $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES')->resource;
+
+        $this->assertSame('RESOURCE001', $resource->identifier);
+        $this->assertSame('resources/logo.png', $resource->href);
+        $this->assertSame('PNGBYTES', $package->getFile('resources/logo.png')->getContent()->getContent());
+
+        $webcontent = $this->findElement((string) $package->manifest, self::MANIFEST_NAMESPACE, 'resource', 'RESOURCE001');
+        $this->assertInstanceOf(DOMElement::class, $webcontent);
+        $this->assertSame('webcontent', $webcontent->getAttribute('type'));
+        $this->assertStringContainsString('href="resources/logo.png"', $this->elementXml($webcontent));
+    }
+
+    #[Test]
+    public function addResourceUsesAnExplicitIdentifierWhenGiven(): void
+    {
+        $package = $this->emptyDraft();
+
+        $resource = $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES', identifier: 'LOGO')->resource;
+
+        $this->assertSame('LOGO', $resource->identifier);
+        $this->assertTrue($package->hasResource('LOGO'));
+    }
+
+    #[Test]
+    public function addResourceSkipsIdentifiersAlreadyUsedInThePackage(): void
+    {
+        // The package already owns RESOURCE001, so the new file must get the
+        // next free identifier rather than duplicating it.
+        $package = $this->draftWithExistingWebcontent();
+
+        $resource = $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES')->resource;
+
+        $this->assertSame('RESOURCE002', $resource->identifier);
+    }
+
+    #[Test]
+    public function addResourceReusesTheResourceWhenTheSameFileIsAddedAgain(): void
+    {
+        $package = $this->emptyDraft();
+        $first = $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES')->resource;
+
+        $second = $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES')->resource;
+
+        // Idempotent: same resource, no duplicate in the manifest.
+        $this->assertSame($first->identifier, $second->identifier);
+        $this->assertSame(1, $this->countResourcesWithHref($package, 'resources/logo.png'));
+    }
+
+    #[Test]
+    public function addResourceThrowsWhenTheSamePathHasDifferentBytes(): void
+    {
+        $package = $this->emptyDraft();
+        $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES');
+
+        $this->expectException(InvalidQtiPackageException::class);
+
+        $this->editor->addResource($package, 'resources/logo.png', 'DIFFERENT');
+    }
+
+    #[Test]
+    public function addResourceThrowsWhenThePathIsOwnedByANonWebcontentResource(): void
+    {
+        // AssessmentTest.xml belongs to the test resource; adding a webcontent
+        // file there would clobber it, so it is refused.
+        $package = $this->emptyDraft();
+
+        $this->expectException(InvalidQtiPackageException::class);
+
+        $this->editor->addResource($package, 'AssessmentTest.xml', 'PNGBYTES');
+    }
+
+    #[Test]
+    public function addedResourceFileIsModifiedSoItIsAlwaysWritten(): void
+    {
+        $package = $this->emptyDraft();
+
+        $resource = $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES')->resource;
+
+        $this->assertTrue($resource->getMainFile()->isModified());
     }
 
     // --- editor convenience --------------------------------------------------
