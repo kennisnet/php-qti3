@@ -102,6 +102,12 @@ final readonly class WebcontentProcessor
         return [$dependencies, $newWebcontent];
     }
 
+    /** The next free `RESOURCEnnn` identifier for the package. */
+    public function availableWebcontentIdentifier(QtiPackage $package): string
+    {
+        return $this->nextWebcontentIdentifier(new WebcontentCollection(), $package);
+    }
+
     /**
      * The next free `RESOURCEnnn` identifier. When editing an existing package
      * the source may already contain webcontent resources, so an identifier is

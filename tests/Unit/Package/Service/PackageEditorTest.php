@@ -530,6 +530,73 @@ final class PackageEditorTest extends TestCase
         $this->assertContains('META1', $dependencies);
     }
 
+    #[Test]
+    public function addResourceRegistersAContentAddressedWebcontentResource(): void
+    {
+        $package = $this->emptyDraft();
+
+        $result = $this->editor->addResource($package, 'photo.png', 'PNGBYTES');
+
+        $expectedHref = 'resources/' . md5('PNGBYTES') . '.png';
+        $this->assertSame('RESOURCE001', $result->resource->identifier);
+        $this->assertSame($expectedHref, $result->resource->href);
+        $this->assertSame('PNGBYTES', $package->getFile($expectedHref)->getContent()->getContent());
+
+        $manifestResource = $this->findElement((string) $package->manifest, self::MANIFEST_NAMESPACE, 'resource', 'RESOURCE001');
+        $this->assertInstanceOf(DOMElement::class, $manifestResource);
+        $this->assertSame('webcontent', $manifestResource->getAttribute('type'));
+        $this->assertSame($expectedHref, $manifestResource->getAttribute('href'));
+    }
+
+    #[Test]
+    public function addResourceIsIdempotentForIdenticalContent(): void
+    {
+        $package = $this->emptyDraft();
+
+        $first = $this->editor->addResource($package, 'a.png', 'SAME');
+        $second = $this->editor->addResource($package, 'b.png', 'SAME');
+
+        // Identical bytes resolve to the same content-addressed resource, so no
+        // duplicate is created and the original identifier is returned.
+        $this->assertSame($first->resource->identifier, $second->resource->identifier);
+        $this->assertSame($first->resource->href, $second->resource->href);
+        $this->assertSame(1, $this->countResourcesWithHref($package, $first->resource->href));
+    }
+
+    #[Test]
+    public function addResourceCreatesDistinctResourcesForDifferentContent(): void
+    {
+        $package = $this->emptyDraft();
+
+        $first = $this->editor->addResource($package, 'a.png', 'ONE');
+        $second = $this->editor->addResource($package, 'b.png', 'TWO');
+
+        $this->assertSame('RESOURCE001', $first->resource->identifier);
+        $this->assertSame('RESOURCE002', $second->resource->identifier);
+        $this->assertNotSame($first->resource->href, $second->resource->href);
+    }
+
+    #[Test]
+    public function addResourceSkipsIdentifiersAlreadyUsedInThePackage(): void
+    {
+        // The package already owns RESOURCE001.
+        $package = $this->draftWithExistingWebcontent();
+
+        $result = $this->editor->addResource($package, 'photo.png', 'PNGBYTES');
+
+        $this->assertSame('RESOURCE002', $result->resource->identifier);
+    }
+
+    #[Test]
+    public function addResourceDropsAnUnusableExtension(): void
+    {
+        $package = $this->emptyDraft();
+
+        $result = $this->editor->addResource($package, 'noextension', 'BYTES');
+
+        $this->assertSame('resources/' . md5('BYTES'), $result->resource->href);
+    }
+
     // --- editor convenience --------------------------------------------------
 
     private function addItem(QtiPackage $package, string $testId = self::TEST_ID): Resource

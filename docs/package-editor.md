@@ -135,6 +135,34 @@ $parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
 $result = $editor->updateItem($package, $parsed->item); // $result->resource is the updated item
 ```
 
+## Adding a resource (e.g. an uploaded file)
+
+`addResource()` adds a standalone `webcontent` asset — an uploaded image, audio
+clip, etc. — to the package, independent of any item. This supports a two-step
+editor flow: the file is uploaded and added first, and the item XML that
+references it arrives in a later request.
+
+```php
+// Request 1: the uploaded bytes are added to the package.
+$result = $editor->addResource($package, 'photo.png', $uploadedBytes);
+$href = $result->resource->href; // e.g. "resources/<md5>.png" — use this in the item XML
+// ...save the package...
+```
+
+The file is stored under `resources/` with a **content-addressed** name (the md5
+of its bytes plus the original extension), so adding identical bytes again is
+idempotent and returns the existing resource instead of a duplicate. Pass
+`isBinary: false` for text-based assets.
+
+```php
+// Request 2: an item update whose XML references $href reuses the resource
+// added earlier — no duplicate resource is created, and the dependency is
+// linked automatically.
+$itemXml = str_replace('{{IMAGE}}', $href, $template);
+$parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
+$editor->updateItem($package, $parsed->item);
+```
+
 ## Removing an item
 
 ```php

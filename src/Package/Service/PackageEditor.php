@@ -17,6 +17,7 @@ use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -55,6 +56,39 @@ final readonly class PackageEditor
     public function getAvailableItemIdentifier(QtiPackage $package): string
     {
         return $this->identifierGenerator->nextIdentifier($this->itemIdentifiers($package));
+    }
+
+    /**
+     * Add a standalone webcontent asset (e.g. an uploaded image) to the package,
+     * independent of any item. The bytes are stored under `resources/` with a
+     * content-addressed name (md5 of the content plus the original extension)
+     * and registered as a `webcontent` resource with a fresh `RESOURCEnnn`
+     * identifier.
+     *
+     * Adding identical bytes again is idempotent: the existing resource is
+     * returned instead of a duplicate. A later {@see self::updateItem()} whose
+     * item XML references the returned href ({@see Resource::$href}) reuses this
+     * resource rather than re-adding it.
+     */
+    public function addResource(QtiPackage $package, string $filename, string $content, bool $isBinary = true): EditResult
+    {
+        $href = $this->contentAddressedHref($filename, $content);
+
+        $existing = $this->resourceByHref($package, $href);
+        if ($existing !== null) {
+            return new EditResult($existing, new StringCollection());
+        }
+
+        $resource = new Webcontent(
+            $href,
+            $this->webcontentProcessor->availableWebcontentIdentifier($package),
+            $href,
+            new MemoryFileContent($content),
+            $isBinary,
+        );
+        $package->addResource($resource);
+
+        return new EditResult($resource, new StringCollection());
     }
 
     /**
@@ -197,6 +231,32 @@ final readonly class PackageEditor
         foreach ($webcontent as $webcontentFile) {
             $package->addResource($webcontentFile);
         }
+    }
+
+    /**
+     * Package-relative, content-addressed path for an uploaded asset: the md5
+     * of its bytes under `resources/`, keeping the original extension so the
+     * file type is preserved. Only a plain alphanumeric extension is kept; any
+     * other value (empty, or crafted) is dropped so the path stays confined to
+     * `resources/`.
+     */
+    private function contentAddressedHref(string $filename, string $content): string
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $suffix = preg_match('/^[a-z0-9]+$/', $extension) === 1 ? '.' . $extension : '';
+
+        return 'resources/' . md5($content) . $suffix;
+    }
+
+    private function resourceByHref(QtiPackage $package, string $href): ?Resource
+    {
+        foreach ($package->resources as $resource) {
+            if ($resource->href === $href) {
+                return $resource;
+            }
+        }
+
+        return null;
     }
 
     private function linkNewDependencies(QtiPackage $package, Resource $itemResource, ManifestResourceDependencyCollection $dependencies): void
