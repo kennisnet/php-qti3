@@ -63,6 +63,34 @@ class PackageEditorIntegrationTest extends TestCase
         $this->assertFalse($reloaded->hasFile('ITEM001.xml'));
     }
 
+    #[Test]
+    public function inPlaceWriteSkippingUnmodifiedFilesStillProducesACompletePackage(): void
+    {
+        $this->seedPackageOnDisk();
+        $client = $this->createClient();
+        $editor = $client->getPackageEditor();
+
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+
+        // Only touch ITEM002; ITEM001 and its file stay untouched (unmodified).
+        $editor->updateItem(
+            $package,
+            $client->getAssessmentItemParser()->parseFromString($this->itemXml('ITEM002', 'Aangepast'))->item,
+        );
+
+        // Write back over the source location, skipping unchanged files.
+        $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package, skipUnmodifiedFiles: true);
+
+        // Reload: the edit persisted and the skipped (untouched) item is intact.
+        $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $this->assertStringContainsString('Aangepast', (string) $reloaded->getFile('ITEM002.xml'));
+        $this->assertStringContainsString('Vraag tekst', (string) $reloaded->getFile('ITEM001.xml'));
+        $this->assertTrue($reloaded->hasResource('ITEM001'));
+        $this->assertTrue($reloaded->hasResource('ITEM002'));
+        $test = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID)->test;
+        $this->assertSame(['ITEM001', 'ITEM002'], $test->getItemIdentifiers());
+    }
+
     private function seedPackageOnDisk(): void
     {
         $dir = $this->tempDataDir . '/' . self::PACKAGE_DIR;

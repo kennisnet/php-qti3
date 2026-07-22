@@ -21,11 +21,12 @@ class XmlFile extends PackageFile implements Stringable
         string $name,
         IFileContent $content,
         private readonly IXmlReader $xmlReader,
+        bool $modified = false,
     ) {
         if (!str_ends_with($name, '.xml')) {
             throw new InvalidArgumentException('XML file name must end with .xml');
         }
-        parent::__construct($name, $content);
+        parent::__construct($name, $content, false, $modified);
     }
 
     public function getXml(): DOMDocument
@@ -34,6 +35,11 @@ class XmlFile extends PackageFile implements Stringable
             $this->xmlDocument = $this->xmlReader->read($this->content->getContent());
             $this->xmlDocument->preserveWhiteSpace = true;
             $this->xmlDocument->formatOutput = true;
+            // Once the DOM is materialized, getContent() re-serializes from it
+            // and the caller may mutate it in place. We cannot cheaply prove the
+            // output still matches the source bytes, so treat the file as
+            // modified rather than risk skipping a changed file on write.
+            $this->markModified();
         }
         return $this->xmlDocument;
     }
@@ -41,6 +47,7 @@ class XmlFile extends PackageFile implements Stringable
     public function replaceContent(string $xml): void
     {
         $this->xmlDocument = $this->xmlReader->read($xml);
+        $this->markModified();
     }
 
     public function getContent(): IFileContent

@@ -51,6 +51,52 @@ class FlysystemPackageWriterTest extends TestCase
     }
 
     #[Test]
+    public function skipUnmodifiedFilesOnlyWritesModifiedFiles(): void
+    {
+        $dataStorage = $this->createMock(FilesystemOperator::class);
+
+        $dataStorage->expects($this->once())
+            ->method('createDirectory')
+            ->with('output-folder');
+
+        // Only the modified file is written; the unchanged one is left in place.
+        $dataStorage->expects($this->once())
+            ->method('writeStream')
+            ->willReturnCallback(function (string $path, $stream): void {
+                $this->assertSame('output-folder/changed.xml', $path);
+                $this->assertSame('<changed/>', stream_get_contents($stream));
+            });
+
+        $unchanged = new PackageFile('media.png', new MemoryFileContent('BINARY'));
+        $changed = new PackageFile('changed.xml', new MemoryFileContent('<changed/>'), false, modified: true);
+
+        $qtiPackage = $this->createMock(QtiPackage::class);
+        $qtiPackage->method('getFiles')
+            ->willReturn(new PackageFileCollection([$unchanged, $changed]));
+
+        $writer = new FlysystemPackageWriter('output-folder', $dataStorage);
+        $writer->write($qtiPackage, skipUnmodifiedFiles: true);
+    }
+
+    #[Test]
+    public function byDefaultEveryFileIsWrittenRegardlessOfModifiedState(): void
+    {
+        $dataStorage = $this->createMock(FilesystemOperator::class);
+        $dataStorage->expects($this->once())->method('createDirectory');
+        // Both files are written when the flag is not set (default behaviour).
+        $dataStorage->expects($this->exactly(2))->method('writeStream');
+
+        $unchanged = new PackageFile('media.png', new MemoryFileContent('BINARY'));
+        $changed = new PackageFile('changed.xml', new MemoryFileContent('<changed/>'), false, modified: true);
+
+        $qtiPackage = $this->createMock(QtiPackage::class);
+        $qtiPackage->method('getFiles')
+            ->willReturn(new PackageFileCollection([$unchanged, $changed]));
+
+        (new FlysystemPackageWriter('output-folder', $dataStorage))->write($qtiPackage);
+    }
+
+    #[Test]
     public function writeHandlesEmptyPackage(): void
     {
         $dataStorage = $this->createMock(FilesystemOperator::class);

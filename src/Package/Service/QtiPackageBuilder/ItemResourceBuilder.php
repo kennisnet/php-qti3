@@ -41,6 +41,7 @@ readonly class ItemResourceBuilder
                     $href,
                     new MemoryFileContent($xml),
                     $this->xmlReader,
+                    modified: true,
                 )],
             ),
             $resourceDependencies,

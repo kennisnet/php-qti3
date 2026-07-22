@@ -31,4 +31,26 @@ class PackageFileTest extends TestCase
     {
         $this->assertEquals($this->testContent, $this->packageFile->getContent());
     }
+
+    #[Test]
+    public function aFileIsNotModifiedByDefault(): void
+    {
+        $this->assertFalse($this->packageFile->isModified());
+    }
+
+    #[Test]
+    public function aFileCanBeConstructedAsModified(): void
+    {
+        $file = new PackageFile('test.tst', $this->testContent, false, modified: true);
+
+        $this->assertTrue($file->isModified());
+    }
+
+    #[Test]
+    public function markModifiedFlagsTheFileAsModified(): void
+    {
+        $this->packageFile->markModified();
+
+        $this->assertTrue($this->packageFile->isModified());
+    }
 }

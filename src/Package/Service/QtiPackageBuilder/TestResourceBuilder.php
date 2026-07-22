@@ -44,6 +44,7 @@ readonly class TestResourceBuilder
                     $href,
                     new MemoryFileContent($xml),
                     $this->xmlReader,
+                    modified: true,
                 ),
             ]),
             new ManifestResourceDependencyCollection([

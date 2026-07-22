@@ -17,11 +17,16 @@ readonly class FlysystemPackageWriter implements IPackageWriter
         private FilesystemOperator $dataStorage,
     ) {}
 
-    public function write(QtiPackage $qtiPackage): void
+    public function write(QtiPackage $qtiPackage, bool $skipUnmodifiedFiles = false): void
     {
         $this->dataStorage->createDirectory($this->folderName);
 
         foreach ($qtiPackage->getFiles() as $resourceFile) {
+            // When writing back over the package's own location, unchanged files
+            // are already present at the destination and can be left as-is.
+            if ($skipUnmodifiedFiles && !$resourceFile->isModified()) {
+                continue;
+            }
             $filePath = $this->folderName . '/' . $resourceFile->getFilepath();
             $this->writeStream($resourceFile->getContent(), $filePath);
         }

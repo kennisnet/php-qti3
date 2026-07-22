@@ -27,6 +27,9 @@ class Webcontent extends Resource
                     $filepath,
                     $content,
                     $isBinary,
+                    // Webcontent resources are only constructed for media that is
+                    // being added to the package, so their file is always new.
+                    modified: true,
                 )],
             ),
             new ManifestResourceDependencyCollection(),
