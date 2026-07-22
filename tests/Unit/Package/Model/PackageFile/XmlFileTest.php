@@ -69,6 +69,47 @@ class XmlFileTest extends TestCase
     }
 
     #[Test]
+    public function aFileIsModifiedByDefault(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader);
+
+        $this->assertTrue($xmlFile->isModified());
+    }
+
+    #[Test]
+    public function aSourcePassthroughStaysUnmodifiedWhileTheDomIsNotLoaded(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader, modified: false);
+
+        // Serving the original bytes without materializing the DOM leaves it
+        // unmodified, so a writer may skip it.
+        $this->assertSame('<root/>', $xmlFile->getContent()->getContent());
+        $this->assertFalse($xmlFile->isModified());
+    }
+
+    #[Test]
+    public function replaceContentMarksTheFileAsModified(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader, modified: false);
+
+        $xmlFile->replaceContent('<other-root/>');
+
+        $this->assertTrue($xmlFile->isModified());
+    }
+
+    #[Test]
+    public function materializingTheDomMarksTheFileAsModified(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader, modified: false);
+
+        // Once the DOM is exposed it may be mutated in place, so the file is
+        // conservatively treated as modified.
+        $xmlFile->getDocumentElement();
+
+        $this->assertTrue($xmlFile->isModified());
+    }
+
+    #[Test]
     public function aTextWithSpecialCharactersWillBeConvertedToXmlEntities(): void
     {
         $xmlDocument = new DOMDocument();

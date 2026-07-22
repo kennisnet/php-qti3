@@ -454,6 +454,33 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function filesLoadedFromTheSourcePackageAreNotModifiedButTheManifestIs(): void
+    {
+        // Locks the reader boundary the skip-on-write optimization relies on:
+        // verbatim source files are skippable, the manifest is always written.
+        $package = $this->draftWithMedia();
+
+        $this->assertFalse($package->getFile('resources/pic.png')->isModified());
+        $this->assertFalse($package->getFile('ITEM001.xml')->isModified());
+        $this->assertTrue($package->manifest->isModified());
+    }
+
+    #[Test]
+    public function addedItemAndMediaFilesAreModifiedSoTheyAreAlwaysWritten(): void
+    {
+        $package = $this->emptyDraft();
+
+        $added = $this->editor->addItemToTest(
+            $package,
+            self::TEST_ID,
+            $this->item('ITEM001', imageSrc: 'https://example.com/pic.png'),
+        )->resource;
+
+        $this->assertTrue($added->getMainFile()->isModified());
+        $this->assertTrue($package->getResource('RESOURCE001')->getMainFile()->isModified());
+    }
+
+    #[Test]
     public function updateItemKeepsMediaAlreadyInThePackageWithoutDuplicatingIt(): void
     {
         $package = $this->draftWithMedia();

@@ -21,4 +21,12 @@ class WarningsTest extends TestCase
         $this->assertFalse($warnings->files->first()->isBinary());
         $this->assertInstanceOf(MemoryFileContent::class, $warnings->files->first()->getContent());
     }
+
+    #[Test]
+    public function itsFileIsMarkedModifiedSoItIsWrittenEvenInSkipMode(): void
+    {
+        $warnings = new Warnings(new StringCollection(['content']));
+
+        $this->assertTrue($warnings->files->first()->isModified());
+    }
 }

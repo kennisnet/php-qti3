@@ -24,8 +24,12 @@ class ZipPackageWriter implements IPackageWriter
         private readonly FileSystemUtils $fileSystemUtils,
     ) {}
 
-    public function write(QtiPackage $qtiPackage): void
+    public function write(QtiPackage $qtiPackage, bool $skipUnmodifiedFiles = false): void
     {
+        // A zip archive is built from scratch and must contain every file to be
+        // valid, so $skipUnmodifiedFiles does not apply here.
+        unset($skipUnmodifiedFiles);
+
         $zipArchive = $this->getZipArchive($this->zipFilepath);
 
         foreach ($qtiPackage->getFiles() as $file) {

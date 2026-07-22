@@ -44,4 +44,12 @@ class WebcontentTest extends TestCase
 
         $this->assertTrue($webcontent->files->first()->isBinary());
     }
+
+    #[Test]
+    public function itsFileIsMarkedModifiedBecauseItIsAlwaysNewlyAdded(): void
+    {
+        $webcontent = new Webcontent('resources/pic.png', 'ID', 'resources/pic.png', new MemoryFileContent('x'));
+
+        $this->assertTrue($webcontent->files->first()->isModified());
+    }
 }
