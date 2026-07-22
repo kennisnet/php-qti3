@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Package\Model\PackageFile;
 
 use Qti3\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use DOMDocument;
 use DOMElement;
@@ -37,6 +38,25 @@ class XmlFile extends PackageFile implements Stringable
         return $this->xmlDocument;
     }
 
+    public function replaceContent(string $xml): void
+    {
+        $this->xmlDocument = $this->xmlReader->read($xml);
+    }
+
+    public function getContent(): IFileContent
+    {
+        if ($this->xmlDocument === null) {
+            return parent::getContent();
+        }
+
+        $xml = $this->xmlDocument->saveXML();
+        if ($xml === false) {
+            throw new RuntimeException(sprintf('Failed to serialize XML file %s', $this->getFilepath())); // @codeCoverageIgnore
+        }
+
+        return new MemoryFileContent($xml);
+    }
+
     public function getDocumentElement(): DOMElement
     {
         $documentElement = $this->getXml()->documentElement;
@@ -49,6 +69,6 @@ class XmlFile extends PackageFile implements Stringable
 
     public function __toString(): string
     {
-        return $this->content->getContent();
+        return $this->getContent()->getContent();
     }
 }

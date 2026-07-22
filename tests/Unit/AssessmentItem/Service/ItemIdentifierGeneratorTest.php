@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Package\Service;
+namespace Qti3\Tests\Unit\AssessmentItem\Service;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Qti3\Package\Service\ItemIdentifierGenerator;
+use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
 
 final class ItemIdentifierGeneratorTest extends TestCase
 {

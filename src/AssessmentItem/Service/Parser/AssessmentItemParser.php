@@ -11,8 +11,12 @@ use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use Qti3\AssessmentItem\Model\Feedback\ModalFeedback;
+use Qti3\AssessmentItem\Model\Stylesheet\Stylesheet;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Xml\Reader\IXmlReader;
+use Qti3\Shared\Xml\Reader\XmlParsingException;
 use DOMElement;
 
 class AssessmentItemParser extends AbstractParser
@@ -24,11 +28,63 @@ class AssessmentItemParser extends AbstractParser
         private readonly ResponseProcessingParser $responseProcessingParser,
         private readonly StylesheetParser $stylesheetParser,
         private readonly ModalFeedbackParser $modalFeedbackParser,
+        private readonly IXmlReader $xmlReader,
     ) {}
 
-    public function parse(DOMElement $element): AssessmentItem
+    /**
+     * Parse an assessment item from its XML string; malformed XML surfaces as a
+     * {@see ParseError}, like every other parse failure.
+     *
+     * @throws ParseError
+     */
+    /**
+     * Parse an assessment item from its XML string; malformed XML surfaces as a
+     * {@see ParseError}, like every other parse failure. Constructs the model
+     * cannot hold are not refused but reported through the result's warnings.
+     * Pass `$source` (e.g. a filename) to prefix those warnings so they can be
+     * traced back to their origin.
+     *
+     * @throws ParseError
+     */
+    public function parseFromString(string $xml, ?string $source = null): ItemParseResult
+    {
+        try {
+            $document = $this->xmlReader->read($xml);
+        } catch (XmlParsingException $exception) {
+            throw new ParseError('Invalid assessment item XML: ' . $exception->getMessage(), 0, $exception);
+        }
+
+        $element = $document->documentElement;
+        if (!$element instanceof DOMElement) {
+            throw new ParseError('Assessment item XML has no document element'); // @codeCoverageIgnore
+        }
+
+        $result = $this->parse($element);
+        if ($source === null) {
+            return $result;
+        }
+
+        return new ItemParseResult($result->item, $this->prefixWarnings($result->warnings, $source));
+    }
+
+    private function prefixWarnings(StringCollection $warnings, string $source): StringCollection
+    {
+        $prefixed = new StringCollection();
+        foreach ($warnings as $warning) {
+            $prefixed->add($source . ': ' . $warning);
+        }
+
+        return $prefixed;
+    }
+
+    /**
+     * Parse an assessment item element into its model plus the warnings for any
+     * construct that could not be represented (see {@see ItemParseResult}).
+     */
+    public function parse(DOMElement $element): ItemParseResult
     {
         $this->validateTag($element, AssessmentItem::qtiTagName());
+        $warnings = new StringCollection();
 
         $identifierValue = $element->getAttribute('identifier');
         $identifier = AssessmentItemId::fromString($identifierValue ?: 'item-' . uniqid());
@@ -39,6 +95,7 @@ class AssessmentItemParser extends AbstractParser
         $itemBody = null;
         $responseProcessing = null;
         $stylesheet = null;
+        $stylesheetCount = 0;
         $modalFeedbacks = [];
 
         foreach ($this->getChildren($element) as $child) {
@@ -50,8 +107,9 @@ class AssessmentItemParser extends AbstractParser
                 $itemBody = $this->itemBodyParser->parse($child);
             } elseif ($child->nodeName === ResponseProcessing::qtiTagName()) {
                 $responseProcessing = $this->responseProcessingParser->parse($child);
-            } elseif ($child->nodeName === \Qti3\AssessmentItem\Model\Stylesheet\Stylesheet::qtiTagName()) {
+            } elseif ($child->nodeName === Stylesheet::qtiTagName()) {
                 $stylesheet = $this->stylesheetParser->parse($child);
+                $stylesheetCount++;
             } elseif ($child->nodeName === ModalFeedback::qtiTagName()) {
                 $modalFeedbacks[] = $this->modalFeedbackParser->parse($child);
             }
@@ -61,7 +119,25 @@ class AssessmentItemParser extends AbstractParser
             throw new ParseError('AssessmentItem must contain an itemBody');
         }
 
-        return new AssessmentItem(
+        if ($stylesheetCount > 1) {
+            $warnings->add(sprintf('%s: keeps only one <qti-stylesheet>, the others are dropped', $this->locate($element)));
+        }
+
+        $this->warnUnconsumed(
+            $element,
+            ['identifier', 'title', 'adaptive', 'time-dependent', 'xml:lang'],
+            [
+                ResponseDeclaration::qtiTagName(),
+                OutcomeDeclaration::qtiTagName(),
+                ItemBody::qtiTagName(),
+                ResponseProcessing::qtiTagName(),
+                Stylesheet::qtiTagName(),
+                ModalFeedback::qtiTagName(),
+            ],
+            $warnings,
+        );
+
+        $item = new AssessmentItem(
             $identifier,
             $itemBody,
             $responseDeclarations,
@@ -70,6 +146,11 @@ class AssessmentItemParser extends AbstractParser
             $title,
             $stylesheet,
             $modalFeedbacks,
+            timeDependent: $element->getAttribute('time-dependent') === 'true',
+            adaptive: $element->getAttribute('adaptive') === 'true',
+            language: $element->getAttribute('xml:lang') ?: 'nl-NL',
         );
+
+        return new ItemParseResult($item, $warnings);
     }
 }

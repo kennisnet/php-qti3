@@ -40,6 +40,35 @@ class XmlFileTest extends TestCase
     }
 
     #[Test]
+    public function contentIsServedFromTheOriginalBytesWhileTheDomIsNotLoaded(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader);
+
+        $this->assertSame('<root/>', $xmlFile->getContent()->getContent());
+    }
+
+    #[Test]
+    public function domMutationsSurviveInTheContent(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader);
+
+        $xmlFile->getDocumentElement()->setAttribute('identifier', 'ITEM001');
+
+        $this->assertStringContainsString('<root identifier="ITEM001"/>', $xmlFile->getContent()->getContent());
+    }
+
+    #[Test]
+    public function replaceContentReplacesTheWholeDocument(): void
+    {
+        $xmlFile = new XmlFile('test.xml', new MemoryFileContent('<root/>'), $this->xmlReader);
+
+        $xmlFile->replaceContent('<other-root/>');
+
+        $this->assertStringContainsString('<other-root/>', $xmlFile->getContent()->getContent());
+        $this->assertStringContainsString('<other-root/>', (string) $xmlFile);
+    }
+
+    #[Test]
     public function aTextWithSpecialCharactersWillBeConvertedToXmlEntities(): void
     {
         $xmlDocument = new DOMDocument();

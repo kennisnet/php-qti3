@@ -5,10 +5,10 @@ namespace Qti3\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
-use Qti3\Package\Model\IItemEditor;
+use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
-use Qti3\Package\Service\IItemEditorFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
+use Qti3\AssessmentItem\Service\AssessmentItemValidator;
 use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
@@ -20,7 +20,6 @@ use Qti3\QtiClient;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\Tests\Unit\Package\Model\QtiPackageMock;
-use RuntimeException;
 
 class QtiClientTest extends TestCase
 {
@@ -77,30 +76,29 @@ class QtiClientTest extends TestCase
         $this->assertSame($factory, $container->getFilesystemPackageFactory());
     }
 
-    public function testGetItemEditorDelegatesWhenTheFactorySupportsItemEditing(): void
+    public function testGetPackageEditorReturnsInstance(): void
     {
-        $itemEditor = $this->createMock(IItemEditor::class);
-        $factory = $this->createMockForIntersectionOfInterfaces([
-            IFilesystemPackageFactory::class,
-            IItemEditorFactory::class,
-        ]);
-        $factory->expects($this->once())
-            ->method('getItemEditor')
-            ->with('qti/v1')
-            ->willReturn($itemEditor);
+        $client = $this->createClient();
 
-        $client = $this->createClient(filesystemPackageFactory: $factory);
-
-        $this->assertSame($itemEditor, $client->getItemEditor('qti/v1'));
+        $this->assertInstanceOf(PackageEditor::class, $client->getPackageEditor());
     }
 
-    public function testGetItemEditorThrowsWhenTheFactoryDoesNotSupportItemEditing(): void
+    public function testGetPackageEditorReturnsSameInstance(): void
     {
-        $client = $this->createClient(filesystemPackageFactory: $this->createMock(IFilesystemPackageFactory::class));
+        $client = $this->createClient();
 
-        $this->expectException(RuntimeException::class);
+        $this->assertSame($client->getPackageEditor(), $client->getPackageEditor());
+    }
 
-        $client->getItemEditor('qti/v1');
+    public function testGetAssessmentItemValidatorReturnsSameInstance(): void
+    {
+        $client = $this->createClient();
+
+        $this->assertInstanceOf(AssessmentItemValidator::class, $client->getAssessmentItemValidator());
+        $this->assertSame(
+            $client->getAssessmentItemValidator(),
+            $client->getAssessmentItemValidator(),
+        );
     }
 
     public function testGetQtiPackageBuilderReturnsInstance(): void

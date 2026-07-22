@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Package\Validator;
+namespace Qti3\AssessmentItem\Service;
 
-use Qti3\Package\Exception\InvalidAssessmentItemException;
+use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlParsingException;
@@ -22,7 +22,7 @@ use RuntimeException;
  * Structural validation also works for interaction types the typed item parser
  * cannot handle (e.g. inline-choice), which is why it is string/DOM based.
  */
-final readonly class AssessmentItemValidator
+final readonly class AssessmentItemValidator implements IAssessmentItemValidator
 {
     private const string ASI_NAMESPACE = 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0';
     private const string ROOT_ELEMENT = 'qti-assessment-item';

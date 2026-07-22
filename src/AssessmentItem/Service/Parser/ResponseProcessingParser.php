@@ -19,13 +19,13 @@ class ResponseProcessingParser extends AbstractParser
         $this->validateTag($element, ResponseProcessing::qtiTagName());
 
         if ($element->hasAttribute('template')) {
-            if ($element->getAttribute('template') === 'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/match_correct.xml') {
+            if ($element->getAttribute('template') === ResponseProcessing::TEMPLATE_MATCH_CORRECT) {
                 return ResponseProcessing::matchCorrect();
             }
-            if ($element->getAttribute('template') === 'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response.xml') {
+            if ($element->getAttribute('template') === ResponseProcessing::TEMPLATE_MAP_RESPONSE) {
                 return ResponseProcessing::mapResponse();
             }
-            if ($element->getAttribute('template') === 'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response_point.xml') {
+            if ($element->getAttribute('template') === ResponseProcessing::TEMPLATE_MAP_RESPONSE_POINT) {
                 return ResponseProcessing::mapResponsePoint();
             }
         }

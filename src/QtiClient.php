@@ -28,12 +28,13 @@ use Qti3\Package\Filesystem\Zip\ZipArchiveFactory;
 use Qti3\Package\Filesystem\Zip\ZipPackageFactory;
 use Qti3\Package\Filesystem\Zip\QtiPackageVersionUpdater;
 use Qti3\Package\Model\Manifest\ManifestFactory;
-use Qti3\Package\Model\IItemEditor;
 use Qti3\Package\Service\IFilesystemPackageFactory;
-use Qti3\Package\Service\IItemEditorFactory;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\IZipPackageFactory;
+use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
 use Qti3\Package\Service\QtiPackageBuilder;
+use Qti3\Package\Service\WebcontentProcessor;
+use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
@@ -44,19 +45,22 @@ use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
+use Qti3\AssessmentItem\Service\AssessmentItemValidator;
+use Qti3\AssessmentItem\Service\IAssessmentItemValidator;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\Package\Validator\ResponseProcessingValidator;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlReader;
-use RuntimeException;
 
 final class QtiClient
 {
     private ?QtiPackageReader $qtiPackageReader = null;
     private ?IZipPackageFactory $zipPackageFactory = null;
     private ?QtiPackageBuilder $qtiPackageBuilder = null;
+    private ?WebcontentProcessor $webcontentProcessor = null;
+    private ?PackageEditor $packageEditor = null;
     private ?IXmlBuilder $xmlBuilder = null;
     private ?ResponseProcessor $responseProcessor = null;
     private ?QtiPackageValidator $qtiPackageValidator = null;
@@ -75,6 +79,7 @@ final class QtiClient
     private ?AssessmentSectionParser $assessmentSectionParser = null;
     private ?AssessmentItemRefParser $assessmentItemRefParser = null;
     private ?TestBuilder $testBuilder = null;
+    private ?IAssessmentItemValidator $assessmentItemValidator = null;
 
     public function __construct(
         private readonly IFilesystemPackageFactory $filesystemPackageFactory,
@@ -103,6 +108,7 @@ final class QtiClient
             new ResponseProcessingParser(new ProcessingElementParser($qtiExpressionParser)),
             new StylesheetParser(),
             new ModalFeedbackParser(new StylesheetParser()),
+            $this->getXmlReader(),
         );
     }
 
@@ -168,19 +174,27 @@ final class QtiClient
     }
 
     /**
-     * Item editor for an already extracted package folder, for adding and
-     * updating assessment items in place.
-     *
-     * Requires the configured filesystem package factory to also implement
-     * {@see IItemEditorFactory} (the shipped {@see FlysystemPackageFactory} does).
+     * Domain service that edits the assessment items of a {@see \Qti3\Package\Model\QtiPackage}
+     * in place. The caller loads the package and, after editing, saves it
+     * through a package writer; the editor itself does no filesystem I/O. Each
+     * edit is surgical: it touches only the assessment test being edited and
+     * the item that is added or updated.
      */
-    public function getItemEditor(string $folder): IItemEditor
+    public function getPackageEditor(): PackageEditor
     {
-        if (!$this->filesystemPackageFactory instanceof IItemEditorFactory) {
-            throw new RuntimeException('The configured filesystem package factory does not support item editing.');
-        }
+        return $this->packageEditor ??= new PackageEditor(
+            $this->getTestBuilder(),
+            new ItemIdentifierGenerator(),
+            $this->getTestResourceBuilder(),
+            $this->getItemResourceBuilder(),
+            $this->getWebcontentProcessor(),
+            $this->getAssessmentItemParser(),
+        );
+    }
 
-        return $this->filesystemPackageFactory->getItemEditor($folder);
+    public function getAssessmentItemValidator(): IAssessmentItemValidator
+    {
+        return $this->assessmentItemValidator ??= new AssessmentItemValidator($this->getXmlReader());
     }
 
     public function getQtiPackageBuilder(): QtiPackageBuilder
@@ -189,6 +203,13 @@ final class QtiClient
             $this->getManifestBuilder(),
             $this->getTestResourceBuilder(),
             $this->getItemResourceBuilder(),
+            $this->getWebcontentProcessor(),
+        );
+    }
+
+    public function getWebcontentProcessor(): WebcontentProcessor
+    {
+        return $this->webcontentProcessor ??= new WebcontentProcessor(
             $this->resourceValidator,
             $this->resourceDownloader,
         );

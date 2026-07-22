@@ -10,6 +10,7 @@ use Qti3\AssessmentTest\Model\Section\AssessmentSectionCollection;
 use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
 use Qti3\AssessmentTest\Model\TestPart\SubmissionMode;
 use Qti3\AssessmentTest\Model\TestPart\TestPart;
+use Qti3\Shared\Collection\StringCollection;
 use DOMElement;
 
 class TestPartParser extends AbstractParser
@@ -18,9 +19,10 @@ class TestPartParser extends AbstractParser
         private readonly AssessmentSectionParser $sectionParser
     ) {}
 
-    public function parse(DOMElement $element): TestPart
+    public function parse(DOMElement $element, ?StringCollection $warnings = null): TestPart
     {
         $this->validateTag($element, TestPart::qtiTagName());
+        $warnings ??= new StringCollection();
 
         $identifier = $element->getAttribute('identifier');
         $navigationMode = NavigationMode::from($element->getAttribute('navigation-mode'));
@@ -29,9 +31,16 @@ class TestPartParser extends AbstractParser
         $sections = new AssessmentSectionCollection();
         foreach ($this->getChildren($element) as $child) {
             if ($child->nodeName === AssessmentSection::qtiTagName()) {
-                $sections->add($this->sectionParser->parse($child));
+                $sections->add($this->sectionParser->parse($child, $warnings));
             }
         }
+
+        $this->warnUnconsumed(
+            $element,
+            ['identifier', 'navigation-mode', 'submission-mode'],
+            [AssessmentSection::qtiTagName()],
+            $warnings,
+        );
 
         return new TestPart(
             $identifier,

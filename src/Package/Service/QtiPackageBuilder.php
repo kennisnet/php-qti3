@@ -9,20 +9,16 @@ use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\QtiPackage;
+use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
+use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Package\Model\Resource\Warnings;
-use Qti3\Package\Model\Resource\Webcontent;
 use Qti3\Package\Model\Resource\WebcontentCollection;
-use Qti3\Package\Downloader\Resource\IResourceDownloader;
-use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use Qti3\Shared\Model\IQtiResourceProvider;
 use Qti3\Shared\Model\IXmlElement;
-use Qti3\Shared\Model\QtiResource;
 use Qti3\Shared\Collection\StringCollection;
-use Exception;
 
 class QtiPackageBuilder
 {
@@ -30,16 +26,24 @@ class QtiPackageBuilder
         private readonly ManifestBuilder $manifestBuilder,
         private readonly TestResourceBuilder $testResourceBuilder,
         private readonly ItemResourceBuilder $itemResourceBuilder,
-        private readonly IResourceValidator $resourceValidator,
-        private readonly IResourceDownloader $resourceDownloader,
+        private readonly WebcontentProcessor $webcontentProcessor,
     ) {}
 
     /**
+     * Generate a package from the typed models.
+     *
+     * When `$sourcePackage` is given (editing an existing package), files that
+     * already live in that package are carried over as they are: media
+     * referenced by relative path keeps its path and bytes, metadata
+     * resources and their dependency on the test resource are copied, and the
+     * test resource keeps its identifier.
+     *
      * @param array<int,AssessmentItem> $assessmentItems
      */
     public function buildForTest(
         AssessmentTest $assessmentTest,
         array $assessmentItems,
+        ?QtiPackage $sourcePackage = null,
     ): QtiPackage {
         $assessmentTest->validateItems($assessmentItems);
 
@@ -48,21 +52,34 @@ class QtiPackageBuilder
         $warnings = new StringCollection();
         $webcontent = new WebcontentCollection();
 
-        $dependencies = $this->processWebcontent($webcontent, $assessmentTest, $warnings);
-        $resources->add($this->testResourceBuilder->build($assessmentTest, $dependencies));
+        $dependencies = $this->webcontentProcessor->process($webcontent, $assessmentTest, $warnings, $sourcePackage);
+        foreach ($this->sourceMetadataDependencies($sourcePackage) as $metadataDependency) {
+            $dependencies->add($metadataDependency);
+        }
+        $sourceTestResource = $this->sourceTestResource($sourcePackage);
+        $resources->add($this->testResourceBuilder->build(
+            $assessmentTest,
+            $dependencies,
+            $sourceTestResource?->identifier ?? TestResourceBuilder::DEFAULT_IDENTIFIER,
+            $sourceTestResource?->href ?? TestResourceBuilder::ASSESSMENT_TEST_FILE_NAME,
+        ));
 
         foreach ($assessmentItems as $assessmentItem) {
             $itemRef = $assessmentTest->findItemRef($assessmentItem->identifier());
-            $dependencies = $this->processWebcontent($webcontent, $assessmentItem, $warnings);
+            $dependencies = $this->webcontentProcessor->process($webcontent, $assessmentItem, $warnings, $sourcePackage);
 
             $resources->add($this->itemResourceBuilder->build(
                 (string) $itemRef->identifier,
                 $assessmentItem,
                 $dependencies,
+                $itemRef->href,
             ));
         }
         foreach ($webcontent as $webcontentFile) {
             $resources->add($webcontentFile);
+        }
+        foreach ($this->sourceMetadataResources($sourcePackage) as $metadataResource) {
+            $resources->add($metadataResource);
         }
         if ($warnings->count() > 0) {
             $resources->add(new Warnings($warnings));
@@ -74,76 +91,41 @@ class QtiPackageBuilder
         );
     }
 
+    private function sourceTestResource(?QtiPackage $sourcePackage): ?Resource
+    {
+        return $sourcePackage?->resources->filterByType(ResourceType::ASSESSMENT_TEST)->first();
+    }
+
     /**
-     * @return array<int,QtiResource>
+     * @return array<int, Resource>
      */
-    private function getQtiResources(IXmlElement $element, StringCollection $warnings): array
+    private function sourceMetadataResources(?QtiPackage $sourcePackage): array
     {
-        $resources = [];
-
-        foreach ($element->children() as $child) {
-            if ($child instanceof IQtiResourceProvider) {
-                $this->processResourceProvider($child, $warnings);
-                $resource = $child->getResource();
-                if ($resource !== null) {
-                    $resources[] = $resource;
-                }
-            }
-            if ($child instanceof IXmlElement) {
-                $resources = [...$resources, ...$this->getQtiResources($child, $warnings)];
-            }
-        }
-
-        return $resources;
+        return $sourcePackage?->resources->filterByType(ResourceType::RESOURCE_METADATA)->all() ?? [];
     }
 
-    private function processWebcontent(
-        WebcontentCollection $webcontent,
-        IXmlElement $element,
-        StringCollection $warnings,
-    ): ManifestResourceDependencyCollection {
-        $qtiResources = $this->getQtiResources($element, $warnings);
-
-        $dependencies = new ManifestResourceDependencyCollection();
-        foreach ($qtiResources as $qtiResource) {
-            $webcontentFile = $webcontent->findByOriginalPath($qtiResource->originalPath);
-            if (!$webcontentFile) {
-                $webcontentFile = new Webcontent(
-                    $qtiResource->originalPath,
-                    sprintf('RESOURCE%03d', $webcontent->count() + 1),
-                    $qtiResource->relativePath . $qtiResource->filename,
-                    $this->resourceDownloader,
-                    $qtiResource->isBinary,
-                );
-                $webcontent->add($webcontentFile);
-            }
-            $dependencies->add(new ManifestResourceDependency($webcontentFile->identifier));
-        }
-        return $dependencies;
-    }
-
-    private function processResourceProvider(IQtiResourceProvider $resourceProvider, StringCollection $warnings): void
+    /**
+     * @return array<int, ManifestResourceDependency>
+     */
+    private function sourceMetadataDependencies(?QtiPackage $sourcePackage): array
     {
-        $source = $resourceProvider->getSource();
-        if (!$source || str_starts_with($source, 'data:')) {
-            return;
+        $sourceTest = $this->sourceTestResource($sourcePackage);
+        if ($sourceTest === null) {
+            return [];
         }
-        $filename =
-            md5($source) . '.' .
-            pathinfo($source, PATHINFO_EXTENSION);
 
-        $resource = new QtiResource(
-            type: 'webcontent',
-            originalPath: $source,
-            relativePath: 'resources/',
-            filename: $filename,
-            isBinary: $resourceProvider->isBinary(),
+        $metadataIdentifiers = array_map(
+            static fn(Resource $resource): string => $resource->identifier,
+            $this->sourceMetadataResources($sourcePackage),
         );
-        try {
-            $this->resourceValidator->validate($resource);
-            $resourceProvider->setResource($resource);
-        } catch (Exception $e) {
-            $warnings->add($e->getMessage());
+
+        $dependencies = [];
+        foreach ($sourceTest->resourceDependencies as $dependency) {
+            if (in_array($dependency->identifierref, $metadataIdentifiers, true)) {
+                $dependencies[] = new ManifestResourceDependency($dependency->identifierref);
+            }
         }
+
+        return $dependencies;
     }
 }

@@ -14,6 +14,8 @@ use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceCollection;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\AssessmentTest\Service\TestBuilder;
+use Qti3\AssessmentTest\Service\TestParseResult;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -55,10 +57,10 @@ class QtiPackageReaderIntegrationTest extends TestCase
         $assessmentTestParser->expects($this->once())
             ->method('parse')
             ->with($this->isInstanceOf(\DOMElement::class))
-            ->willReturn($assessmentTest);
+            ->willReturn(new TestParseResult($assessmentTest, new StringCollection()));
 
         $result = $builder->buildFromPackage($package, 'test-id');
-        
-        $this->assertSame($assessmentTest, $result);
+
+        $this->assertSame($assessmentTest, $result->test);
     }
 }

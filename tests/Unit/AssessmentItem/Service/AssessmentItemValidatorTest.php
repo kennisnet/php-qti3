@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Tests\Unit\Package\Validator;
+namespace Qti3\Tests\Unit\AssessmentItem\Service;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Qti3\Package\Exception\InvalidAssessmentItemException;
-use Qti3\Package\Validator\AssessmentItemValidator;
+use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
+use Qti3\AssessmentItem\Service\AssessmentItemValidator;
 use Qti3\Shared\Xml\Reader\XmlReader;
 
 final class AssessmentItemValidatorTest extends TestCase

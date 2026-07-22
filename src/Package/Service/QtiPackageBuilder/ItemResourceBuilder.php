@@ -11,6 +11,7 @@ use Qti3\Package\Model\PackageFile\PackageFileCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 
 readonly class ItemResourceBuilder
@@ -24,17 +25,20 @@ readonly class ItemResourceBuilder
         string $itemRefIdentifier,
         AssessmentItem $assessmentItem,
         ManifestResourceDependencyCollection $resourceDependencies,
+        ?string $href = null,
     ): Resource {
+        $href ??= $itemRefIdentifier . '.xml';
+
         /** @var string $xml */
         $xml = $this->xmlBuilder->generateXmlFromObject($assessmentItem)->saveXML();
 
         return new Resource(
             $itemRefIdentifier,
             ResourceType::ASSESSMENT_ITEM,
-            $itemRefIdentifier . '.xml',
+            $href,
             new PackageFileCollection(
                 [new XmlFile(
-                    $itemRefIdentifier . '.xml',
+                    $href,
                     new MemoryFileContent($xml),
                     $this->xmlReader,
                 )],

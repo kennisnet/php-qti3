@@ -27,8 +27,13 @@ class AssessmentItem extends QtiElement
         public readonly string $title = '',
         ?Stylesheet $stylesheet = null,
         public readonly array $modalFeedbacks = [],
+        public readonly bool $timeDependent = false,
+        public readonly bool $adaptive = false,
+        public readonly string $language = 'nl-NL',
     ) {
-        $this->stylesheet = $stylesheet ?? new Stylesheet(__DIR__ . '/../Resources/stylesheet.css');
+        // The default stylesheet is a library asset, so it may be read from the
+        // local filesystem; a stylesheet parsed from item content is not.
+        $this->stylesheet = $stylesheet ?? new Stylesheet(__DIR__ . '/../Resources/stylesheet.css', trusted: true);
     }
 
     /**
@@ -39,9 +44,9 @@ class AssessmentItem extends QtiElement
         return [
             'title' => $this->title,
             'identifier' => (string) $this->identifier,
-            'adaptive' => 'false',
-            'time-dependent' => 'false',
-            'xml:lang' => 'nl-NL',
+            'adaptive' => $this->adaptive ? 'true' : 'false',
+            'time-dependent' => $this->timeDependent ? 'true' : 'false',
+            'xml:lang' => $this->language,
             'xmlns' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0',
             'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:schemaLocation' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd http://www.w3.org/1998/Math/MathML https://purl.imsglobal.org/spec/mathml/v3p0/schema/xsd/mathml3.xsd',
@@ -58,6 +63,23 @@ class AssessmentItem extends QtiElement
             $this->responseProcessing,
             ...$this->modalFeedbacks,
         ];
+    }
+
+    public function withIdentifier(AssessmentItemId $identifier): self
+    {
+        return new self(
+            $identifier,
+            $this->itemBody,
+            $this->responseDeclarations,
+            $this->outcomeDeclarations,
+            $this->responseProcessing,
+            $this->title,
+            $this->stylesheet,
+            $this->modalFeedbacks,
+            $this->timeDependent,
+            $this->adaptive,
+            $this->language,
+        );
     }
 
     public function identifier(): AssessmentItemId

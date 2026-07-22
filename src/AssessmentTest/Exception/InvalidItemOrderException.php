@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Package\Exception;
+namespace Qti3\AssessmentTest\Exception;
 
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Exception\DomainError;

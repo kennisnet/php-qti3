@@ -173,6 +173,11 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
         return $this->attributes['src'] ?? null;
     }
 
+    public function isTrustedSource(): bool
+    {
+        return false;
+    }
+
     public function isBinary(): bool
     {
         return true;

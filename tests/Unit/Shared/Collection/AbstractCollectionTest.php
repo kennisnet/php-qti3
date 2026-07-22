@@ -36,6 +36,28 @@ class AbstractCollectionTest extends TestCase
     }
 
     #[Test]
+    public function replaceAllReplacesTheContentInOrder(): void
+    {
+        $node1 = new TextNode('first');
+        $node2 = new TextNode('second');
+        $this->collection->add($node1);
+        $this->collection->add($node2);
+
+        $this->collection->replaceAll([$node2, $node1]);
+
+        $this->assertSame([$node2, $node1], $this->collection->all());
+    }
+
+    #[Test]
+    public function replaceAllValidatesTheItems(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        /** @phpstan-ignore-next-line intentionally invalid item */
+        $this->collection->replaceAll([new stdClass()]);
+    }
+
+    #[Test]
     public function offsetSetWithSpecificOffsetSetsAtThatPosition(): void
     {
         $node1 = new TextNode('first');

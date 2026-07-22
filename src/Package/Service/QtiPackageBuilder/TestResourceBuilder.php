@@ -13,11 +13,13 @@ use Qti3\Package\Model\PackageFile\PackageFileCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
+use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 
 readonly class TestResourceBuilder
 {
     public const ASSESSMENT_TEST_FILE_NAME = 'AssessmentTest.xml';
+    public const string DEFAULT_IDENTIFIER = 'TEST';
 
     public function __construct(
         private IXmlBuilder $xmlBuilder,
@@ -27,7 +29,8 @@ readonly class TestResourceBuilder
     public function build(
         AssessmentTest $assessmentTest,
         ManifestResourceDependencyCollection $resourceDependencies,
-        string $identifier = 'TEST',
+        string $identifier = self::DEFAULT_IDENTIFIER,
+        string $href = self::ASSESSMENT_TEST_FILE_NAME,
     ): Resource {
         /** @var string $xml */
         $xml = $this->xmlBuilder->generateXmlFromObject($assessmentTest)->saveXML();
@@ -35,10 +38,10 @@ readonly class TestResourceBuilder
         return new Resource(
             $identifier,
             ResourceType::ASSESSMENT_TEST,
-            self::ASSESSMENT_TEST_FILE_NAME,
+            $href,
             new PackageFileCollection([
                 new XmlFile(
-                    self::ASSESSMENT_TEST_FILE_NAME,
+                    $href,
                     new MemoryFileContent($xml),
                     $this->xmlReader,
                 ),
