@@ -21,7 +21,8 @@ class Warnings extends Resource
             ResourceType::CONTROLFILE,
             self::WARNINGS_FILE_NAME,
             new PackageFileCollection([
-                new PackageFile(self::WARNINGS_FILE_NAME, new MemoryFileContent($warnings->join(PHP_EOL))),
+                // Generated in memory, so it must be written even in skip mode.
+                new PackageFile(self::WARNINGS_FILE_NAME, new MemoryFileContent($warnings->join(PHP_EOL)), modified: true),
             ]),
             new ManifestResourceDependencyCollection(),
         );
