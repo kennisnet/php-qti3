@@ -71,12 +71,17 @@ final readonly class WebcontentProcessor
      * file whose derived path already exists is reused (its dependency remapped)
      * instead of duplicated — e.g. shared media or the item stylesheet.
      *
+     * Warnings raised while resolving the media (e.g. a refused local path or
+     * an unreachable URL) are collected into `$warnings` so the caller can
+     * surface them: such a reference is dropped from the package while the
+     * regenerated item XML keeps its original `src`, which is data loss.
+     *
      * @return array{0: ManifestResourceDependencyCollection, 1: list<Webcontent>}
      */
-    public function resolveNewWebcontent(QtiPackage $package, IXmlElement $element): array
+    public function resolveNewWebcontent(QtiPackage $package, IXmlElement $element, StringCollection $warnings): array
     {
         $webcontent = new WebcontentCollection();
-        $rawDependencies = $this->process($webcontent, $element, new StringCollection(), $package);
+        $rawDependencies = $this->process($webcontent, $element, $warnings, $package);
 
         $reusedIdentifiers = [];
         $newWebcontent = [];

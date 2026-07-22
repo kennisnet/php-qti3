@@ -74,7 +74,10 @@ final readonly class PackageEditor
         $this->assertIdentifierAvailable($package, $identifier);
         $item = $item->withIdentifier(AssessmentItemId::fromString($identifier));
 
-        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item);
+        // Media-resolution warnings join the test-parse warnings: both surface
+        // data loss the caller must see (a refused reference leaves a dangling
+        // src in the regenerated item).
+        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, $parsed->warnings);
         $itemResource = $this->itemResourceBuilder->build($identifier, $item, $dependencies, $identifier . '.xml');
 
         $test->addItemRef(new AssessmentItemRef($item->identifier(), $identifier . '.xml'), $position);
@@ -105,7 +108,11 @@ final readonly class PackageEditor
         // shows up here, so the reconcile below leaves it untouched.
         $previousMediaDependencies = $this->mediaDependenciesOf($package, $itemResource);
 
-        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item);
+        // Collect media-resolution warnings so they reach the EditResult: a
+        // refused reference is dropped from the package while the regenerated
+        // item XML keeps its original src, which is data loss the caller must see.
+        $warnings = new StringCollection();
+        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, $warnings);
 
         $rebuilt = $this->itemResourceBuilder->build($identifier, $item, $dependencies, $itemResource->href);
         $this->getXmlFileFromResource($itemResource)->replaceContent((string) $rebuilt->getMainFile());
@@ -113,7 +120,7 @@ final readonly class PackageEditor
         $this->registerWebcontent($package, $newWebcontent);
         $this->reconcileMediaDependencies($package, $itemResource, $previousMediaDependencies, $dependencies);
 
-        return new EditResult($itemResource, new StringCollection());
+        return new EditResult($itemResource, $warnings);
     }
 
     /**
@@ -241,7 +248,10 @@ final readonly class PackageEditor
             return new ManifestResourceDependencyCollection();
         }
 
-        [$dependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $item);
+        // Re-scanning the *previous* content only to diff dependencies; its
+        // warnings were already surfaced when that content was added, so they
+        // are discarded here.
+        [$dependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, new StringCollection());
 
         return $dependencies;
     }

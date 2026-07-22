@@ -432,6 +432,28 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemSurfacesAWarningWhenItemMediaIsRefused(): void
+    {
+        $package = $this->emptyDraft();
+
+        // A refused reference is dropped from the package but its src stays in
+        // the item XML — the resulting data loss must reach the EditResult.
+        $result = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001', imageSrc: '/etc/passwd'));
+
+        $this->assertStringContainsString('Refused local file reference', implode("\n", $result->warnings->all()));
+    }
+
+    #[Test]
+    public function updateItemSurfacesAWarningWhenItemMediaIsRefused(): void
+    {
+        $package = $this->draftWithMedia();
+
+        $result = $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: '../secret.png'));
+
+        $this->assertStringContainsString('Refused local file reference', implode("\n", $result->warnings->all()));
+    }
+
+    #[Test]
     public function updateItemKeepsMediaAlreadyInThePackageWithoutDuplicatingIt(): void
     {
         $package = $this->draftWithMedia();
