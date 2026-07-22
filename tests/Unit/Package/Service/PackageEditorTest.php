@@ -572,6 +572,19 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addResourceThrowsAQtiPackageExceptionWhenTheExplicitIdentifierIsTaken(): void
+    {
+        // The package already owns RESOURCE001; reusing it as an explicit
+        // identifier is a package-level collision, reported as such (not a
+        // test-focused exception).
+        $package = $this->draftWithExistingWebcontent();
+
+        $this->expectException(InvalidQtiPackageException::class);
+
+        $this->editor->addResource($package, 'resources/logo.png', 'PNGBYTES', identifier: 'RESOURCE001');
+    }
+
+    #[Test]
     public function addResourceThrowsWhenThePathIsOwnedByANonWebcontentResource(): void
     {
         // AssessmentTest.xml belongs to the test resource; adding a webcontent

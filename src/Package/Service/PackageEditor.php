@@ -180,7 +180,11 @@ final readonly class PackageEditor
         }
 
         $identifier ??= $this->webcontentIdentifierGenerator->next($package);
-        $this->assertIdentifierAvailable($package, $identifier);
+        if ($package->hasResource($identifier)) {
+            throw new InvalidQtiPackageException(new StringCollection([
+                sprintf('Package already contains a resource with identifier "%s"', $identifier),
+            ]));
+        }
 
         $resource = new Webcontent($filepath, $identifier, $filepath, new MemoryFileContent($contents), $isBinary);
         $package->addResource($resource);
@@ -194,12 +198,24 @@ final readonly class PackageEditor
             ->filter(static fn(Resource $resource): bool => $resource->href === $filepath)
             ->first();
 
-        if ($owner instanceof Webcontent && $owner->getMainFile()?->getContent()->getContent() === $contents) {
-            return $owner;
+        if ($owner instanceof Webcontent) {
+            if ($owner->getMainFile()?->getContent()->getContent() === $contents) {
+                return $owner;
+            }
+
+            throw new InvalidQtiPackageException(new StringCollection([
+                sprintf('Package already contains a different file at "%s"', $filepath),
+            ]));
+        }
+
+        if ($owner instanceof Resource) {
+            throw new InvalidQtiPackageException(new StringCollection([
+                sprintf('Path "%s" is already used by resource "%s" of type "%s"', $filepath, $owner->identifier, $owner->type->value),
+            ]));
         }
 
         throw new InvalidQtiPackageException(new StringCollection([
-            sprintf('Package already contains a different file at "%s"', $filepath),
+            sprintf('Path "%s" is a package file that is not a replaceable webcontent resource', $filepath),
         ]));
     }
 
