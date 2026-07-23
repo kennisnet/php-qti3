@@ -32,6 +32,7 @@ final readonly class WebcontentProcessor
     public function __construct(
         private IResourceValidator $resourceValidator,
         private IResourceDownloader $resourceDownloader,
+        private WebcontentIdentifierGenerator $identifierGenerator,
     ) {}
 
     /**
@@ -53,7 +54,7 @@ final readonly class WebcontentProcessor
             if (!$webcontentFile) {
                 $webcontentFile = new Webcontent(
                     $qtiResource->originalPath,
-                    $this->nextWebcontentIdentifier($webcontent, $sourcePackage),
+                    $this->identifierGenerator->nextIdentifier($this->usedIdentifiers($webcontent, $sourcePackage)),
                     $qtiResource->relativePath . $qtiResource->filename,
                     $this->contentFor($qtiResource->originalPath, $sourcePackage),
                     $qtiResource->isBinary,
@@ -103,29 +104,24 @@ final readonly class WebcontentProcessor
     }
 
     /**
-     * The next free `RESOURCEnnn` identifier. When editing an existing package
-     * the source may already contain webcontent resources, so an identifier is
-     * only accepted once it collides with neither the current collection nor a
-     * resource already in the source package — otherwise a new media file could
-     * be handed an identifier that is already taken (e.g. RESOURCE001), yielding
-     * a duplicate resource and an invalid manifest.
+     * The identifiers already taken for the run: those of the webcontent
+     * gathered so far this pass plus every resource already in the source
+     * package. Feeding these to the generator keeps a new media file from being
+     * handed an identifier that is already in use.
+     *
+     * @return list<string>
      */
-    private function nextWebcontentIdentifier(WebcontentCollection $webcontent, ?QtiPackage $sourcePackage): string
+    private function usedIdentifiers(WebcontentCollection $webcontent, ?QtiPackage $sourcePackage): array
     {
-        $used = [];
+        $identifiers = [];
         foreach ($webcontent as $existing) {
-            $used[$existing->identifier] = true;
+            $identifiers[] = $existing->identifier;
         }
         foreach ($sourcePackage?->resources ?? [] as $resource) {
-            $used[$resource->identifier] = true;
+            $identifiers[] = $resource->identifier;
         }
 
-        $index = 1;
-        while (isset($used[$identifier = sprintf('RESOURCE%03d', $index)])) {
-            $index++;
-        }
-
-        return $identifier;
+        return $identifiers;
     }
 
     private function resourceByHref(QtiPackage $package, ?string $href): ?Resource

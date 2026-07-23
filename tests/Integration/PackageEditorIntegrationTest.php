@@ -7,6 +7,7 @@ namespace Qti3\Tests\Integration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
 
 #[Group('integration')]
 class PackageEditorIntegrationTest extends TestCase
@@ -89,6 +90,50 @@ class PackageEditorIntegrationTest extends TestCase
         $this->assertTrue($reloaded->hasResource('ITEM002'));
         $test = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID)->test;
         $this->assertSame(['ITEM001', 'ITEM002'], $test->getItemIdentifiers());
+    }
+
+    #[Test]
+    public function anUploadedResourceIsReusedByALaterItemUpdateThatReferencesIt(): void
+    {
+        $this->seedPackageOnDisk();
+        $client = $this->createClient();
+        $editor = $client->getPackageEditor();
+
+        // Request 1: an uploaded file is added to the package and saved. The
+        // item XML does not reference it yet.
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $upload = $editor->addResource($package, 'resources/photo.png', new MemoryFileContent('PNGBYTES'));
+        $href = $upload->resource->href;
+        $resourceId = $upload->resource->identifier;
+        $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package);
+
+        // Request 2: reload and update an item whose new XML references the
+        // upload by its href.
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $itemXml = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="ITEM001" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><p><img src="%s" alt="Foto"/></p></qti-item-body></qti-assessment-item>',
+            self::ASI_NAMESPACE,
+            $href,
+        );
+        $item = $client->getAssessmentItemParser()->parseFromString($itemXml)->item;
+        $editor->updateItem($package, $item);
+        $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package);
+
+        // The item now depends on the uploaded resource, which was reused (not
+        // duplicated) and whose bytes persisted across both writes.
+        $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $this->assertSame('PNGBYTES', $reloaded->getFile($href)->getContent()->getContent());
+        $this->assertSame(1, count(array_filter(
+            $reloaded->resources->all(),
+            static fn($resource): bool => $resource->href === $href,
+        )));
+        $dependencyRefs = array_map(
+            static fn($dependency): string => $dependency->identifierref,
+            $reloaded->getResource('ITEM001')->resourceDependencies->all(),
+        );
+        $this->assertContains($resourceId, $dependencyRefs);
     }
 
     private function seedPackageOnDisk(): void

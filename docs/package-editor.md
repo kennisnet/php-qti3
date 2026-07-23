@@ -135,6 +135,42 @@ $parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
 $result = $editor->updateItem($package, $parsed->item); // $result->resource is the updated item
 ```
 
+## Adding a resource (e.g. an uploaded file)
+
+`addResource()` adds a standalone `webcontent` asset — an uploaded image, audio
+clip, etc. — to the package, independent of any item. This supports a two-step
+editor flow: the file is uploaded and added first, and the item XML that
+references it arrives in a later request.
+
+You choose the package-relative path the file should live at, and pass the
+content as an `IFileContent` — `MemoryFileContent` for raw bytes, or a
+lazy/streaming implementation. It is registered as a `webcontent` resource with
+a fresh `RESOURCEnnn` identifier. Intermediate directories in the path are
+created by the writer when the package is saved.
+
+```php
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+
+// Request 1: the uploaded bytes are added to the package at a path you choose.
+$result = $editor->addResource($package, 'resources/photo.png', new MemoryFileContent($uploadedBytes));
+$href = $result->resource->href; // 'resources/photo.png' — use this in the item XML
+// ...save the package...
+```
+
+Pass `isBinary: false` for text-based assets. The path must stay inside the
+package: an absolute path or a `..` segment is rejected, and adding a second
+resource at a path that already exists throws — the caller is responsible for
+choosing a unique path.
+
+```php
+// Request 2: an item update whose XML references $href reuses the resource
+// added earlier — no duplicate resource is created, and the dependency is
+// linked automatically.
+$itemXml = str_replace('{{IMAGE}}', $href, $template);
+$parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
+$editor->updateItem($package, $parsed->item);
+```
+
 ## Removing an item
 
 ```php
