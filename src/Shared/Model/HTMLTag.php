@@ -75,10 +75,13 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
             'requiredAttributes' => [],
         ],
         [
+            // `alt` is not required at construction so an <img> authored without
+            // one is accepted; a default empty alt="" is emitted on serialization
+            // (see attributes()) to keep the output valid.
             'tags' => ['img'],
             'type' => self::INLINE,
             'allowedAttributes' => ['alt', 'height', 'longdesc', 'src', 'width'],
-            'requiredAttributes' => ['alt', 'src'],
+            'requiredAttributes' => ['src'],
         ],
         [
             'tags' => ['object'],
@@ -169,6 +172,14 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
                 $attributes['src'] = $resolvedPath;
             }
         }
+
+        // `alt` is mandatory on a serialized <img>; default a missing one to the
+        // empty string (valid for a decorative image) so an item authored
+        // without alt still round-trips to spec-valid XML.
+        if ($this->tagName === 'img' && !isset($attributes['alt'])) {
+            $attributes['alt'] = '';
+        }
+
         return $attributes;
     }
 

@@ -111,6 +111,11 @@ to insert it at a specific index instead:
 $editor->addItemToTest($package, $testId, $parsed->item, position: 0);
 ```
 
+> **`<img>` without `alt`.** An `<img>` may be authored without an `alt`
+> attribute — for example while the editor still lets the author fill it in.
+> Parsing accepts it, and the item is written back with a valid empty `alt=""`
+> rather than being rejected. (`src` is still required.)
+
 ## Updating an item
 
 Updating replaces the content of an existing item, identified by the model's own

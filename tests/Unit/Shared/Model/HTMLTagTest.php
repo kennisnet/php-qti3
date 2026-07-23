@@ -180,4 +180,30 @@ class HTMLTagTest extends TestCase
 
         new HTMLTag('source', ['type' => 'image/webp']);
     }
+
+    #[Test]
+    public function anImgWithoutAltIsAcceptedAndSerializesWithAnEmptyAlt(): void
+    {
+        // Authoring an <img> without alt no longer throws; a default empty
+        // alt="" is emitted so the serialized element stays valid.
+        $tag = new HTMLTag('img', ['src' => 'resources/pic.png']);
+
+        $this->assertSame('', $tag->attributes()['alt']);
+    }
+
+    #[Test]
+    public function anImgKeepsAnExplicitAlt(): void
+    {
+        $tag = new HTMLTag('img', ['src' => 'resources/pic.png', 'alt' => 'A cat']);
+
+        $this->assertSame('A cat', $tag->attributes()['alt']);
+    }
+
+    #[Test]
+    public function anImgStillRequiresSrc(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new HTMLTag('img', ['alt' => 'A cat']);
+    }
 }
