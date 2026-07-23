@@ -19,6 +19,8 @@ use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotChoice;
 use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\Hottext;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction\InlineChoice;
+use Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction\InlineChoiceInteraction;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\SimpleAssociableChoice;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\SimpleMatchSet;
@@ -44,6 +46,7 @@ class InteractionParser extends AbstractParser
             GapMatchInteraction::qtiTagName() => $this->parseGapMatchInteraction($element),
             HotspotInteraction::qtiTagName() => $this->parseHotspotInteraction($element),
             HottextInteraction::qtiTagName() => $this->parseHottextInteraction($element),
+            InlineChoiceInteraction::qtiTagName() => $this->parseInlineChoiceInteraction($element),
             MatchInteraction::qtiTagName() => $this->parseMatchInteraction($element),
             OrderInteraction::qtiTagName() => $this->parseOrderInteraction($element),
             SelectPointInteraction::qtiTagName() => $this->parseSelectPointInteraction($element),
@@ -169,6 +172,35 @@ class InteractionParser extends AbstractParser
         $maxChoices = (int) ($element->getAttribute('max-choices') ?: '0');
         $content = $this->parseContentChildren($element);
         return new HottextInteraction($maxChoices, $content, $responseIdentifier);
+    }
+
+    private function parseInlineChoiceInteraction(DOMElement $element): InlineChoiceInteraction
+    {
+        $this->validateTag($element, InlineChoiceInteraction::qtiTagName());
+        $responseIdentifier = $element->getAttribute('response-identifier') ?: 'RESPONSE';
+        $shuffle = strtolower($element->getAttribute('shuffle')) === 'true';
+        $required = strtolower($element->getAttribute('required')) === 'true';
+
+        $choices = [];
+        foreach ($this->getChildren($element) as $child) {
+            if ($child->nodeName === InlineChoice::qtiTagName()) {
+                $choices[] = $this->parseInlineChoice($child);
+            }
+        }
+
+        return new InlineChoiceInteraction($choices, $responseIdentifier, $shuffle, $required);
+    }
+
+    private function parseInlineChoice(DOMElement $element): InlineChoice
+    {
+        $this->validateTag($element, InlineChoice::qtiTagName());
+        $identifier = $element->getAttribute('identifier');
+        $fixed = strtolower($element->getAttribute('fixed')) === 'true';
+        $templateIdentifier = $element->getAttribute('template-identifier') ?: null;
+        $showHide = $element->getAttribute('show-hide') ?: 'show';
+        $content = $this->parseContentChildren($element);
+
+        return new InlineChoice($identifier, $content, $fixed, $templateIdentifier, $showHide);
     }
 
     private function parseMatchInteraction(DOMElement $element): MatchInteraction

@@ -18,6 +18,7 @@ use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapText;
 use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\Hottext;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction\InlineChoiceInteraction;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\OrderInteraction;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\Orientation;
@@ -208,6 +209,71 @@ class InteractionParserTest extends TestCase
         $this->assertSame('RESPONSE_HT', $result->responseIdentifier);
         $this->assertSame(2, $result->maxChoices);
         $this->assertGreaterThan(0, count($result->content));
+    }
+
+    #[Test]
+    public function parseInlineChoiceInteraction(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE_IC" shuffle="true" required="true">
+                <qti-inline-choice identifier="G">gaseous</qti-inline-choice>
+                <qti-inline-choice identifier="L">liquid</qti-inline-choice>
+                <qti-inline-choice identifier="S">solid</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(InlineChoiceInteraction::class, $result);
+        $this->assertSame('RESPONSE_IC', $result->responseIdentifier);
+        $this->assertTrue($result->shuffle);
+        $this->assertTrue($result->required);
+        $this->assertCount(3, $result->choices);
+        $this->assertSame('G', $result->choices[0]->identifier);
+        $this->assertInstanceOf(TextNode::class, $result->choices[0]->content->all()[0]);
+        $this->assertSame('gaseous', $result->choices[0]->content->all()[0]->content);
+        $this->assertSame('L', $result->choices[1]->identifier);
+        $this->assertSame('S', $result->choices[2]->identifier);
+    }
+
+    #[Test]
+    public function parseInlineChoiceInteractionDefaults(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction>
+                <qti-inline-choice identifier="A">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(InlineChoiceInteraction::class, $result);
+        $this->assertSame('RESPONSE', $result->responseIdentifier);
+        $this->assertFalse($result->shuffle);
+        $this->assertFalse($result->required);
+        $this->assertCount(1, $result->choices);
+        $choice = $result->choices[0];
+        $this->assertSame('A', $choice->identifier);
+        $this->assertFalse($choice->fixed);
+        $this->assertNull($choice->templateIdentifier);
+        $this->assertSame('show', $choice->showHide);
+    }
+
+    #[Test]
+    public function parseInlineChoiceKeepsChoiceAttributes(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE">
+                <qti-inline-choice identifier="A" fixed="true" template-identifier="SHOW_A" show-hide="hide">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $choice = $result->choices[0];
+        $this->assertTrue($choice->fixed);
+        $this->assertSame('SHOW_A', $choice->templateIdentifier);
+        $this->assertSame('hide', $choice->showHide);
     }
 
     #[Test]
