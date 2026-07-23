@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
+use Qti3\Package\Exception\InvalidResourceReferenceException;
 use Qti3\Package\Filesystem\FlysystemPackageFactory;
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -418,42 +419,91 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
-    public function addItemRefusesLocalFilePathReferencesInItemMedia(): void
+    public function addItemRejectsAndLeavesThePackageUntouchedForADisallowedPath(): void
     {
         $package = $this->emptyDraft();
 
-        $added = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER', imageSrc: '/etc/passwd'))->resource;
-
-        $manifest = (string) $package->manifest;
-        // The local/traversal path is never registered as a resource...
-        $this->assertStringNotContainsString('passwd', $manifest);
-        // ...while the bundled (trusted) stylesheet still is.
-        $this->assertStringContainsString('type="webcontent"', $manifest);
-        $this->assertStringContainsString('.css', $manifest);
-        // The item itself was still added.
-        $this->assertSame('ITEM001', $added->identifier);
+        try {
+            $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001', imageSrc: '/etc/passwd'));
+            $this->fail('Expected InvalidResourceReferenceException');
+        } catch (InvalidResourceReferenceException $exception) {
+            $this->assertStringContainsString('outside the package', implode("\n", $exception->validationErrors()->all()));
+            // The rejected edit mutated nothing: no item, no manifest entry.
+            $this->assertFalse($package->hasResource('ITEM001'));
+            $this->assertStringNotContainsString('passwd', (string) $package->manifest);
+        }
     }
 
     #[Test]
-    public function addItemSurfacesAWarningWhenItemMediaIsRefused(): void
+    public function addItemRejectsAReferenceToAResourceNotInThePackage(): void
     {
         $package = $this->emptyDraft();
 
-        // A refused reference is dropped from the package but its src stays in
-        // the item XML — the resulting data loss must reach the EditResult.
-        $result = $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001', imageSrc: '/etc/passwd'));
-
-        $this->assertStringContainsString('Refused local file reference', implode("\n", $result->warnings->all()));
+        try {
+            $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001', imageSrc: 'resources/missing.png'));
+            $this->fail('Expected InvalidResourceReferenceException');
+        } catch (InvalidResourceReferenceException $exception) {
+            $this->assertStringContainsString('not present in the package', implode("\n", $exception->validationErrors()->all()));
+            $this->assertStringContainsString('resources/missing.png', implode("\n", $exception->validationErrors()->all()));
+            $this->assertFalse($package->hasResource('ITEM001'));
+        }
     }
 
     #[Test]
-    public function updateItemSurfacesAWarningWhenItemMediaIsRefused(): void
+    public function updateItemRejectsAReferenceToAResourceNotInThePackageAndLeavesItUntouched(): void
+    {
+        $package = $this->draftWithMedia();
+        $before = (string) $package->getFile('ITEM001.xml');
+
+        try {
+            $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: 'resources/missing.png'));
+            $this->fail('Expected InvalidResourceReferenceException');
+        } catch (InvalidResourceReferenceException) {
+            // The item content is unchanged: the failed update was not written.
+            $this->assertSame($before, (string) $package->getFile('ITEM001.xml'));
+        }
+    }
+
+    #[Test]
+    public function updateItemRejectsATraversalPath(): void
     {
         $package = $this->draftWithMedia();
 
-        $result = $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: '../secret.png'));
+        $this->expectException(InvalidResourceReferenceException::class);
 
-        $this->assertStringContainsString('Refused local file reference', implode("\n", $result->warnings->all()));
+        $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: '../secret.png'));
+    }
+
+    #[Test]
+    public function updateItemAcceptsAReferenceToAResourceAlreadyInThePackage(): void
+    {
+        // The media referenced by the update already lives in the package
+        // (e.g. uploaded via addResource in an earlier request): no exception.
+        $package = $this->draftWithMedia();
+
+        $result = $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: 'resources/pic.png'));
+
+        $this->assertSame('ITEM001', $result->resource->identifier);
+    }
+
+    #[Test]
+    public function updateItemAcceptsADataUriReference(): void
+    {
+        $package = $this->draftWithMedia();
+
+        $result = $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: 'data:image/png;base64,AAAA'));
+
+        $this->assertSame('ITEM001', $result->resource->identifier);
+    }
+
+    #[Test]
+    public function updateItemAcceptsAnHttpUrlReference(): void
+    {
+        $package = $this->draftWithMedia();
+
+        $result = $this->editor->updateItem($package, $this->item('ITEM001', imageSrc: 'https://example.com/remote.png'));
+
+        $this->assertSame('ITEM001', $result->resource->identifier);
     }
 
     #[Test]

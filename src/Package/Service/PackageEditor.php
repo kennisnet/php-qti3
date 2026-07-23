@@ -17,6 +17,7 @@ use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidQtiPackageException;
+use Qti3\Package\Exception\InvalidResourceReferenceException;
 use Qti3\Package\Model\FileContent\IFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
@@ -110,6 +111,10 @@ final readonly class PackageEditor
         $this->assertIdentifierAvailable($package, $identifier);
         $item = $item->withIdentifier(AssessmentItemId::fromString($identifier));
 
+        // Every resource the item references must resolve against the package
+        // before anything is mutated; an unresolvable reference fails the edit.
+        $this->assertResourceReferencesResolve($package, $item);
+
         // Media-resolution warnings join the test-parse warnings: both surface
         // data loss the caller must see (a refused reference leaves a dangling
         // src in the regenerated item).
@@ -137,6 +142,10 @@ final readonly class PackageEditor
     {
         $identifier = (string) $item->identifier();
         $itemResource = $package->getResource($identifier, ResourceType::ASSESSMENT_ITEM);
+
+        // Every resource the item references must resolve against the package
+        // before anything is mutated; an unresolvable reference fails the edit.
+        $this->assertResourceReferencesResolve($package, $item);
 
         // Which media the item referenced *before* this edit, derived from the
         // current content by the same scan that produces the new dependencies.
@@ -223,6 +232,21 @@ final readonly class PackageEditor
         );
 
         $this->getXmlFileFromResource($testResource)->replaceContent((string) $rebuilt->getMainFile());
+    }
+
+    /**
+     * Fail the edit when the item references a resource that cannot be resolved
+     * against the package (a relative path not present in it, or a path that
+     * escapes it). Called before any mutation, so a rejected edit leaves the
+     * package untouched. In-package files, `data:` URIs, `http(s)` URLs and
+     * trusted library assets are all valid references.
+     */
+    private function assertResourceReferencesResolve(QtiPackage $package, AssessmentItem $item): void
+    {
+        $invalidReferences = $this->webcontentProcessor->findInvalidReferences($item, $package);
+        if ($invalidReferences !== []) {
+            throw new InvalidResourceReferenceException(new StringCollection($invalidReferences));
+        }
     }
 
     /**

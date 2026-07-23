@@ -7,6 +7,7 @@ namespace Qti3\Tests\Integration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\Package\Exception\InvalidResourceReferenceException;
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 
 #[Group('integration')]
@@ -134,6 +135,37 @@ class PackageEditorIntegrationTest extends TestCase
             $reloaded->getResource('ITEM001')->resourceDependencies->all(),
         );
         $this->assertContains($resourceId, $dependencyRefs);
+    }
+
+    #[Test]
+    public function anItemUpdateReferencingAResourceNotInThePackageIsRejectedAndLeavesTheItemUntouched(): void
+    {
+        $this->seedPackageOnDisk();
+        $client = $this->createClient();
+        $editor = $client->getPackageEditor();
+
+        // The upload never happened (or the path is wrong): the item references
+        // a resource that is not in the package.
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $itemXml = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="ITEM001" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><p><img src="resources/never-uploaded.png" alt="Foto"/></p></qti-item-body></qti-assessment-item>',
+            self::ASI_NAMESPACE,
+        );
+        $item = $client->getAssessmentItemParser()->parseFromString($itemXml)->item;
+
+        try {
+            $editor->updateItem($package, $item);
+            $this->fail('Expected InvalidResourceReferenceException');
+        } catch (InvalidResourceReferenceException $exception) {
+            $this->assertStringContainsString('resources/never-uploaded.png', implode("\n", $exception->validationErrors()->all()));
+        }
+
+        // Nothing was written: the on-disk item still has its original content.
+        $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $this->assertStringContainsString('Vraag tekst', (string) $reloaded->getFile('ITEM001.xml'));
+        $this->assertStringNotContainsString('never-uploaded', (string) $reloaded->getFile('ITEM001.xml'));
     }
 
     private function seedPackageOnDisk(): void
