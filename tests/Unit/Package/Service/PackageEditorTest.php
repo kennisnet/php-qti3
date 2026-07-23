@@ -108,6 +108,26 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemAcceptsAnImgWithoutAltAndStoresItWithAnEmptyAlt(): void
+    {
+        // The editor UI may submit an <img> before an alt has been filled in;
+        // it is accepted and written back with a valid empty alt="".
+        $package = $this->emptyDraft();
+
+        $xml = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item xmlns="%s" identifier="PLACEHOLDER" title="Vraag" time-dependent="false">'
+            . '<qti-item-body><p><img src="data:image/png;base64,AAAA"/></p></qti-item-body></qti-assessment-item>',
+            self::ASI_NAMESPACE,
+        );
+        $item = $this->client->getAssessmentItemParser()->parseFromString($xml)->item;
+
+        $added = $this->editor->addItemToTest($package, self::TEST_ID, $item)->resource;
+
+        $this->assertStringContainsString('alt=""', (string) $package->getFile($added->href));
+    }
+
+    #[Test]
     public function addItemAppendsAnItemRefToTheSectionByDefault(): void
     {
         $package = $this->emptyDraft();
