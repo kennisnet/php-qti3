@@ -13,6 +13,7 @@ use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Service\QtiPackageBuilder;
+use Qti3\Package\Service\WebcontentIdentifierGenerator;
 use Qti3\Package\Service\WebcontentProcessor;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
@@ -48,6 +49,7 @@ class QtiPackageBuilderTest extends TestCase
             new WebcontentProcessor(
                 $this->resourceValidator,
                 $this->createMock(IResourceDownloader::class),
+                new WebcontentIdentifierGenerator(),
             ),
         );
     }

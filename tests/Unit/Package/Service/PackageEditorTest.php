@@ -9,6 +9,8 @@ use DOMElement;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\AssessmentItem;
@@ -531,49 +533,32 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
-    public function addResourceRegistersAContentAddressedWebcontentResource(): void
+    public function addResourceRegistersAWebcontentResourceAtTheGivenPath(): void
     {
         $package = $this->emptyDraft();
 
-        $result = $this->editor->addResource($package, 'photo.png', 'PNGBYTES');
+        $result = $this->editor->addResource($package, 'resources/photo.png', 'PNGBYTES');
 
-        $expectedHref = 'resources/' . md5('PNGBYTES') . '.png';
         $this->assertSame('RESOURCE001', $result->resource->identifier);
-        $this->assertSame($expectedHref, $result->resource->href);
-        $this->assertSame('PNGBYTES', $package->getFile($expectedHref)->getContent()->getContent());
+        $this->assertSame('resources/photo.png', $result->resource->href);
+        $this->assertSame('PNGBYTES', $package->getFile('resources/photo.png')->getContent()->getContent());
 
         $manifestResource = $this->findElement((string) $package->manifest, self::MANIFEST_NAMESPACE, 'resource', 'RESOURCE001');
         $this->assertInstanceOf(DOMElement::class, $manifestResource);
         $this->assertSame('webcontent', $manifestResource->getAttribute('type'));
-        $this->assertSame($expectedHref, $manifestResource->getAttribute('href'));
+        $this->assertSame('resources/photo.png', $manifestResource->getAttribute('href'));
     }
 
     #[Test]
-    public function addResourceIsIdempotentForIdenticalContent(): void
+    public function addResourceAssignsSequentialIdentifiers(): void
     {
         $package = $this->emptyDraft();
 
-        $first = $this->editor->addResource($package, 'a.png', 'SAME');
-        $second = $this->editor->addResource($package, 'b.png', 'SAME');
-
-        // Identical bytes resolve to the same content-addressed resource, so no
-        // duplicate is created and the original identifier is returned.
-        $this->assertSame($first->resource->identifier, $second->resource->identifier);
-        $this->assertSame($first->resource->href, $second->resource->href);
-        $this->assertSame(1, $this->countResourcesWithHref($package, $first->resource->href));
-    }
-
-    #[Test]
-    public function addResourceCreatesDistinctResourcesForDifferentContent(): void
-    {
-        $package = $this->emptyDraft();
-
-        $first = $this->editor->addResource($package, 'a.png', 'ONE');
-        $second = $this->editor->addResource($package, 'b.png', 'TWO');
+        $first = $this->editor->addResource($package, 'resources/one.png', 'ONE');
+        $second = $this->editor->addResource($package, 'resources/two.png', 'TWO');
 
         $this->assertSame('RESOURCE001', $first->resource->identifier);
         $this->assertSame('RESOURCE002', $second->resource->identifier);
-        $this->assertNotSame($first->resource->href, $second->resource->href);
     }
 
     #[Test]
@@ -582,19 +567,42 @@ final class PackageEditorTest extends TestCase
         // The package already owns RESOURCE001.
         $package = $this->draftWithExistingWebcontent();
 
-        $result = $this->editor->addResource($package, 'photo.png', 'PNGBYTES');
+        $result = $this->editor->addResource($package, 'resources/photo.png', 'PNGBYTES');
 
         $this->assertSame('RESOURCE002', $result->resource->identifier);
     }
 
     #[Test]
-    public function addResourceDropsAnUnusableExtension(): void
+    public function addResourceThrowsWhenAResourceAlreadyExistsAtThePath(): void
+    {
+        $package = $this->emptyDraft();
+        $this->editor->addResource($package, 'resources/photo.png', 'FIRST');
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->editor->addResource($package, 'resources/photo.png', 'SECOND');
+    }
+
+    #[Test]
+    #[DataProvider('invalidResourcePathProvider')]
+    public function addResourceRejectsPathsThatEscapeThePackage(string $path): void
     {
         $package = $this->emptyDraft();
 
-        $result = $this->editor->addResource($package, 'noextension', 'BYTES');
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->assertSame('resources/' . md5('BYTES'), $result->resource->href);
+        $this->editor->addResource($package, $path, 'BYTES');
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidResourcePathProvider(): iterable
+    {
+        yield 'absolute path' => ['/etc/passwd'];
+        yield 'parent traversal' => ['../secret.png'];
+        yield 'nested traversal' => ['resources/../../secret.png'];
+        yield 'empty path' => [''];
     }
 
     // --- editor convenience --------------------------------------------------

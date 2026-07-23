@@ -50,6 +50,7 @@ final readonly class PackageEditor
         private ItemResourceBuilder $itemResourceBuilder,
         private WebcontentProcessor $webcontentProcessor,
         private AssessmentItemParser $assessmentItemParser,
+        private WebcontentIdentifierGenerator $webcontentIdentifierGenerator,
     ) {}
 
     /** Next free item identifier for the package (`ITEMnnn`, package-unique). */
@@ -60,29 +61,28 @@ final readonly class PackageEditor
 
     /**
      * Add a standalone webcontent asset (e.g. an uploaded image) to the package,
-     * independent of any item. The bytes are stored under `resources/` with a
-     * content-addressed name (md5 of the content plus the original extension)
-     * and registered as a `webcontent` resource with a fresh `RESOURCEnnn`
-     * identifier.
+     * independent of any item. The caller supplies the package-relative `$path`
+     * where the file should live (e.g. `resources/pic.png`); intermediate
+     * directories in that path are created by the writer when the package is
+     * saved. The file is registered as a `webcontent` resource with a fresh
+     * `RESOURCEnnn` identifier.
      *
-     * Adding identical bytes again is idempotent: the existing resource is
-     * returned instead of a duplicate. A later {@see self::updateItem()} whose
-     * item XML references the returned href ({@see Resource::$href}) reuses this
-     * resource rather than re-adding it.
+     * A later {@see self::updateItem()} whose item XML references `$path` reuses
+     * this resource rather than re-adding it. Throws when `$path` is absolute or
+     * escapes the package (`..`), or when the package already holds a file at
+     * `$path`.
      */
-    public function addResource(QtiPackage $package, string $filename, string $content, bool $isBinary = true): EditResult
+    public function addResource(QtiPackage $package, string $path, string $content, bool $isBinary = true): EditResult
     {
-        $href = $this->contentAddressedHref($filename, $content);
-
-        $existing = $this->resourceByHref($package, $href);
-        if ($existing !== null) {
-            return new EditResult($existing, new StringCollection());
+        $this->assertValidResourcePath($path);
+        if ($this->resourceByHref($package, $path) !== null) {
+            throw new InvalidArgumentException(sprintf('Package already contains a resource at path "%s"', $path));
         }
 
         $resource = new Webcontent(
-            $href,
-            $this->webcontentProcessor->availableWebcontentIdentifier($package),
-            $href,
+            $path,
+            $this->webcontentIdentifierGenerator->nextIdentifier($this->resourceIdentifiers($package)),
+            $path,
             new MemoryFileContent($content),
             $isBinary,
         );
@@ -234,18 +234,28 @@ final readonly class PackageEditor
     }
 
     /**
-     * Package-relative, content-addressed path for an uploaded asset: the md5
-     * of its bytes under `resources/`, keeping the original extension so the
-     * file type is preserved. Only a plain alphanumeric extension is kept; any
-     * other value (empty, or crafted) is dropped so the path stays confined to
-     * `resources/`.
+     * A resource path must stay inside the package: no absolute path and no
+     * `..` segment that would let a write escape the package directory.
      */
-    private function contentAddressedHref(string $filename, string $content): string
+    private function assertValidResourcePath(string $path): void
     {
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $suffix = preg_match('/^[a-z0-9]+$/', $extension) === 1 ? '.' . $extension : '';
+        if ($path === ''
+            || str_starts_with($path, '/')
+            || preg_match('~(^|/)\.\.(/|$)~', $path) === 1
+        ) {
+            throw new InvalidArgumentException(sprintf('Invalid resource path "%s": must be a relative path inside the package', $path));
+        }
+    }
 
-        return 'resources/' . md5($content) . $suffix;
+    /**
+     * @return list<string>
+     */
+    private function resourceIdentifiers(QtiPackage $package): array
+    {
+        return array_map(
+            static fn(Resource $resource): string => $resource->identifier,
+            $package->resources->all(),
+        );
     }
 
     private function resourceByHref(QtiPackage $package, string $href): ?Resource

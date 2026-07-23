@@ -142,17 +142,21 @@ clip, etc. — to the package, independent of any item. This supports a two-step
 editor flow: the file is uploaded and added first, and the item XML that
 references it arrives in a later request.
 
+You choose the package-relative path the file should live at; it is registered
+as a `webcontent` resource with a fresh `RESOURCEnnn` identifier. Intermediate
+directories in the path are created by the writer when the package is saved.
+
 ```php
-// Request 1: the uploaded bytes are added to the package.
-$result = $editor->addResource($package, 'photo.png', $uploadedBytes);
-$href = $result->resource->href; // e.g. "resources/<md5>.png" — use this in the item XML
+// Request 1: the uploaded bytes are added to the package at a path you choose.
+$result = $editor->addResource($package, 'resources/photo.png', $uploadedBytes);
+$href = $result->resource->href; // 'resources/photo.png' — use this in the item XML
 // ...save the package...
 ```
 
-The file is stored under `resources/` with a **content-addressed** name (the md5
-of its bytes plus the original extension), so adding identical bytes again is
-idempotent and returns the existing resource instead of a duplicate. Pass
-`isBinary: false` for text-based assets.
+Pass `isBinary: false` for text-based assets. The path must stay inside the
+package: an absolute path or a `..` segment is rejected, and adding a second
+resource at a path that already exists throws — the caller is responsible for
+choosing a unique path.
 
 ```php
 // Request 2: an item update whose XML references $href reuses the resource

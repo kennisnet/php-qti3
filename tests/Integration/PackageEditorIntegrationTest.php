@@ -101,7 +101,7 @@ class PackageEditorIntegrationTest extends TestCase
         // Request 1: an uploaded file is added to the package and saved. The
         // item XML does not reference it yet.
         $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
-        $upload = $editor->addResource($package, 'photo.png', 'PNGBYTES');
+        $upload = $editor->addResource($package, 'resources/photo.png', 'PNGBYTES');
         $href = $upload->resource->href;
         $resourceId = $upload->resource->identifier;
         $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package);
