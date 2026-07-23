@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\MatchInteraction;
 
+use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
-use Qti3\Shared\Model\QtiElement;
 
 /**
- * The text entry interaction allows a candidate to supply a text string for a response.
+ * The match interaction presents two sets of choices and requires the candidate
+ * to create associations between them.
  */
-class MatchInteraction extends QtiElement
+class MatchInteraction extends AbstractInteractionElement
 {
     public function __construct(
         public SimpleMatchSet $simpleMatchSet1,
@@ -19,8 +21,11 @@ class MatchInteraction extends QtiElement
         public string $responseIdentifier = 'RESPONSE',
         public bool $shuffle = false,
         public ?int $maxAssociations = null,
-        public ?string $class = null,
-    ) {}
+        public ?int $minAssociations = null,
+        SharedAttributes $attributes = new SharedAttributes(),
+    ) {
+        parent::__construct($attributes);
+    }
 
     public function attributes(): array
     {
@@ -28,7 +33,8 @@ class MatchInteraction extends QtiElement
             'response-identifier' => $this->responseIdentifier,
             'shuffle' => $this->shuffle ? 'true' : 'false',
             'max-associations' => $this->maxAssociations === null ? null : (string) $this->maxAssociations,
-            'class' => $this->class,
+            'min-associations' => $this->minAssociations === null ? null : (string) $this->minAssociations,
+            ...$this->sharedAttributes(),
         ];
     }
 

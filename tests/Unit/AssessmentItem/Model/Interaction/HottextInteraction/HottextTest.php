@@ -31,6 +31,8 @@ class HottextTest extends TestCase
     {
         $expectedAttributes = [
             'identifier' => 'A',
+            'template-identifier' => null,
+            'show-hide' => 'show',
         ];
 
         $this->assertSame($expectedAttributes, $this->hottext->attributes());

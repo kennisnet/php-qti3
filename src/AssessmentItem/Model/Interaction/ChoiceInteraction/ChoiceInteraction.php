@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction;
 
+use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\SharedAttributes;
+use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\Orientation;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\Shared\Model\QtiElement;
 
 /**
  * The choice interaction allows a candidate to supply a response by selecting one or more choices from a list.
  */
-class ChoiceInteraction extends QtiElement
+class ChoiceInteraction extends AbstractInteractionElement
 {
     /**
      * @param array<int,SimpleChoice> $choices
@@ -21,7 +24,12 @@ class ChoiceInteraction extends QtiElement
         public ?Prompt $prompt = null,
         public bool $shuffle = false,
         public int $maxChoices = 1,
-    ) {}
+        public ?int $minChoices = null,
+        public ?Orientation $orientation = null,
+        SharedAttributes $attributes = new SharedAttributes(),
+    ) {
+        parent::__construct($attributes);
+    }
 
     public function attributes(): array
     {
@@ -29,6 +37,9 @@ class ChoiceInteraction extends QtiElement
             'response-identifier' => $this->responseIdentifier,
             'shuffle' => $this->shuffle ? 'true' : 'false',
             'max-choices' => (string) $this->maxChoices,
+            'min-choices' => $this->minChoices === null ? null : (string) $this->minChoices,
+            'orientation' => $this->orientation?->value,
+            ...$this->sharedAttributes(),
         ];
     }
 

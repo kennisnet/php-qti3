@@ -28,6 +28,9 @@ class HotspotChoiceTest extends TestCase
             'shape' => 'circle',
             'coords' => '418,29,40',
             'identifier' => 'I',
+            'template-identifier' => null,
+            'show-hide' => 'show',
+            'hotspot-label' => null,
         ];
 
         $this->assertSame($expectedAttributes, $this->hotspotChoice->attributes());

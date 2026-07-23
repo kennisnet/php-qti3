@@ -2,19 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
 use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
-use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\SharedAttributes;
 
-class Hottext extends AbstractInteractionElement
+/**
+ * The optional qti-label of an {@see InlineChoiceInteraction}: a run of inline
+ * content that labels the interaction. It carries no attributes of its own
+ * beyond the shared ones.
+ */
+class Label extends AbstractInteractionElement
 {
     public function __construct(
-        public string $identifier,
         public ContentNodeCollection $content,
-        public ?string $templateIdentifier = null,
-        public string $showHide = 'show',
         SharedAttributes $attributes = new SharedAttributes(),
     ) {
         parent::__construct($attributes);
@@ -23,9 +25,6 @@ class Hottext extends AbstractInteractionElement
     public function attributes(): array
     {
         return [
-            'identifier' => $this->identifier,
-            'template-identifier' => $this->templateIdentifier,
-            'show-hide' => $this->showHide,
             ...$this->sharedAttributes(),
         ];
     }

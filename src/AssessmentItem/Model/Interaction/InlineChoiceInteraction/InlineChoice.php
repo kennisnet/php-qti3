@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
+use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
-use Qti3\Shared\Model\QtiElement;
 
 /**
  * A single selectable option (qti-inline-choice) within an
  * {@see InlineChoiceInteraction}.
  */
-class InlineChoice extends QtiElement
+class InlineChoice extends AbstractInteractionElement
 {
     public function __construct(
         public string $identifier,
@@ -20,7 +21,10 @@ class InlineChoice extends QtiElement
         // Identifier of a template variable used to control the visibility of the choice.
         public ?string $templateIdentifier = null,
         public string $showHide = 'show',
-    ) {}
+        SharedAttributes $attributes = new SharedAttributes(),
+    ) {
+        parent::__construct($attributes);
+    }
 
     public function attributes(): array
     {
@@ -29,6 +33,7 @@ class InlineChoice extends QtiElement
             'fixed' => $this->fixed ? 'true' : null,
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
+            ...$this->sharedAttributes(),
         ];
     }
 

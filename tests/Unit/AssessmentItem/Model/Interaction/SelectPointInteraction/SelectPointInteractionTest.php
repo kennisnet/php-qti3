@@ -39,6 +39,7 @@ class SelectPointInteractionTest extends TestCase
         $this->assertEquals(
             [
                 'max-choices' => '1',
+                'min-choices' => null,
                 'response-identifier' => 'RESPONSE',
             ],
             $this->interaction->attributes(),

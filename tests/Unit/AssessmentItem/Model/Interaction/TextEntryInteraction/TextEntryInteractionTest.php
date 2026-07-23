@@ -28,6 +28,17 @@ class TextEntryInteractionTest extends TestCase
     public function textEntryInteractionCanBeCreatedWithResponseIdentifier(): void
     {
         $textEntryInteractionWithResponse = new TextEntryInteraction('RESPONSE2');
-        $this->assertEquals(['response-identifier' => 'RESPONSE2'], $textEntryInteractionWithResponse->attributes());
+        $this->assertEquals(
+            [
+                'response-identifier' => 'RESPONSE2',
+                'base' => null,
+                'string-identifier' => null,
+                'expected-length' => null,
+                'pattern-mask' => null,
+                'placeholder-text' => null,
+                'format' => null,
+            ],
+            $textEntryInteractionWithResponse->attributes(),
+        );
     }
 }

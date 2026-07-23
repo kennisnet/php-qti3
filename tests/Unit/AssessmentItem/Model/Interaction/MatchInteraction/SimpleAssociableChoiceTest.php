@@ -33,6 +33,11 @@ class SimpleAssociableChoiceTest extends TestCase
         $expectedAttributes = [
             'identifier' => 'CHOICE_1',
             'match-max' => '3',
+            'match-min' => null,
+            'fixed' => null,
+            'template-identifier' => null,
+            'show-hide' => null,
+            'match-group' => null,
         ];
 
         $this->assertSame($expectedAttributes, $this->simpleAssociableChoice->attributes());

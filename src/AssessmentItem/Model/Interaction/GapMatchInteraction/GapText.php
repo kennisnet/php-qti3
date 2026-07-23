@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction;
 
+use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
-use Qti3\Shared\Model\QtiElement;
 
-final class GapText extends QtiElement
+final class GapText extends AbstractInteractionElement
 {
     public function __construct(
         public readonly string $identifier,
@@ -18,7 +19,10 @@ final class GapText extends QtiElement
         //	Identifier of a template variable used to control the visibility of the qti-gap-text
         public readonly ?string $templateIdentifier = null,
         public readonly string $showHide = 'show',
-    ) {}
+        SharedAttributes $attributes = new SharedAttributes(),
+    ) {
+        parent::__construct($attributes);
+    }
 
     public function attributes(): array
     {
@@ -29,6 +33,7 @@ final class GapText extends QtiElement
             'match-group' => $this->matchGroup,
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
+            ...$this->sharedAttributes(),
         ];
     }
 

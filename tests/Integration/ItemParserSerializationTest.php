@@ -466,7 +466,8 @@ XML;
     <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" />
     <qti-item-body>
         <p>Water vapour is in the
-            <qti-inline-choice-interaction response-identifier="RESPONSE" shuffle="true" required="true">
+            <qti-inline-choice-interaction response-identifier="RESPONSE" shuffle="true" required="true" min-choices="1"
+                class="dropdown" data-prompt="choose" not-allowed="dropped">
                 <qti-inline-choice identifier="G">gaseous</qti-inline-choice>
                 <qti-inline-choice identifier="L" fixed="true">liquid</qti-inline-choice>
                 <qti-inline-choice identifier="S">solid</qti-inline-choice>
@@ -480,6 +481,13 @@ XML;
         $first = $this->parseItem($xml);
         $serialized = $this->serializeItem($first);
         $second = $this->parseItem($serialized);
+
+        // Spec-permitted shared and data-* attributes survive serialization; the
+        // unknown attribute is dropped and never re-emitted.
+        $this->assertStringContainsString('class="dropdown"', $serialized);
+        $this->assertStringContainsString('data-prompt="choose"', $serialized);
+        $this->assertStringContainsString('min-choices="1"', $serialized);
+        $this->assertStringNotContainsString('not-allowed', $serialized);
 
         $this->assertSame('inline-choice-001', (string) $second->identifier);
 
@@ -499,6 +507,9 @@ XML;
         $this->assertSame('RESPONSE', $interaction->responseIdentifier);
         $this->assertTrue($interaction->shuffle);
         $this->assertTrue($interaction->required);
+        $this->assertSame(1, $interaction->minChoices);
+        $this->assertSame('dropdown', $interaction->class);
+        $this->assertSame(['data-prompt' => 'choose'], $interaction->dataAttributes);
         $this->assertCount(3, $interaction->choices);
         $this->assertSame('G', $interaction->choices[0]->identifier);
         $this->assertSame('gaseous', $interaction->choices[0]->content->all()[0]->content);
