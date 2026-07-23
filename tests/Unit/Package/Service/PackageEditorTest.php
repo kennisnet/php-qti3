@@ -17,6 +17,7 @@ use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
 use Qti3\Package\Filesystem\FlysystemPackageFactory;
+use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
@@ -537,7 +538,7 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $result = $this->editor->addResource($package, 'resources/photo.png', 'PNGBYTES');
+        $result = $this->editor->addResource($package, 'resources/photo.png', new MemoryFileContent('PNGBYTES'));
 
         $this->assertSame('RESOURCE001', $result->resource->identifier);
         $this->assertSame('resources/photo.png', $result->resource->href);
@@ -554,8 +555,8 @@ final class PackageEditorTest extends TestCase
     {
         $package = $this->emptyDraft();
 
-        $first = $this->editor->addResource($package, 'resources/one.png', 'ONE');
-        $second = $this->editor->addResource($package, 'resources/two.png', 'TWO');
+        $first = $this->editor->addResource($package, 'resources/one.png', new MemoryFileContent('ONE'));
+        $second = $this->editor->addResource($package, 'resources/two.png', new MemoryFileContent('TWO'));
 
         $this->assertSame('RESOURCE001', $first->resource->identifier);
         $this->assertSame('RESOURCE002', $second->resource->identifier);
@@ -567,7 +568,7 @@ final class PackageEditorTest extends TestCase
         // The package already owns RESOURCE001.
         $package = $this->draftWithExistingWebcontent();
 
-        $result = $this->editor->addResource($package, 'resources/photo.png', 'PNGBYTES');
+        $result = $this->editor->addResource($package, 'resources/photo.png', new MemoryFileContent('PNGBYTES'));
 
         $this->assertSame('RESOURCE002', $result->resource->identifier);
     }
@@ -576,11 +577,11 @@ final class PackageEditorTest extends TestCase
     public function addResourceThrowsWhenAResourceAlreadyExistsAtThePath(): void
     {
         $package = $this->emptyDraft();
-        $this->editor->addResource($package, 'resources/photo.png', 'FIRST');
+        $this->editor->addResource($package, 'resources/photo.png', new MemoryFileContent('FIRST'));
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->editor->addResource($package, 'resources/photo.png', 'SECOND');
+        $this->editor->addResource($package, 'resources/photo.png', new MemoryFileContent('SECOND'));
     }
 
     #[Test]
@@ -591,7 +592,7 @@ final class PackageEditorTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->editor->addResource($package, $path, 'BYTES');
+        $this->editor->addResource($package, $path, new MemoryFileContent('BYTES'));
     }
 
     /**

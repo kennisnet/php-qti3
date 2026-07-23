@@ -17,7 +17,7 @@ use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidQtiPackageException;
-use Qti3\Package\Model\FileContent\MemoryFileContent;
+use Qti3\Package\Model\FileContent\IFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -62,17 +62,19 @@ final readonly class PackageEditor
     /**
      * Add a standalone webcontent asset (e.g. an uploaded image) to the package,
      * independent of any item. The caller supplies the package-relative `$path`
-     * where the file should live (e.g. `resources/pic.png`); intermediate
-     * directories in that path are created by the writer when the package is
-     * saved. The file is registered as a `webcontent` resource with a fresh
-     * `RESOURCEnnn` identifier.
+     * where the file should live (e.g. `resources/pic.png`) and its `$content`
+     * as an {@see IFileContent} (e.g. {@see \Qti3\Package\Model\FileContent\MemoryFileContent}
+     * for raw bytes, or
+     * a lazy/streaming implementation); intermediate directories in the path are
+     * created by the writer when the package is saved. The file is registered as
+     * a `webcontent` resource with a fresh `RESOURCEnnn` identifier.
      *
      * A later {@see self::updateItem()} whose item XML references `$path` reuses
      * this resource rather than re-adding it. Throws when `$path` is absolute or
      * escapes the package (`..`), or when the package already holds a file at
      * `$path`.
      */
-    public function addResource(QtiPackage $package, string $path, string $content, bool $isBinary = true): EditResult
+    public function addResource(QtiPackage $package, string $path, IFileContent $content, bool $isBinary = true): EditResult
     {
         $this->assertValidResourcePath($path);
         if ($this->resourceByHref($package, $path) !== null) {
@@ -83,7 +85,7 @@ final readonly class PackageEditor
             $path,
             $this->webcontentIdentifierGenerator->nextIdentifier($this->resourceIdentifiers($package)),
             $path,
-            new MemoryFileContent($content),
+            $content,
             $isBinary,
         );
         $package->addResource($resource);

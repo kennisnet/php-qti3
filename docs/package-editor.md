@@ -142,13 +142,17 @@ clip, etc. — to the package, independent of any item. This supports a two-step
 editor flow: the file is uploaded and added first, and the item XML that
 references it arrives in a later request.
 
-You choose the package-relative path the file should live at; it is registered
-as a `webcontent` resource with a fresh `RESOURCEnnn` identifier. Intermediate
-directories in the path are created by the writer when the package is saved.
+You choose the package-relative path the file should live at, and pass the
+content as an `IFileContent` — `MemoryFileContent` for raw bytes, or a
+lazy/streaming implementation. It is registered as a `webcontent` resource with
+a fresh `RESOURCEnnn` identifier. Intermediate directories in the path are
+created by the writer when the package is saved.
 
 ```php
+use Qti3\Package\Model\FileContent\MemoryFileContent;
+
 // Request 1: the uploaded bytes are added to the package at a path you choose.
-$result = $editor->addResource($package, 'resources/photo.png', $uploadedBytes);
+$result = $editor->addResource($package, 'resources/photo.png', new MemoryFileContent($uploadedBytes));
 $href = $result->resource->href; // 'resources/photo.png' — use this in the item XML
 // ...save the package...
 ```
