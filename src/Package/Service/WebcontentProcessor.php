@@ -104,6 +104,72 @@ final readonly class WebcontentProcessor
     }
 
     /**
+     * Walk every resource reference in `$element` and return a message for each
+     * one that cannot be resolved against `$package`. A reference is valid when
+     * it is a `data:` URI, an `http(s)` URL, a trusted (library-provided) asset,
+     * or a file already present in the package. A relative path that is not in
+     * the package — or a path that escapes it (absolute or containing `..`) — is
+     * invalid. Read-only: unlike {@see self::process()} it resolves nothing.
+     *
+     * @return list<string>
+     */
+    public function findInvalidReferences(IXmlElement $element, QtiPackage $package): array
+    {
+        // The element itself may be a resource provider (many nodes are), so it
+        // is checked too, not just its descendants.
+        $invalid = [];
+        if ($element instanceof IQtiResourceProvider) {
+            $message = $this->invalidReferenceMessage($element, $package);
+            if ($message !== null) {
+                $invalid[] = $message;
+            }
+        }
+
+        return [...$invalid, ...$this->invalidReferencesInDescendants($element, $package)];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function invalidReferencesInDescendants(IXmlElement $element, QtiPackage $package): array
+    {
+        $invalid = [];
+        foreach ($element->children() as $child) {
+            if ($child instanceof IQtiResourceProvider) {
+                $message = $this->invalidReferenceMessage($child, $package);
+                if ($message !== null) {
+                    $invalid[] = $message;
+                }
+            }
+            if ($child instanceof IXmlElement) {
+                $invalid = [...$invalid, ...$this->invalidReferencesInDescendants($child, $package)];
+            }
+        }
+
+        return $invalid;
+    }
+
+    private function invalidReferenceMessage(IQtiResourceProvider $provider, QtiPackage $package): ?string
+    {
+        $source = $provider->getSource();
+        if ($source === null || $source === '' || str_starts_with($source, 'data:')) {
+            return null;
+        }
+        if ($package->hasFile($source)
+            || preg_match('~^https?://~i', $source) === 1
+            || $provider->isTrustedSource()
+        ) {
+            return null;
+        }
+
+        if (str_starts_with($source, '/') || preg_match('~(^|/)\.\.(/|$)~', $source) === 1) {
+            return sprintf('References a path outside the package: "%s"', $source);
+        }
+
+        return sprintf('References a resource that is not present in the package: "%s"', $source);
+    }
+
+    /**
      * The identifiers already taken for the run: those of the webcontent
      * gathered so far this pass plus every resource already in the source
      * package. Feeding these to the generator keeps a new media file from being

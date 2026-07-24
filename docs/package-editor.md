@@ -176,6 +176,21 @@ $parsed = $qtiClient->getAssessmentItemParser()->parseFromString($itemXml);
 $editor->updateItem($package, $parsed->item);
 ```
 
+## Resource references are validated on add and update
+
+When an item is added or updated, every resource reference in its content
+(image `src`, `<source>` `srcset`, …) is checked against the package **before
+anything is written**. A reference is valid when it points to a file already in
+the package (such as one added with `addResource`), a `data:` URI, an `http(s)`
+URL, or a trusted library asset. A reference to a resource that is not in the
+package — or a path that escapes it (absolute, or containing `..`) — throws
+`InvalidResourceReferenceException`; the edit is rejected and the package is left
+untouched. The exception lists every offending reference (`validationErrors()`),
+so a caller such as the editor backend can report exactly which media are
+missing. For accepted references the item's manifest dependencies are
+reconciled automatically: newly referenced resources are linked and references
+the item dropped are unlinked.
+
 ## Removing an item
 
 ```php
@@ -235,6 +250,7 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 | Unknown `$testId`, or updating/removing a non-existent item | `Qti3\Shared\Exception\ResourceNotFoundException` |
 | Adding an item whose identifier already exists in the package | `Qti3\AssessmentTest\Exception\InvalidAssessmentTestException` |
 | Reorder list that does not match the items in the test | `Qti3\AssessmentTest\Exception\InvalidItemOrderException` |
+| Adding/updating an item whose content references a resource not in the package (or a path outside it) | `Qti3\Package\Exception\InvalidResourceReferenceException` |
 
 A construct the model cannot hold (outcome processing, test feedback, rubric
 blocks, nested sections, a template declaration, an unconsumed attribute, ...)
