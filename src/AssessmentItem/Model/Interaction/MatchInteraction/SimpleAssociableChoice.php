@@ -17,7 +17,7 @@ class SimpleAssociableChoice extends AbstractBaseSequenceElement
         public ?int $matchMin = null,
         public bool $fixed = false,
         public ?string $templateIdentifier = null,
-        public ?string $showHide = null,
+        public string $showHide = 'show',
         public ?string $matchGroup = null,
         BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {

@@ -36,7 +36,7 @@ class SimpleAssociableChoiceTest extends TestCase
             'match-min' => null,
             'fixed' => null,
             'template-identifier' => null,
-            'show-hide' => null,
+            'show-hide' => 'show',
             'match-group' => null,
         ];
 

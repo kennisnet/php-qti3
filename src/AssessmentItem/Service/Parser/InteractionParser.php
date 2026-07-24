@@ -328,7 +328,7 @@ class InteractionParser extends AbstractParser
             $this->intAttributeOrNull($element, 'match-min'),
             strtolower($element->getAttribute('fixed')) === 'true',
             $element->getAttribute('template-identifier') ?: null,
-            $element->getAttribute('show-hide') ?: null,
+            $element->getAttribute('show-hide') ?: 'show',
             $element->getAttribute('match-group') ?: null,
             $shared,
         );
