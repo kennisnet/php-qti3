@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\SharedAttributes;
 
@@ -13,7 +13,7 @@ use Qti3\Shared\Model\SharedAttributes;
  * content that labels the interaction. It carries no attributes of its own
  * beyond the shared ones.
  */
-class Label extends AbstractInteractionElement
+class Label extends AbstractSharedAttributeElement
 {
     public function __construct(
         public ContentNodeCollection $content,

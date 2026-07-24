@@ -17,6 +17,62 @@ abstract class AbstractParser
      */
     protected const array SHARED_GLOBAL_ATTRIBUTES = ['id', 'class', 'xml:lang', 'label', 'dir'];
 
+    /**
+     * The ARIA attributes enumerated by ARIABaseDType in the QTI 3.0 ASI schema
+     * (imsqti_asiv3p0_v1p0.xsd). `aria-*` attributes outside this set are not
+     * spec-permitted and are dropped rather than carried through.
+     *
+     * @var list<string>
+     */
+    protected const array ARIA_ATTRIBUTES = [
+        'aria-activedescendant',
+        'aria-atomic',
+        'aria-autocomplete',
+        'aria-busy',
+        'aria-checked',
+        'aria-colcount',
+        'aria-colindex',
+        'aria-colspan',
+        'aria-controls',
+        'aria-current',
+        'aria-describedby',
+        'aria-details',
+        'aria-disabled',
+        'aria-errormessage',
+        'aria-expanded',
+        'aria-flowto',
+        'aria-haspopup',
+        'aria-hidden',
+        'aria-invalid',
+        'aria-keyshortcuts',
+        'aria-label',
+        'aria-labelledby',
+        'aria-level',
+        'aria-live',
+        'aria-modal',
+        'aria-multiline',
+        'aria-multiselectable',
+        'aria-orientation',
+        'aria-owns',
+        'aria-placeholder',
+        'aria-posinset',
+        'aria-pressed',
+        'aria-readonly',
+        'aria-relevant',
+        'aria-required',
+        'aria-roledescription',
+        'aria-rowcount',
+        'aria-rowindex',
+        'aria-rowspan',
+        'aria-selected',
+        'aria-setsize',
+        'aria-sort',
+        'aria-valuemax',
+        'aria-valuemin',
+        'aria-valuenow',
+        'aria-valuetext',
+    ];
+
     protected function validateTag(DOMElement|DOMNode|null $element, string $tagName): void
     {
         if (!$element instanceof DOMElement) {
@@ -77,8 +133,10 @@ abstract class AbstractParser
                 continue;
             }
             if ($allowAria && str_starts_with($name, 'aria-')) {
-                $aria[$name] = $value;
-                continue;
+                if (in_array($name, self::ARIA_ATTRIBUTES, true)) {
+                    $aria[$name] = $value; // enumerated by ARIABaseDType
+                }
+                continue; // unknown aria-* is not spec-permitted: drop it
             }
             if (!in_array($name, $allowedGlobals, true)) {
                 continue; // not permitted by the spec for this element: drop it

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\MatchInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 
@@ -12,7 +12,7 @@ use Qti3\AssessmentItem\Model\Interaction\Prompt;
  * The match interaction presents two sets of choices and requires the candidate
  * to create associations between them.
  */
-class MatchInteraction extends AbstractInteractionElement
+class MatchInteraction extends AbstractSharedAttributeElement
 {
     public function __construct(
         public SimpleMatchSet $simpleMatchSet1,

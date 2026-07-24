@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
@@ -14,7 +14,7 @@ use Qti3\Shared\Model\ContentNodeCollection;
  * as selectable runs of text embedded within a surrounding
  * context, such as a simple passage of text.
  */
-class HottextInteraction extends AbstractInteractionElement
+class HottextInteraction extends AbstractSharedAttributeElement
 {
     public function __construct(
         public int $maxChoices,

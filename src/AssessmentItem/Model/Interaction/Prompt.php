@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction;
 
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\SharedAttributes;
 
-class Prompt extends AbstractInteractionElement
+class Prompt extends AbstractSharedAttributeElement
 {
     public function __construct(
         public ContentNodeCollection $content,

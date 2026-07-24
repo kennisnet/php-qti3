@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\SelectPointInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\Shared\Model\HTMLTag;
@@ -12,7 +12,7 @@ use Qti3\Shared\Model\HTMLTag;
 /**
  * The select point interaction requires the candidate to select points on an image.
  */
-class SelectPointInteraction extends AbstractInteractionElement
+class SelectPointInteraction extends AbstractSharedAttributeElement
 {
     public function __construct(
         public HTMLTag $image,

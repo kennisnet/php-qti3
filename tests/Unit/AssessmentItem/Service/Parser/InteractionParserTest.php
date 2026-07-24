@@ -333,6 +333,23 @@ class InteractionParserTest extends TestCase
     }
 
     #[Test]
+    public function dropsAriaAttributesNotEnumeratedByTheSchema(): void
+    {
+        // aria-label is enumerated by ARIABaseDType; aria-foo is not and must be dropped.
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE"
+                aria-label="keep me" aria-foo="drop me">
+                <qti-inline-choice identifier="A">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertSame(['aria-label' => 'keep me'], $result->ariaAttributes);
+        $this->assertArrayNotHasKey('aria-foo', $result->ariaAttributes);
+    }
+
+    #[Test]
     public function dropsAriaAndRoleOnElementsThatDoNotAllowThem(): void
     {
         // qti-simple-match-set only permits id (+ data-*): it does not extend the ARIA base.

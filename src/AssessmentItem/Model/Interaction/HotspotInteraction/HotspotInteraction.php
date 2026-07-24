@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\HotspotInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\HTMLTag;
 
 /**
  * The hotspot interaction allows a candidate to supply hotspots on an image for a response.
  */
-class HotspotInteraction extends AbstractInteractionElement
+class HotspotInteraction extends AbstractSharedAttributeElement
 {
     /**
      * @param array<int,HotspotChoice> $choices

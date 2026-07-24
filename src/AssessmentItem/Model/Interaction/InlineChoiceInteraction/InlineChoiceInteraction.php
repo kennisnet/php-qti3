@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\QtiElement;
 
@@ -13,7 +13,7 @@ use Qti3\Shared\Model\QtiElement;
  * of choices to the candidate inline, embedded in a surrounding run of content,
  * from which a single choice must be selected (typically rendered as a drop-down).
  */
-class InlineChoiceInteraction extends AbstractInteractionElement
+class InlineChoiceInteraction extends AbstractSharedAttributeElement
 {
     /**
      * @param array<int,InlineChoice> $choices

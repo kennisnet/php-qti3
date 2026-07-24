@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\Shared\Model\QtiElement;
@@ -12,7 +12,7 @@ use Qti3\Shared\Model\QtiElement;
 /**
  * The extended text interaction allows a candidate to supply a text string for a response.
  */
-class ExtendedTextInteraction extends AbstractInteractionElement
+class ExtendedTextInteraction extends AbstractSharedAttributeElement
 {
     public function __construct(
         public string $responseIdentifier = 'RESPONSE',

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\AssessmentItem\Model\ItemBody;
@@ -16,7 +16,7 @@ use InvalidArgumentException;
 /**
  * The gap match interaction requires the candidate to match items in one list with items in another list.
  */
-final class GapMatchInteraction extends AbstractInteractionElement
+final class GapMatchInteraction extends AbstractSharedAttributeElement
 {
     /**
      * @var array<int,string>

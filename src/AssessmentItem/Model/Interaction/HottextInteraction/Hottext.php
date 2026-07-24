@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-class Hottext extends AbstractInteractionElement
+class Hottext extends AbstractSharedAttributeElement
 {
     public function __construct(
         public string $identifier,

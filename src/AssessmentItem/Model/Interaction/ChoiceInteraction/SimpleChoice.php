@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction;
 
 use Qti3\AssessmentItem\Model\Feedback\FeedbackInline;
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-class SimpleChoice extends AbstractInteractionElement
+class SimpleChoice extends AbstractSharedAttributeElement
 {
     public function __construct(
         public string $identifier,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\Orientation;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
@@ -13,7 +13,7 @@ use Qti3\Shared\Model\QtiElement;
 /**
  * The choice interaction allows a candidate to supply a response by selecting one or more choices from a list.
  */
-class ChoiceInteraction extends AbstractInteractionElement
+class ChoiceInteraction extends AbstractSharedAttributeElement
 {
     /**
      * @param array<int,SimpleChoice> $choices

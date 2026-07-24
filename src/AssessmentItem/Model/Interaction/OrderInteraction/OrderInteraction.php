@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\OrderInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\SimpleChoice;
 use Qti3\Shared\Model\SharedAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
@@ -12,7 +12,7 @@ use Qti3\AssessmentItem\Model\Interaction\Prompt;
 /**
  * The order interaction requires the candidate to reorder a set of choices.
  */
-class OrderInteraction extends AbstractInteractionElement
+class OrderInteraction extends AbstractSharedAttributeElement
 {
     /**
      * @param array<int,SimpleChoice> $choices

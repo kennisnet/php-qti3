@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction;
 
-use Qti3\AssessmentItem\Model\Interaction\AbstractInteractionElement;
+use Qti3\Shared\Model\AbstractSharedAttributeElement;
 use Qti3\Shared\Model\SharedAttributes;
 
 /**
  * The text entry interaction allows a candidate to supply a text string for a response.
  */
-class TextEntryInteraction extends AbstractInteractionElement
+class TextEntryInteraction extends AbstractSharedAttributeElement
 {
     public function __construct(
         public string $responseIdentifier = 'RESPONSE',
