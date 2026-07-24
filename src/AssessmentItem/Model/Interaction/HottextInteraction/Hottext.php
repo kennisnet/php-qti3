@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\HottextInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-class Hottext extends AbstractSharedAttributeElement
+class Hottext extends AbstractBaseSequenceElement
 {
     public function __construct(
         public string $identifier,
         public ContentNodeCollection $content,
         public ?string $templateIdentifier = null,
         public string $showHide = 'show',
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -26,7 +26,7 @@ class Hottext extends AbstractSharedAttributeElement
             'identifier' => $this->identifier,
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

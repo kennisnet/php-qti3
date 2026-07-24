@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\OrderInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
 use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\SimpleChoice;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 
 /**
  * The order interaction requires the candidate to reorder a set of choices.
  */
-class OrderInteraction extends AbstractSharedAttributeElement
+class OrderInteraction extends AbstractBaseSequenceElement
 {
     /**
      * @param array<int,SimpleChoice> $choices
@@ -25,7 +25,7 @@ class OrderInteraction extends AbstractSharedAttributeElement
         public ?Prompt $prompt = null,
         public ?int $minChoices = null,
         public ?int $maxChoices = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -38,7 +38,7 @@ class OrderInteraction extends AbstractSharedAttributeElement
             'shuffle' => $this->shuffle === null ? null : ($this->shuffle ? 'true' : 'false'),
             'min-choices' => $this->minChoices === null ? null : (string) $this->minChoices,
             'max-choices' => $this->maxChoices === null ? null : (string) $this->maxChoices,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

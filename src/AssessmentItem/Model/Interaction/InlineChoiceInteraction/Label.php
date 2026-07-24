@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
 use Qti3\Shared\Model\ContentNodeCollection;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 
 /**
  * The optional qti-label of an {@see InlineChoiceInteraction}: a run of inline
  * content that labels the interaction. It carries no attributes of its own
  * beyond the shared ones.
  */
-class Label extends AbstractSharedAttributeElement
+class Label extends AbstractBaseSequenceElement
 {
     public function __construct(
         public ContentNodeCollection $content,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -25,7 +25,7 @@ class Label extends AbstractSharedAttributeElement
     public function attributes(): array
     {
         return [
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

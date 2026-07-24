@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-final class GapText extends AbstractSharedAttributeElement
+final class GapText extends AbstractBaseSequenceElement
 {
     public function __construct(
         public readonly string $identifier,
@@ -19,7 +19,7 @@ final class GapText extends AbstractSharedAttributeElement
         //	Identifier of a template variable used to control the visibility of the qti-gap-text
         public readonly ?string $templateIdentifier = null,
         public readonly string $showHide = 'show',
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -33,7 +33,7 @@ final class GapText extends AbstractSharedAttributeElement
             'match-group' => $this->matchGroup,
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

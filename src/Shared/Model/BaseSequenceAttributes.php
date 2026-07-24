@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Qti3\Shared\Model;
 
 /**
- * The attributes the QTI base types share across body, interaction and choice
- * elements: the HTML-ish global attributes (id, class, xml:lang, label, dir),
- * the WAI-ARIA role, and the two open attribute families (aria-* and the data-*
- * extension attributes) as name => value maps.
+ * The attribute set carried by the QTI base type `BaseSequenceDType` (see the
+ * bundled ASI schema `imsqti_asiv3p0_v1p0.xsd`): the HTML-ish global attributes
+ * (id, class, xml:lang, label, dir), the WAI-ARIA role, and the two open
+ * attribute families (aria-* and the data-* extension attributes) as
+ * name => value maps.
  *
- * These are not specific to any one element kind; they come from the shared
- * base types (ARIABase, BaseSequence, ...) that sit under most of the schema.
+ * `BaseSequence` extends `ARIABase` (role + aria-*) and adds the globals plus
+ * the data-* extension family, so it is the shared anchor most body,
+ * interaction and choice elements sit under.
  */
-final readonly class SharedAttributes
+final readonly class BaseSequenceAttributes
 {
     /**
      * @param array<string,string> $ariaAttributes aria-* attributes, verbatim

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\MatchInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-class SimpleAssociableChoice extends AbstractSharedAttributeElement
+class SimpleAssociableChoice extends AbstractBaseSequenceElement
 {
     public function __construct(
         public string $identifier,
@@ -19,7 +19,7 @@ class SimpleAssociableChoice extends AbstractSharedAttributeElement
         public ?string $templateIdentifier = null,
         public ?string $showHide = null,
         public ?string $matchGroup = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -34,7 +34,7 @@ class SimpleAssociableChoice extends AbstractSharedAttributeElement
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
             'match-group' => $this->matchGroup,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

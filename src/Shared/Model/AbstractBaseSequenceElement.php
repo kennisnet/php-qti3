@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Qti3\Shared\Model;
 
 /**
- * Base for any QTI element that carries the shared attribute set — the
+ * Base for any QTI element that carries the `BaseSequence` attribute set — the
  * interactions, their choices/gaps/prompts/labels, and (in principle) any other
  * body element the QTI base types sit under.
  *
- * It accepts a single {@see SharedAttributes} value object and unpacks it into
+ * It accepts a single {@see BaseSequenceAttributes} value object and unpacks it into
  * individual typed, readonly properties, so every element exposes e.g.
  * `$element->id`, `$element->class`, `$element->role` directly, plus the open
  * aria-* and data-* maps.
  *
  * The parser only fills the attributes the schema permits for a given element
- * (see {@see \Qti3\AssessmentItem\Service\Parser\AbstractParser::readSharedAttributes()});
+ * (see {@see \Qti3\AssessmentItem\Service\Parser\AbstractParser::readBaseSequenceAttributes()});
  * anything else is dropped, so an unsupported attribute is never carried on the
  * model nor re-emitted.
  */
-abstract class AbstractSharedAttributeElement extends QtiElement
+abstract class AbstractBaseSequenceElement extends QtiElement
 {
     public readonly ?string $id;
 
@@ -39,7 +39,7 @@ abstract class AbstractSharedAttributeElement extends QtiElement
     /** @var array<string,string> */
     public readonly array $dataAttributes;
 
-    public function __construct(SharedAttributes $attributes = new SharedAttributes())
+    public function __construct(BaseSequenceAttributes $attributes = new BaseSequenceAttributes())
     {
         $this->id = $attributes->id;
         $this->class = $attributes->class;
@@ -52,13 +52,13 @@ abstract class AbstractSharedAttributeElement extends QtiElement
     }
 
     /**
-     * The shared attributes in serialization form, to be merged into the
+     * The base-sequence attributes in serialization form, to be merged into the
      * concrete element's own attributes(). Only attributes that are actually
      * set are returned, so absent ones are never emitted.
      *
      * @return array<string,string>
      */
-    protected function sharedAttributes(): array
+    protected function baseSequenceAttributes(): array
     {
         $named = array_filter([
             'id' => $this->id,

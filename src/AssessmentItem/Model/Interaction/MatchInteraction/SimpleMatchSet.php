@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\MatchInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 
-class SimpleMatchSet extends AbstractSharedAttributeElement
+class SimpleMatchSet extends AbstractBaseSequenceElement
 {
     /**
      * @param array<int,SimpleAssociableChoice> $choices
      */
     public function __construct(
         public array $choices,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -22,7 +22,7 @@ class SimpleMatchSet extends AbstractSharedAttributeElement
     public function attributes(): array
     {
         return [
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

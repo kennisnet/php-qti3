@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\Shared\Model\QtiElement;
 
 /**
  * The extended text interaction allows a candidate to supply a text string for a response.
  */
-class ExtendedTextInteraction extends AbstractSharedAttributeElement
+class ExtendedTextInteraction extends AbstractBaseSequenceElement
 {
     public function __construct(
         public string $responseIdentifier = 'RESPONSE',
@@ -26,7 +26,7 @@ class ExtendedTextInteraction extends AbstractSharedAttributeElement
         public ?int $minStrings = null,
         public ?int $expectedLines = null,
         public ?string $format = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -44,7 +44,7 @@ class ExtendedTextInteraction extends AbstractSharedAttributeElement
             'min-strings' => $this->minStrings === null ? null : (string) $this->minStrings,
             'expected-lines' => $this->expectedLines === null ? null : (string) $this->expectedLines,
             'format' => $this->format,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

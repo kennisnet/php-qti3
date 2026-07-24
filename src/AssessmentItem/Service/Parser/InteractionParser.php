@@ -75,7 +75,7 @@ class InteractionParser extends AbstractParser
             }
         }
 
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'shuffle', 'max-choices', 'min-choices', 'orientation']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'shuffle', 'max-choices', 'min-choices', 'orientation']);
 
         return new ChoiceInteraction($choices, $responseIdentifier, $prompt, $shuffle, $maxChoices, $minChoices, $orientation, $shared);
     }
@@ -96,7 +96,7 @@ class InteractionParser extends AbstractParser
             }
         }
 
-        $shared = $this->readSharedAttributes($element, ['identifier', 'fixed', 'template-identifier', 'show-hide']);
+        $shared = $this->readBaseSequenceAttributes($element, ['identifier', 'fixed', 'template-identifier', 'show-hide']);
 
         return new SimpleChoice($identifier, $content, $feedback, $fixed, $templateIdentifier, $showHide, $shared);
     }
@@ -117,7 +117,7 @@ class InteractionParser extends AbstractParser
     {
         $this->validateTag($element, TextEntryInteraction::qtiTagName());
         $responseIdentifier = $element->getAttribute('response-identifier') ?: 'RESPONSE';
-        $shared = $this->readSharedAttributes($element, [
+        $shared = $this->readBaseSequenceAttributes($element, [
             'response-identifier', 'base', 'string-identifier', 'expected-length',
             'pattern-mask', 'placeholder-text', 'format',
         ]);
@@ -139,7 +139,7 @@ class InteractionParser extends AbstractParser
         $this->validateTag($element, ExtendedTextInteraction::qtiTagName());
         $responseIdentifier = $element->getAttribute('response-identifier') ?: 'RESPONSE';
         $prompt = $this->findPrompt($element);
-        $shared = $this->readSharedAttributes($element, [
+        $shared = $this->readBaseSequenceAttributes($element, [
             'response-identifier', 'base', 'string-identifier', 'expected-length', 'pattern-mask',
             'placeholder-text', 'max-strings', 'min-strings', 'expected-lines', 'format',
         ]);
@@ -170,7 +170,7 @@ class InteractionParser extends AbstractParser
         $prompt = $this->findPrompt($element);
 
         $content = $this->parseContentChildren($element);
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'shuffle', 'max-associations', 'min-associations']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'shuffle', 'max-associations', 'min-associations']);
 
         return new GapMatchInteraction(
             $content,
@@ -205,7 +205,7 @@ class InteractionParser extends AbstractParser
             throw new ParseError('HotspotInteraction must contain an img element');
         }
 
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'max-choices', 'min-choices']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'max-choices', 'min-choices']);
 
         return new HotspotInteraction($image, $choices, $maxChoices, $responseIdentifier, $minChoices, $shared);
     }
@@ -215,7 +215,7 @@ class InteractionParser extends AbstractParser
         $shapeName = $element->getAttribute('shape') ?: 'default';
         $coords = $element->getAttribute('coords') ?: '';
         $shape = ShapeFactory::create($shapeName, $coords);
-        $shared = $this->readSharedAttributes($element, ['shape', 'coords', 'identifier', 'template-identifier', 'show-hide', 'hotspot-label']);
+        $shared = $this->readBaseSequenceAttributes($element, ['shape', 'coords', 'identifier', 'template-identifier', 'show-hide', 'hotspot-label']);
 
         return new HotspotChoice(
             $shape,
@@ -234,7 +234,7 @@ class InteractionParser extends AbstractParser
         $maxChoices = (int) ($element->getAttribute('max-choices') ?: '0');
         $minChoices = $this->intAttributeOrNull($element, 'min-choices');
         $content = $this->parseContentChildren($element);
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'max-choices', 'min-choices']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'max-choices', 'min-choices']);
 
         return new HottextInteraction($maxChoices, $content, $responseIdentifier, $minChoices, $shared);
     }
@@ -254,11 +254,11 @@ class InteractionParser extends AbstractParser
                 $choices[] = $this->parseInlineChoice($child);
             }
             if ($child->nodeName === Label::qtiTagName()) {
-                $label = new Label($this->parseContentChildren($child), $this->readSharedAttributes($child, []));
+                $label = new Label($this->parseContentChildren($child), $this->readBaseSequenceAttributes($child, []));
             }
         }
 
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'shuffle', 'required', 'min-choices']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'shuffle', 'required', 'min-choices']);
 
         return new InlineChoiceInteraction($choices, $responseIdentifier, $shuffle, $required, $minChoices, $label, $shared);
     }
@@ -271,7 +271,7 @@ class InteractionParser extends AbstractParser
         $templateIdentifier = $element->getAttribute('template-identifier') ?: null;
         $showHide = $element->getAttribute('show-hide') ?: 'show';
         $content = $this->parseContentChildren($element);
-        $shared = $this->readSharedAttributes($element, ['identifier', 'fixed', 'template-identifier', 'show-hide']);
+        $shared = $this->readBaseSequenceAttributes($element, ['identifier', 'fixed', 'template-identifier', 'show-hide']);
 
         return new InlineChoice($identifier, $content, $fixed, $templateIdentifier, $showHide, $shared);
     }
@@ -294,7 +294,7 @@ class InteractionParser extends AbstractParser
         $set1 = $sets[0] ?? new SimpleMatchSet([]);
         $set2 = $sets[1] ?? new SimpleMatchSet([]);
 
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'shuffle', 'max-associations', 'min-associations']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'shuffle', 'max-associations', 'min-associations']);
 
         return new MatchInteraction($set1, $set2, $prompt, $responseIdentifier, $shuffle, $maxAssociations, $minAssociations, $shared);
     }
@@ -310,7 +310,7 @@ class InteractionParser extends AbstractParser
         }
 
         // A qti-simple-match-set only permits id (plus data-*); it does not extend the ARIA base.
-        $shared = $this->readSharedAttributes($element, [], ['id'], allowAria: false);
+        $shared = $this->readBaseSequenceAttributes($element, [], ['id'], allowAria: false);
 
         return new SimpleMatchSet($choices, $shared);
     }
@@ -319,7 +319,7 @@ class InteractionParser extends AbstractParser
     {
         $matchMaxAttr = $element->getAttribute('match-max');
         $content = $this->parseContentChildren($element);
-        $shared = $this->readSharedAttributes($element, ['identifier', 'match-max', 'match-min', 'fixed', 'template-identifier', 'show-hide', 'match-group']);
+        $shared = $this->readBaseSequenceAttributes($element, ['identifier', 'match-max', 'match-min', 'fixed', 'template-identifier', 'show-hide', 'match-group']);
 
         return new SimpleAssociableChoice(
             $element->getAttribute('identifier'),
@@ -350,7 +350,7 @@ class InteractionParser extends AbstractParser
             }
         }
 
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'shuffle', 'orientation', 'min-choices', 'max-choices']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'shuffle', 'orientation', 'min-choices', 'max-choices']);
 
         return new OrderInteraction(
             $choices,
@@ -383,7 +383,7 @@ class InteractionParser extends AbstractParser
             throw new ParseError('SelectPointInteraction must contain an img element');
         }
 
-        $shared = $this->readSharedAttributes($element, ['response-identifier', 'max-choices', 'min-choices']);
+        $shared = $this->readBaseSequenceAttributes($element, ['response-identifier', 'max-choices', 'min-choices']);
 
         return new SelectPointInteraction($image, $maxChoices, $prompt, $responseIdentifier, $minChoices, $shared);
     }
@@ -393,7 +393,7 @@ class InteractionParser extends AbstractParser
         foreach ($this->getChildren($element) as $child) {
             if ($child->nodeName === Prompt::qtiTagName()) {
                 $content = $this->parseContentChildren($child);
-                return new Prompt($content, $this->readSharedAttributes($child, []));
+                return new Prompt($content, $this->readBaseSequenceAttributes($child, []));
             }
         }
         return null;
@@ -441,7 +441,7 @@ class InteractionParser extends AbstractParser
                     $this->parseContentChildren($node),
                     $node->getAttribute('template-identifier') ?: null,
                     $node->getAttribute('show-hide') ?: 'show',
-                    $this->readSharedAttributes($node, ['identifier', 'template-identifier', 'show-hide']),
+                    $this->readBaseSequenceAttributes($node, ['identifier', 'template-identifier', 'show-hide']),
                 );
             }
             if ($node->nodeName === Gap::qtiTagName()) {
@@ -451,7 +451,7 @@ class InteractionParser extends AbstractParser
                     $node->getAttribute('show-hide') ?: 'show',
                     $node->getAttribute('match-group') ?: null,
                     strtolower($node->getAttribute('required')) === 'true',
-                    $this->readSharedAttributes($node, ['identifier', 'template-identifier', 'show-hide', 'match-group', 'required']),
+                    $this->readBaseSequenceAttributes($node, ['identifier', 'template-identifier', 'show-hide', 'match-group', 'required']),
                 );
             }
             if ($node->nodeName === GapText::qtiTagName()) {
@@ -468,7 +468,7 @@ class InteractionParser extends AbstractParser
                     $matchGroup,
                     $templateIdentifier,
                     $showHide,
-                    $this->readSharedAttributes($node, ['identifier', 'match-max', 'match-min', 'match-group', 'template-identifier', 'show-hide']),
+                    $this->readBaseSequenceAttributes($node, ['identifier', 'match-max', 'match-min', 'match-group', 'template-identifier', 'show-hide']),
                 );
             }
             if ($node->nodeName === FeedbackInline::qtiTagName()) {

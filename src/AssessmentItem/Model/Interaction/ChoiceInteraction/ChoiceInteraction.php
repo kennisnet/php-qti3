@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\Orientation;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\Shared\Model\QtiElement;
@@ -13,7 +13,7 @@ use Qti3\Shared\Model\QtiElement;
 /**
  * The choice interaction allows a candidate to supply a response by selecting one or more choices from a list.
  */
-class ChoiceInteraction extends AbstractSharedAttributeElement
+class ChoiceInteraction extends AbstractBaseSequenceElement
 {
     /**
      * @param array<int,SimpleChoice> $choices
@@ -26,7 +26,7 @@ class ChoiceInteraction extends AbstractSharedAttributeElement
         public int $maxChoices = 1,
         public ?int $minChoices = null,
         public ?Orientation $orientation = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -39,7 +39,7 @@ class ChoiceInteraction extends AbstractSharedAttributeElement
             'max-choices' => (string) $this->maxChoices,
             'min-choices' => $this->minChoices === null ? null : (string) $this->minChoices,
             'orientation' => $this->orientation?->value,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

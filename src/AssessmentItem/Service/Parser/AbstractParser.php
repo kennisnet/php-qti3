@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service\Parser;
 
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Collection\StringCollection;
 use DOMAttr;
 use DOMElement;
@@ -103,12 +103,12 @@ abstract class AbstractParser
      * @param bool          $allowAria      whether role/aria-* are permitted (false for
      *                                      elements that do not extend the ARIA base)
      */
-    protected function readSharedAttributes(
+    protected function readBaseSequenceAttributes(
         DOMElement $element,
         array $consumed,
         array $allowedGlobals = self::SHARED_GLOBAL_ATTRIBUTES,
         bool $allowAria = true,
-    ): SharedAttributes {
+    ): BaseSequenceAttributes {
         $globals = ['id' => null, 'class' => null, 'xml:lang' => null, 'label' => null, 'dir' => null];
         $role = null;
         $aria = [];
@@ -144,7 +144,7 @@ abstract class AbstractParser
             $globals[$name] = $value;
         }
 
-        return new SharedAttributes(
+        return new BaseSequenceAttributes(
             $globals['id'],
             $globals['class'],
             $globals['xml:lang'],

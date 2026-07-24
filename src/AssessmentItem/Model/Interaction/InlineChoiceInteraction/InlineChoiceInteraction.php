@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Model\QtiElement;
 
 /**
@@ -13,7 +13,7 @@ use Qti3\Shared\Model\QtiElement;
  * of choices to the candidate inline, embedded in a surrounding run of content,
  * from which a single choice must be selected (typically rendered as a drop-down).
  */
-class InlineChoiceInteraction extends AbstractSharedAttributeElement
+class InlineChoiceInteraction extends AbstractBaseSequenceElement
 {
     /**
      * @param array<int,InlineChoice> $choices
@@ -26,7 +26,7 @@ class InlineChoiceInteraction extends AbstractSharedAttributeElement
         public ?int $minChoices = null,
         // The qti-label child element, distinct from the shared `label` attribute.
         public ?Label $labelElement = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -38,7 +38,7 @@ class InlineChoiceInteraction extends AbstractSharedAttributeElement
             'shuffle' => $this->shuffle ? 'true' : 'false',
             'required' => $this->required ? 'true' : null,
             'min-choices' => $this->minChoices === null ? null : (string) $this->minChoices,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

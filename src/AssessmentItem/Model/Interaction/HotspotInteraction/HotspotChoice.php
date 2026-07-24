@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\HotspotInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\AssessmentItem\Model\Shape\IShapeWithCoords;
 
-class HotspotChoice extends AbstractSharedAttributeElement
+class HotspotChoice extends AbstractBaseSequenceElement
 {
     public function __construct(
         public IShapeWithCoords $shape,
@@ -16,7 +16,7 @@ class HotspotChoice extends AbstractSharedAttributeElement
         public ?string $templateIdentifier = null,
         public string $showHide = 'show',
         public ?string $hotspotLabel = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -30,7 +30,7 @@ class HotspotChoice extends AbstractSharedAttributeElement
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
             'hotspot-label' => $this->hotspotLabel,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 
 /**
  * The text entry interaction allows a candidate to supply a text string for a response.
  */
-class TextEntryInteraction extends AbstractSharedAttributeElement
+class TextEntryInteraction extends AbstractBaseSequenceElement
 {
     public function __construct(
         public string $responseIdentifier = 'RESPONSE',
@@ -20,7 +20,7 @@ class TextEntryInteraction extends AbstractSharedAttributeElement
         public ?string $patternMask = null,
         public ?string $placeholderText = null,
         public ?string $format = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -35,7 +35,7 @@ class TextEntryInteraction extends AbstractSharedAttributeElement
             'pattern-mask' => $this->patternMask,
             'placeholder-text' => $this->placeholderText,
             'format' => $this->format,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 }

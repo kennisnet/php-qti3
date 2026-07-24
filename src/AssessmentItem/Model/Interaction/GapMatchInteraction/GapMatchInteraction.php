@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\AssessmentItem\Model\ItemBody;
 use Qti3\Shared\Model\ContentNodeCollection;
@@ -16,7 +16,7 @@ use InvalidArgumentException;
 /**
  * The gap match interaction requires the candidate to match items in one list with items in another list.
  */
-final class GapMatchInteraction extends AbstractSharedAttributeElement
+final class GapMatchInteraction extends AbstractBaseSequenceElement
 {
     /**
      * @var array<int,string>
@@ -30,7 +30,7 @@ final class GapMatchInteraction extends AbstractSharedAttributeElement
         public readonly bool $shuffle = false,
         public readonly ?int $maxAssociations = 0,
         public readonly ?int $minAssociations = null,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
 
@@ -51,7 +51,7 @@ final class GapMatchInteraction extends AbstractSharedAttributeElement
             'shuffle' => $this->shuffle ? 'true' : 'false',
             'max-associations' => $this->maxAssociations === null ? null : (string) $this->maxAssociations,
             'min-associations' => $this->minAssociations === null ? null : (string) $this->minAssociations,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

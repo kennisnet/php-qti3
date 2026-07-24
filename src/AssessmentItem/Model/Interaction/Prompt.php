@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
 use Qti3\Shared\Model\ContentNodeCollection;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 
-class Prompt extends AbstractSharedAttributeElement
+class Prompt extends AbstractBaseSequenceElement
 {
     public function __construct(
         public ContentNodeCollection $content,
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -20,7 +20,7 @@ class Prompt extends AbstractSharedAttributeElement
     public function attributes(): array
     {
         return [
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 

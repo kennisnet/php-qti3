@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
-use Qti3\Shared\Model\AbstractSharedAttributeElement;
-use Qti3\Shared\Model\SharedAttributes;
+use Qti3\Shared\Model\AbstractBaseSequenceElement;
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
 /**
  * A single selectable option (qti-inline-choice) within an
  * {@see InlineChoiceInteraction}.
  */
-class InlineChoice extends AbstractSharedAttributeElement
+class InlineChoice extends AbstractBaseSequenceElement
 {
     public function __construct(
         public string $identifier,
@@ -21,7 +21,7 @@ class InlineChoice extends AbstractSharedAttributeElement
         // Identifier of a template variable used to control the visibility of the choice.
         public ?string $templateIdentifier = null,
         public string $showHide = 'show',
-        SharedAttributes $attributes = new SharedAttributes(),
+        BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
     ) {
         parent::__construct($attributes);
     }
@@ -33,7 +33,7 @@ class InlineChoice extends AbstractSharedAttributeElement
             'fixed' => $this->fixed ? 'true' : null,
             'template-identifier' => $this->templateIdentifier,
             'show-hide' => $this->showHide,
-            ...$this->sharedAttributes(),
+            ...$this->baseSequenceAttributes(),
         ];
     }
 
