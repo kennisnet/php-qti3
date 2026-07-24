@@ -115,6 +115,24 @@ final readonly class WebcontentProcessor
      */
     public function findInvalidReferences(IXmlElement $element, QtiPackage $package): array
     {
+        // The element itself may be a resource provider (many nodes are), so it
+        // is checked too, not just its descendants.
+        $invalid = [];
+        if ($element instanceof IQtiResourceProvider) {
+            $message = $this->invalidReferenceMessage($element, $package);
+            if ($message !== null) {
+                $invalid[] = $message;
+            }
+        }
+
+        return [...$invalid, ...$this->invalidReferencesInDescendants($element, $package)];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function invalidReferencesInDescendants(IXmlElement $element, QtiPackage $package): array
+    {
         $invalid = [];
         foreach ($element->children() as $child) {
             if ($child instanceof IQtiResourceProvider) {
@@ -124,7 +142,7 @@ final readonly class WebcontentProcessor
                 }
             }
             if ($child instanceof IXmlElement) {
-                $invalid = [...$invalid, ...$this->findInvalidReferences($child, $package)];
+                $invalid = [...$invalid, ...$this->invalidReferencesInDescendants($child, $package)];
             }
         }
 

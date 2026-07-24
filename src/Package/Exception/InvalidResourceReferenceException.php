@@ -34,7 +34,7 @@ final class InvalidResourceReferenceException extends DomainError implements Has
 
     protected function errorMessage(): string
     {
-        return 'Item references one or more resources that are not present in the package';
+        return 'Item references one or more resources that cannot be resolved against the package';
     }
 
     public function validationErrors(): StringCollection

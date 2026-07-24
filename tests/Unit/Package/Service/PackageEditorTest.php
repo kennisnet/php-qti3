@@ -427,6 +427,9 @@ final class PackageEditorTest extends TestCase
             $this->editor->addItemToTest($package, self::TEST_ID, $this->item('ITEM001', imageSrc: '/etc/passwd'));
             $this->fail('Expected InvalidResourceReferenceException');
         } catch (InvalidResourceReferenceException $exception) {
+            // The top-level message covers both missing and outside-package
+            // cases; the specific reference is in the validation errors.
+            $this->assertStringContainsString('cannot be resolved against the package', $exception->getMessage());
             $this->assertStringContainsString('outside the package', implode("\n", $exception->validationErrors()->all()));
             // The rejected edit mutated nothing: no item, no manifest entry.
             $this->assertFalse($package->hasResource('ITEM001'));
