@@ -20,7 +20,7 @@
         "phpunit/phpunit": "^11.0"
     },
     "suggest": {
-        "league/flysystem": "Required for FlysystemPackageReader and FlysystemPackageWriter (^3.0)",
+        "league/flysystem": "Required for FlysystemPackageReader, FlysystemPackageWriter and FlysystemMediaSource (^3.0)",
         "symfony/http-client": "Required for PsrHttpClientResourceValidator and PsrHttpClientResourceDownloader (^7.0)"
     },
     "autoload": {

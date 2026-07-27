@@ -7,6 +7,7 @@ namespace Qti3\Package\Service;
 use Qti3\Package\Model\FileContent\ExternalFileContent;
 use Qti3\Package\Model\FileContent\IFileContent;
 use Qti3\Package\Model\FileContent\LocalFileContent;
+use Qti3\Package\Model\IMediaSource;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\QtiPackage;
@@ -39,14 +40,19 @@ final readonly class WebcontentProcessor
      * Collect the webcontent referenced by `$element` into `$webcontent` and
      * return the dependencies on them. Entries already in `$webcontent` (matched
      * by original path) are reused.
+     *
+     * Pass `$packageMediaSource` (the media files of the package's own source,
+     * addressed by package-relative path) to accept local file references for
+     * this operation; without it every local path is refused.
      */
     public function process(
         WebcontentCollection $webcontent,
         IXmlElement $element,
         StringCollection $warnings,
         ?QtiPackage $sourcePackage,
+        ?IMediaSource $packageMediaSource = null,
     ): ManifestResourceDependencyCollection {
-        $qtiResources = $this->getQtiResources($element, $warnings, $sourcePackage);
+        $qtiResources = $this->getQtiResources($element, $warnings, $sourcePackage, $packageMediaSource);
 
         $dependencies = new ManifestResourceDependencyCollection();
         foreach ($qtiResources as $qtiResource) {
@@ -56,7 +62,7 @@ final readonly class WebcontentProcessor
                     $qtiResource->originalPath,
                     $this->identifierGenerator->nextIdentifier($this->usedIdentifiers($webcontent, $sourcePackage)),
                     $qtiResource->relativePath . $qtiResource->filename,
-                    $this->contentFor($qtiResource->originalPath, $sourcePackage),
+                    $this->contentFor($qtiResource->originalPath, $sourcePackage, $packageMediaSource),
                     $qtiResource->isBinary,
                 );
                 $webcontent->add($webcontentFile);
@@ -79,10 +85,14 @@ final readonly class WebcontentProcessor
      *
      * @return array{0: ManifestResourceDependencyCollection, 1: list<Webcontent>}
      */
-    public function resolveNewWebcontent(QtiPackage $package, IXmlElement $element, StringCollection $warnings): array
-    {
+    public function resolveNewWebcontent(
+        QtiPackage $package,
+        IXmlElement $element,
+        StringCollection $warnings,
+        ?IMediaSource $packageMediaSource = null,
+    ): array {
         $webcontent = new WebcontentCollection();
-        $rawDependencies = $this->process($webcontent, $element, $warnings, $package);
+        $rawDependencies = $this->process($webcontent, $element, $warnings, $package, $packageMediaSource);
 
         $reusedIdentifiers = [];
         $newWebcontent = [];
@@ -107,49 +117,51 @@ final readonly class WebcontentProcessor
      * Walk every resource reference in `$element` and return a message for each
      * one that cannot be resolved against `$package`. A reference is valid when
      * it is a `data:` URI, an `http(s)` URL, a trusted (library-provided) asset,
-     * or a file already present in the package. A relative path that is not in
-     * the package — or a path that escapes it (absolute or containing `..`) — is
-     * invalid. Read-only: unlike {@see self::process()} it resolves nothing.
+     * a file already present in the package, or a file in `$packageMediaSource`
+     * (the media files of the package's own source). A relative path found in
+     * none of those — or a path that escapes the package (absolute or containing
+     * `..`) — is invalid. Read-only: unlike {@see self::process()} it resolves
+     * nothing.
      *
      * @return list<string>
      */
-    public function findInvalidReferences(IXmlElement $element, QtiPackage $package): array
+    public function findInvalidReferences(IXmlElement $element, QtiPackage $package, ?IMediaSource $packageMediaSource = null): array
     {
         // The element itself may be a resource provider (many nodes are), so it
         // is checked too, not just its descendants.
         $invalid = [];
         if ($element instanceof IQtiResourceProvider) {
-            $message = $this->invalidReferenceMessage($element, $package);
+            $message = $this->invalidReferenceMessage($element, $package, $packageMediaSource);
             if ($message !== null) {
                 $invalid[] = $message;
             }
         }
 
-        return [...$invalid, ...$this->invalidReferencesInDescendants($element, $package)];
+        return [...$invalid, ...$this->invalidReferencesInDescendants($element, $package, $packageMediaSource)];
     }
 
     /**
      * @return list<string>
      */
-    private function invalidReferencesInDescendants(IXmlElement $element, QtiPackage $package): array
+    private function invalidReferencesInDescendants(IXmlElement $element, QtiPackage $package, ?IMediaSource $packageMediaSource): array
     {
         $invalid = [];
         foreach ($element->children() as $child) {
             if ($child instanceof IQtiResourceProvider) {
-                $message = $this->invalidReferenceMessage($child, $package);
+                $message = $this->invalidReferenceMessage($child, $package, $packageMediaSource);
                 if ($message !== null) {
                     $invalid[] = $message;
                 }
             }
             if ($child instanceof IXmlElement) {
-                $invalid = [...$invalid, ...$this->invalidReferencesInDescendants($child, $package)];
+                $invalid = [...$invalid, ...$this->invalidReferencesInDescendants($child, $package, $packageMediaSource)];
             }
         }
 
         return $invalid;
     }
 
-    private function invalidReferenceMessage(IQtiResourceProvider $provider, QtiPackage $package): ?string
+    private function invalidReferenceMessage(IQtiResourceProvider $provider, QtiPackage $package, ?IMediaSource $packageMediaSource): ?string
     {
         $source = $provider->getSource();
         if ($source === null || $source === '' || str_starts_with($source, 'data:')) {
@@ -158,6 +170,7 @@ final readonly class WebcontentProcessor
         if ($package->hasFile($source)
             || preg_match('~^https?://~i', $source) === 1
             || $provider->isTrustedSource()
+            || ($packageMediaSource?->hasFile($source) ?? false)
         ) {
             return null;
         }
@@ -204,20 +217,24 @@ final readonly class WebcontentProcessor
     /**
      * @return array<int,QtiResource>
      */
-    private function getQtiResources(IXmlElement $element, StringCollection $warnings, ?QtiPackage $sourcePackage): array
-    {
+    private function getQtiResources(
+        IXmlElement $element,
+        StringCollection $warnings,
+        ?QtiPackage $sourcePackage,
+        ?IMediaSource $packageMediaSource,
+    ): array {
         $resources = [];
 
         foreach ($element->children() as $child) {
             if ($child instanceof IQtiResourceProvider) {
-                $this->processResourceProvider($child, $warnings, $sourcePackage);
+                $this->processResourceProvider($child, $warnings, $sourcePackage, $packageMediaSource);
                 $resource = $child->getResource();
                 if ($resource !== null) {
                     $resources[] = $resource;
                 }
             }
             if ($child instanceof IXmlElement) {
-                $resources = [...$resources, ...$this->getQtiResources($child, $warnings, $sourcePackage)];
+                $resources = [...$resources, ...$this->getQtiResources($child, $warnings, $sourcePackage, $packageMediaSource)];
             }
         }
 
@@ -228,6 +245,7 @@ final readonly class WebcontentProcessor
         IQtiResourceProvider $resourceProvider,
         StringCollection $warnings,
         ?QtiPackage $sourcePackage,
+        ?IMediaSource $packageMediaSource,
     ): void {
         $source = $resourceProvider->getSource();
         if (!$source || str_starts_with($source, 'data:')) {
@@ -268,25 +286,29 @@ final readonly class WebcontentProcessor
             return;
         }
 
-        // Any other source is a local filesystem path. Only a library-provided
-        // (trusted) asset such as the default stylesheet may be read from disk;
-        // a local path coming from item content is refused so it can never read
-        // an arbitrary file (e.g. "/etc/passwd" or "../secret") into the package.
-        if (!$resourceProvider->isTrustedSource()) {
-            $warnings->add(sprintf('Refused local file reference "%s": only in-package files, data URIs and http(s) URLs are allowed', $source));
+        // Any other source is a local path. Only a library-provided (trusted)
+        // asset such as the default stylesheet, or a file in the media source
+        // of the package being built, may be read; any other local path coming
+        // from item content is refused so it can never read an arbitrary file
+        // (e.g. "/etc/passwd" or "../secret") into the package.
+        if (!$resourceProvider->isTrustedSource() && !($packageMediaSource?->hasFile($source) ?? false)) {
+            $warnings->add(sprintf('Refused local file reference "%s": only in-package files, package media, data URIs and http(s) URLs are allowed', $source));
             return;
         }
 
         $resourceProvider->setResource($resource);
     }
 
-    private function contentFor(string $originalPath, ?QtiPackage $sourcePackage): IFileContent
+    private function contentFor(string $originalPath, ?QtiPackage $sourcePackage, ?IMediaSource $packageMediaSource): IFileContent
     {
         if ($sourcePackage?->hasFile($originalPath)) {
             return $sourcePackage->getFile($originalPath)->getContent();
         }
         if (preg_match('~^https?://~i', $originalPath) === 1) {
             return new ExternalFileContent($originalPath, $this->resourceDownloader);
+        }
+        if ($packageMediaSource?->hasFile($originalPath)) {
+            return $packageMediaSource->getFileContent($originalPath);
         }
 
         return new LocalFileContent($originalPath);

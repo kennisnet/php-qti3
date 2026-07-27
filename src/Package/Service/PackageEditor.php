@@ -19,6 +19,7 @@ use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidQtiPackageException;
 use Qti3\Package\Exception\InvalidResourceReferenceException;
 use Qti3\Package\Model\FileContent\IFileContent;
+use Qti3\Package\Model\IMediaSource;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
@@ -100,9 +101,20 @@ final readonly class PackageEditor
      * `$identifier` to assign one yourself. Position -1 appends; a zero-based
      * position inserts at that index in the section. The result carries any
      * warnings raised while re-parsing the test being edited.
+     *
+     * Pass `$packageMediaSource` (the media files of the package's own source,
+     * addressed by package-relative path) to accept local file references in
+     * the item content for this operation; without it every local path not
+     * already in the package is refused.
      */
-    public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, ?string $identifier = null, int $position = -1): EditResult
-    {
+    public function addItemToTest(
+        QtiPackage $package,
+        string $testId,
+        AssessmentItem $item,
+        ?string $identifier = null,
+        int $position = -1,
+        ?IMediaSource $packageMediaSource = null,
+    ): EditResult {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
         $parsed = $this->buildTest($package, $testId);
         $test = $parsed->test;
@@ -113,12 +125,12 @@ final readonly class PackageEditor
 
         // Every resource the item references must resolve against the package
         // before anything is mutated; an unresolvable reference fails the edit.
-        $this->assertResourceReferencesResolve($package, $item);
+        $this->assertResourceReferencesResolve($package, $item, $packageMediaSource);
 
         // Media-resolution warnings join the test-parse warnings: both surface
         // data loss the caller must see (a refused reference leaves a dangling
         // src in the regenerated item).
-        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, $parsed->warnings);
+        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, $parsed->warnings, $packageMediaSource);
         $itemResource = $this->itemResourceBuilder->build($identifier, $item, $dependencies, $identifier . '.xml');
 
         $test->addItemRef(new AssessmentItemRef($item->identifier(), $identifier . '.xml'), $position);
@@ -138,26 +150,26 @@ final readonly class PackageEditor
      * constructs. (Warnings about the new item's own content, if any, come from
      * parsing it — see {@see \Qti3\AssessmentItem\Service\Parser\ItemParseResult}.)
      */
-    public function updateItem(QtiPackage $package, AssessmentItem $item): EditResult
+    public function updateItem(QtiPackage $package, AssessmentItem $item, ?IMediaSource $packageMediaSource = null): EditResult
     {
         $identifier = (string) $item->identifier();
         $itemResource = $package->getResource($identifier, ResourceType::ASSESSMENT_ITEM);
 
         // Every resource the item references must resolve against the package
         // before anything is mutated; an unresolvable reference fails the edit.
-        $this->assertResourceReferencesResolve($package, $item);
+        $this->assertResourceReferencesResolve($package, $item, $packageMediaSource);
 
         // Which media the item referenced *before* this edit, derived from the
         // current content by the same scan that produces the new dependencies.
         // A dependency to a non-media resource (e.g. a metadata resource) never
         // shows up here, so the reconcile below leaves it untouched.
-        $previousMediaDependencies = $this->mediaDependenciesOf($package, $itemResource);
+        $previousMediaDependencies = $this->mediaDependenciesOf($package, $itemResource, $packageMediaSource);
 
         // Collect media-resolution warnings so they reach the EditResult: a
         // refused reference is dropped from the package while the regenerated
         // item XML keeps its original src, which is data loss the caller must see.
         $warnings = new StringCollection();
-        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, $warnings);
+        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, $warnings, $packageMediaSource);
 
         $rebuilt = $this->itemResourceBuilder->build($identifier, $item, $dependencies, $itemResource->href);
         $this->getXmlFileFromResource($itemResource)->replaceContent((string) $rebuilt->getMainFile());
@@ -336,8 +348,11 @@ final readonly class PackageEditor
      * Returns an empty collection when the content cannot be parsed, degrading
      * to add-only linking rather than removing dependencies on a guess.
      */
-    private function mediaDependenciesOf(QtiPackage $package, Resource $itemResource): ManifestResourceDependencyCollection
-    {
+    private function mediaDependenciesOf(
+        QtiPackage $package,
+        Resource $itemResource,
+        ?IMediaSource $packageMediaSource,
+    ): ManifestResourceDependencyCollection {
         try {
             $item = $this->assessmentItemParser->parse($this->getXmlFileFromResource($itemResource)->getDocumentElement())->item;
         } catch (ParseError | InvalidArgumentException | ValueError) {
@@ -347,7 +362,7 @@ final readonly class PackageEditor
         // Re-scanning the *previous* content only to diff dependencies; its
         // warnings were already surfaced when that content was added, so they
         // are discarded here.
-        [$dependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, new StringCollection());
+        [$dependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $item, new StringCollection(), $packageMediaSource);
 
         return $dependencies;
     }

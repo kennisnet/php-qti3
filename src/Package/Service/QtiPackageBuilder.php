@@ -6,6 +6,7 @@ namespace Qti3\Package\Service;
 
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentTest\Model\AssessmentTest;
+use Qti3\Package\Model\IMediaSource;
 use Qti3\Package\Model\Manifest\ManifestResourceDependency;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\QtiPackage;
@@ -38,12 +39,18 @@ class QtiPackageBuilder
      * resources and their dependency on the test resource are copied, and the
      * test resource keeps its identifier.
      *
+     * Pass `$packageMediaSource` (the media files of this package's source,
+     * addressed by package-relative path) when the source content references
+     * media by local path: those files are read from the media source and
+     * included as webcontent; any other local path is refused with a warning.
+     *
      * @param array<int,AssessmentItem> $assessmentItems
      */
     public function buildForTest(
         AssessmentTest $assessmentTest,
         array $assessmentItems,
         ?QtiPackage $sourcePackage = null,
+        ?IMediaSource $packageMediaSource = null,
     ): QtiPackage {
         $assessmentTest->validateItems($assessmentItems);
 
@@ -52,7 +59,7 @@ class QtiPackageBuilder
         $warnings = new StringCollection();
         $webcontent = new WebcontentCollection();
 
-        $dependencies = $this->webcontentProcessor->process($webcontent, $assessmentTest, $warnings, $sourcePackage);
+        $dependencies = $this->webcontentProcessor->process($webcontent, $assessmentTest, $warnings, $sourcePackage, $packageMediaSource);
         foreach ($this->sourceMetadataDependencies($sourcePackage) as $metadataDependency) {
             $dependencies->add($metadataDependency);
         }
@@ -66,7 +73,7 @@ class QtiPackageBuilder
 
         foreach ($assessmentItems as $assessmentItem) {
             $itemRef = $assessmentTest->findItemRef($assessmentItem->identifier());
-            $dependencies = $this->webcontentProcessor->process($webcontent, $assessmentItem, $warnings, $sourcePackage);
+            $dependencies = $this->webcontentProcessor->process($webcontent, $assessmentItem, $warnings, $sourcePackage, $packageMediaSource);
 
             $resources->add($this->itemResourceBuilder->build(
                 (string) $itemRef->identifier,
