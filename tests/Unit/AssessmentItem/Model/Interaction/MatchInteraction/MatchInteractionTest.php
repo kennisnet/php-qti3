@@ -43,7 +43,7 @@ class MatchInteractionTest extends TestCase
             'response-identifier' => 'RESPONSE',
             'shuffle' => 'true',
             'max-associations' => '5',
-            'class' => null,
+            'min-associations' => null,
         ];
 
         $this->assertSame($expectedAttributes, $this->matchInteraction->attributes());

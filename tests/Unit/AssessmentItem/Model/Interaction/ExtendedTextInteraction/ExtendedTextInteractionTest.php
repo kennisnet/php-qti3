@@ -19,7 +19,18 @@ class ExtendedTextInteractionTest extends TestCase
         $interaction = new ExtendedTextInteraction();
 
         $this->assertEquals(
-            ['response-identifier' => 'RESPONSE'],
+            [
+                'response-identifier' => 'RESPONSE',
+                'base' => null,
+                'string-identifier' => null,
+                'expected-length' => null,
+                'pattern-mask' => null,
+                'placeholder-text' => null,
+                'max-strings' => null,
+                'min-strings' => null,
+                'expected-lines' => null,
+                'format' => null,
+            ],
             $interaction->attributes(),
         );
     }
@@ -30,7 +41,18 @@ class ExtendedTextInteractionTest extends TestCase
         $interaction = new ExtendedTextInteraction(responseIdentifier: 'CUSTOM_RESPONSE');
 
         $this->assertEquals(
-            ['response-identifier' => 'CUSTOM_RESPONSE'],
+            [
+                'response-identifier' => 'CUSTOM_RESPONSE',
+                'base' => null,
+                'string-identifier' => null,
+                'expected-length' => null,
+                'pattern-mask' => null,
+                'placeholder-text' => null,
+                'max-strings' => null,
+                'min-strings' => null,
+                'expected-lines' => null,
+                'format' => null,
+            ],
             $interaction->attributes(),
         );
     }

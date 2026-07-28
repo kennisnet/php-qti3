@@ -46,7 +46,6 @@ class GapMatchInteractionTest extends TestCase
             'shuffle' => 'false',
             'max-associations' => 0,
             'min-associations' => null,
-            'class' => null,
         ], $this->gapMatchInteraction->attributes());
 
         $this->assertInstanceOf(HTMLTag::class, $this->gapMatchInteraction->children()[3]);

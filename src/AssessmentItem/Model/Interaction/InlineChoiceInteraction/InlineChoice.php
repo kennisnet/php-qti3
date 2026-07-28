@@ -2,20 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction;
+namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
-use Qti3\AssessmentItem\Model\Feedback\FeedbackInline;
 use Qti3\Shared\Model\AbstractBaseSequenceElement;
 use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-class SimpleChoice extends AbstractBaseSequenceElement
+/**
+ * A single selectable option (qti-inline-choice) within an
+ * {@see InlineChoiceInteraction}.
+ */
+class InlineChoice extends AbstractBaseSequenceElement
 {
     public function __construct(
         public string $identifier,
         public ContentNodeCollection $content,
-        public ?FeedbackInline $feedbackInline = null,
         public bool $fixed = false,
+        // Identifier of a template variable used to control the visibility of the choice.
         public ?string $templateIdentifier = null,
         public string $showHide = 'show',
         BaseSequenceAttributes $attributes = new BaseSequenceAttributes(),
@@ -36,9 +39,6 @@ class SimpleChoice extends AbstractBaseSequenceElement
 
     public function children(): array
     {
-        return [
-            ...$this->content->all(),
-            $this->feedbackInline,
-        ];
+        return $this->content->all();
     }
 }

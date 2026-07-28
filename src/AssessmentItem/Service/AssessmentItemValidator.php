@@ -20,7 +20,8 @@ use RuntimeException;
  * {@see \Qti3\Package\Validator\ImsGlobalQtiSyntaxValidator}).
  *
  * Structural validation also works for interaction types the typed item parser
- * cannot handle (e.g. inline-choice), which is why it is string/DOM based.
+ * cannot handle (e.g. custom or upload interactions), which is why it is
+ * string/DOM based.
  */
 final readonly class AssessmentItemValidator implements IAssessmentItemValidator
 {

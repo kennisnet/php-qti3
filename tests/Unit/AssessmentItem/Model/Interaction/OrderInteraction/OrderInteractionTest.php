@@ -46,6 +46,8 @@ class OrderInteractionTest extends TestCase
             'response-identifier' => 'RESPONSE',
             'orientation' => 'horizontal',
             'shuffle' => 'true',
+            'min-choices' => null,
+            'max-choices' => null,
         ];
 
         $this->assertSame($expectedAttributes, $this->orderInteraction->attributes());

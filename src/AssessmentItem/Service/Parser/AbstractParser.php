@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service\Parser;
 
+use Qti3\Shared\Model\BaseSequenceAttributes;
 use Qti3\Shared\Collection\StringCollection;
 use DOMAttr;
 use DOMElement;
@@ -11,6 +12,67 @@ use DOMNode;
 
 abstract class AbstractParser
 {
+    /**
+     * @var list<string>
+     */
+    protected const array SHARED_GLOBAL_ATTRIBUTES = ['id', 'class', 'xml:lang', 'label', 'dir'];
+
+    /**
+     * The ARIA attributes enumerated by ARIABaseDType in the QTI 3.0 ASI schema
+     * (imsqti_asiv3p0_v1p0.xsd). `aria-*` attributes outside this set are not
+     * spec-permitted and are dropped rather than carried through.
+     *
+     * @var list<string>
+     */
+    protected const array ARIA_ATTRIBUTES = [
+        'aria-activedescendant',
+        'aria-atomic',
+        'aria-autocomplete',
+        'aria-busy',
+        'aria-checked',
+        'aria-colcount',
+        'aria-colindex',
+        'aria-colspan',
+        'aria-controls',
+        'aria-current',
+        'aria-describedby',
+        'aria-details',
+        'aria-disabled',
+        'aria-errormessage',
+        'aria-expanded',
+        'aria-flowto',
+        'aria-haspopup',
+        'aria-hidden',
+        'aria-invalid',
+        'aria-keyshortcuts',
+        'aria-label',
+        'aria-labelledby',
+        'aria-level',
+        'aria-live',
+        'aria-modal',
+        'aria-multiline',
+        'aria-multiselectable',
+        'aria-orientation',
+        'aria-owns',
+        'aria-placeholder',
+        'aria-posinset',
+        'aria-pressed',
+        'aria-readonly',
+        'aria-relevant',
+        'aria-required',
+        'aria-roledescription',
+        'aria-rowcount',
+        'aria-rowindex',
+        'aria-rowspan',
+        'aria-selected',
+        'aria-setsize',
+        'aria-sort',
+        'aria-valuemax',
+        'aria-valuemin',
+        'aria-valuenow',
+        'aria-valuetext',
+    ];
+
     protected function validateTag(DOMElement|DOMNode|null $element, string $tagName): void
     {
         if (!$element instanceof DOMElement) {
@@ -33,6 +95,65 @@ abstract class AbstractParser
         }
 
         return $children;
+    }
+
+    /**
+     * @param list<string> $consumed       element-specific attribute names already read
+     * @param list<string> $allowedGlobals HTML-ish global attribute names permitted here
+     * @param bool          $allowAria      whether role/aria-* are permitted (false for
+     *                                      elements that do not extend the ARIA base)
+     */
+    protected function readBaseSequenceAttributes(
+        DOMElement $element,
+        array $consumed,
+        array $allowedGlobals = self::SHARED_GLOBAL_ATTRIBUTES,
+        bool $allowAria = true,
+    ): BaseSequenceAttributes {
+        $globals = ['id' => null, 'class' => null, 'xml:lang' => null, 'label' => null, 'dir' => null];
+        $role = null;
+        $aria = [];
+        $data = [];
+
+        foreach ($element->attributes as $attribute) {
+            if (!$attribute instanceof DOMAttr || $this->isNamespaceAttribute($attribute)) {
+                continue;
+            }
+            $name = $attribute->nodeName;
+            $value = $attribute->nodeValue ?? '';
+
+            if (in_array($name, $consumed, true)) {
+                continue;
+            }
+            if (str_starts_with($name, 'data-')) {
+                $data[$name] = $value; // open extension family (dataExtension / xs:anyAttribute)
+                continue;
+            }
+            if ($allowAria && $name === 'role') {
+                $role = $value;
+                continue;
+            }
+            if ($allowAria && str_starts_with($name, 'aria-')) {
+                if (in_array($name, self::ARIA_ATTRIBUTES, true)) {
+                    $aria[$name] = $value; // enumerated by ARIABaseDType
+                }
+                continue; // unknown aria-* is not spec-permitted: drop it
+            }
+            if (!in_array($name, $allowedGlobals, true)) {
+                continue; // not permitted by the spec for this element: drop it
+            }
+            $globals[$name] = $value;
+        }
+
+        return new BaseSequenceAttributes(
+            $globals['id'],
+            $globals['class'],
+            $globals['xml:lang'],
+            $globals['label'],
+            $globals['dir'],
+            $role,
+            $aria,
+            $data,
+        );
     }
 
     /**
@@ -88,7 +209,7 @@ abstract class AbstractParser
         return '/' . implode('/', array_reverse($segments));
     }
 
-    private function isNamespaceAttribute(DOMAttr $attribute): bool
+    protected function isNamespaceAttribute(DOMAttr $attribute): bool
     {
         return $attribute->nodeName === 'xmlns'
             || str_starts_with($attribute->nodeName, 'xmlns:')

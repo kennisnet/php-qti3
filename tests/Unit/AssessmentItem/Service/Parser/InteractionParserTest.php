@@ -18,6 +18,8 @@ use Qti3\AssessmentItem\Model\Interaction\GapMatchInteraction\GapText;
 use Qti3\AssessmentItem\Model\Interaction\HotspotInteraction\HotspotInteraction;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\Hottext;
 use Qti3\AssessmentItem\Model\Interaction\HottextInteraction\HottextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction\InlineChoiceInteraction;
+use Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction\Label;
 use Qti3\AssessmentItem\Model\Interaction\MatchInteraction\MatchInteraction;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\OrderInteraction;
 use Qti3\AssessmentItem\Model\Interaction\OrderInteraction\Orientation;
@@ -227,6 +229,166 @@ class InteractionParserTest extends TestCase
         $this->assertSame('RESPONSE_HT', $result->responseIdentifier);
         $this->assertSame(2, $result->maxChoices);
         $this->assertGreaterThan(0, count($result->content));
+    }
+
+    #[Test]
+    public function parseInlineChoiceInteraction(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE_IC" shuffle="true" required="true" min-choices="1">
+                <qti-inline-choice identifier="G">gaseous</qti-inline-choice>
+                <qti-inline-choice identifier="L">liquid</qti-inline-choice>
+                <qti-inline-choice identifier="S">solid</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(InlineChoiceInteraction::class, $result);
+        $this->assertSame('RESPONSE_IC', $result->responseIdentifier);
+        $this->assertTrue($result->shuffle);
+        $this->assertTrue($result->required);
+        $this->assertSame(1, $result->minChoices);
+        $this->assertCount(3, $result->choices);
+        $this->assertSame('G', $result->choices[0]->identifier);
+        $this->assertInstanceOf(TextNode::class, $result->choices[0]->content->all()[0]);
+        $this->assertSame('gaseous', $result->choices[0]->content->all()[0]->content);
+        $this->assertSame('L', $result->choices[1]->identifier);
+        $this->assertSame('S', $result->choices[2]->identifier);
+    }
+
+    #[Test]
+    public function parseInlineChoiceInteractionDefaults(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction>
+                <qti-inline-choice identifier="A">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(InlineChoiceInteraction::class, $result);
+        $this->assertSame('RESPONSE', $result->responseIdentifier);
+        $this->assertFalse($result->shuffle);
+        $this->assertFalse($result->required);
+        $this->assertCount(1, $result->choices);
+        $choice = $result->choices[0];
+        $this->assertSame('A', $choice->identifier);
+        $this->assertFalse($choice->fixed);
+        $this->assertNull($choice->templateIdentifier);
+        $this->assertSame('show', $choice->showHide);
+    }
+
+    #[Test]
+    public function parseInlineChoiceInteractionWithLabel(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE">
+                <qti-label class="lbl">Choose one</qti-label>
+                <qti-inline-choice identifier="A">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(Label::class, $result->labelElement);
+        $this->assertSame('lbl', $result->labelElement->class);
+        $this->assertSame('Choose one', $result->labelElement->content->all()[0]->content);
+        // The label precedes the choices, matching the schema's child sequence.
+        $this->assertSame($result->labelElement, $result->children()[0]);
+        $this->assertCount(1, $result->choices);
+    }
+
+    #[Test]
+    public function parseInlineChoiceKeepsChoiceAttributes(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE">
+                <qti-inline-choice identifier="A" fixed="true" template-identifier="SHOW_A" show-hide="hide">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $choice = $result->choices[0];
+        $this->assertTrue($choice->fixed);
+        $this->assertSame('SHOW_A', $choice->templateIdentifier);
+        $this->assertSame('hide', $choice->showHide);
+    }
+
+    #[Test]
+    public function keepsSpecAllowedAttributesAndDropsDisallowedOnes(): void
+    {
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE" min-choices="1"
+                id="ic1" class="fancy" xml:lang="en" dir="ltr"
+                data-custom="x" aria-label="pick one" role="listbox"
+                not-a-real-attribute="drop-me">
+                <qti-inline-choice identifier="A" data-note="keep" bogus="drop">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        // Element-specific attributes are read into their own typed properties.
+        $this->assertSame(1, $result->minChoices);
+
+        // Shared globals become typed properties; role is typed; aria-*/data-* are maps.
+        $this->assertSame('ic1', $result->id);
+        $this->assertSame('fancy', $result->class);
+        $this->assertSame('en', $result->xmlLang);
+        $this->assertSame('ltr', $result->dir);
+        $this->assertSame('listbox', $result->role);
+        $this->assertSame(['aria-label' => 'pick one'], $result->ariaAttributes);
+        $this->assertSame(['data-custom' => 'x'], $result->dataAttributes);
+
+        // The unknown attribute is not permitted for this element and is dropped.
+        $this->assertArrayNotHasKey('not-a-real-attribute', $result->dataAttributes);
+        $this->assertArrayNotHasKey('not-a-real-attribute', $result->ariaAttributes);
+
+        // The same allowlisting applies to the child element.
+        $this->assertSame(['data-note' => 'keep'], $result->choices[0]->dataAttributes);
+    }
+
+    #[Test]
+    public function dropsAriaAttributesNotEnumeratedByTheSchema(): void
+    {
+        // aria-label is enumerated by ARIABaseDType; aria-foo is not and must be dropped.
+        $element = $this->loadElement('
+            <qti-inline-choice-interaction response-identifier="RESPONSE"
+                aria-label="keep me" aria-foo="drop me">
+                <qti-inline-choice identifier="A">Alpha</qti-inline-choice>
+            </qti-inline-choice-interaction>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertSame(['aria-label' => 'keep me'], $result->ariaAttributes);
+        $this->assertArrayNotHasKey('aria-foo', $result->ariaAttributes);
+    }
+
+    #[Test]
+    public function dropsAriaAndRoleOnElementsThatDoNotAllowThem(): void
+    {
+        // qti-simple-match-set only permits id (+ data-*): it does not extend the ARIA base.
+        $element = $this->loadElement('
+            <qti-match-interaction response-identifier="RESPONSE">
+                <qti-simple-match-set id="set1" role="list" aria-label="nope" data-x="y" foo="bar">
+                    <qti-simple-associable-choice identifier="S1" match-max="1">Source</qti-simple-associable-choice>
+                </qti-simple-match-set>
+                <qti-simple-match-set/>
+            </qti-match-interaction>
+        ');
+
+        $set = $this->parser->parse($element)->simpleMatchSet1;
+
+        $this->assertSame('set1', $set->id);
+        $this->assertSame(['data-x' => 'y'], $set->dataAttributes);
+        // role/aria-* are not permitted here, nor is the unknown attribute.
+        $this->assertNull($set->role);
+        $this->assertSame([], $set->ariaAttributes);
+        $this->assertArrayNotHasKey('foo', $set->dataAttributes);
     }
 
     #[Test]

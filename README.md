@@ -223,7 +223,7 @@ $outcomes = $itemState->outcomeSet->outcomes;
 
 ### Supported interactions
 
-The `AssessmentItem` parser supports exactly the interaction types listed below via the `InteractionParser` used by `ItemBodyParser`. Other QTI 3.0 interaction types (e.g. `qti-inline-choice-interaction`, `qti-associate-interaction`, `qti-slider-interaction`, `qti-media-interaction`, the graphic interactions) are **not** supported: parsing such an item throws a `ParseError`, and the item editor (UC-P6) refuses packages containing them.
+The `AssessmentItem` parser supports exactly the interaction types listed below via the `InteractionParser` used by `ItemBodyParser`. Other QTI 3.0 interaction types (e.g. `qti-associate-interaction`, `qti-slider-interaction`, `qti-media-interaction`, the graphic interactions) are **not** supported: parsing such an item throws a `ParseError`, and the item editor (UC-P6) refuses packages containing them.
 
 - `qti-choice-interaction`
 - `qti-text-entry-interaction`
@@ -231,6 +231,7 @@ The `AssessmentItem` parser supports exactly the interaction types listed below 
 - `qti-gap-match-interaction`
 - `qti-hotspot-interaction`
 - `qti-hottext-interaction`
+- `qti-inline-choice-interaction`
 - `qti-match-interaction`
 - `qti-order-interaction`
 - `qti-select-point-interaction`

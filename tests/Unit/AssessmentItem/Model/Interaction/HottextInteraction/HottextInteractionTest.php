@@ -29,6 +29,7 @@ class HottextInteractionTest extends TestCase
     {
         $expectedAttributes = [
             'max-choices' => '1',
+            'min-choices' => null,
             'response-identifier' => 'RESPONSE',
         ];
 

@@ -2,13 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Qti3\AssessmentItem\Model\Interaction;
+namespace Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction;
 
 use Qti3\Shared\Model\AbstractBaseSequenceElement;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\BaseSequenceAttributes;
 
-class Prompt extends AbstractBaseSequenceElement
+/**
+ * The optional qti-label of an {@see InlineChoiceInteraction}: a run of inline
+ * content that labels the interaction. It carries no attributes of its own
+ * beyond the shared ones.
+ */
+class Label extends AbstractBaseSequenceElement
 {
     public function __construct(
         public ContentNodeCollection $content,

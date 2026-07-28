@@ -11,6 +11,7 @@ use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
 use Qti3\AssessmentItem\Model\Feedback\Visibility;
 use Qti3\AssessmentItem\Model\Interaction\ChoiceInteraction\ChoiceInteraction;
 use Qti3\AssessmentItem\Model\Interaction\ExtendedTextInteraction\ExtendedTextInteraction;
+use Qti3\AssessmentItem\Model\Interaction\InlineChoiceInteraction\InlineChoiceInteraction;
 use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteraction;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseCondition;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
@@ -441,6 +442,80 @@ XML;
         $this->assertNotNull($second->responseProcessing);
         $this->assertCount(1, $second->responseProcessing->elements);
         $this->assertInstanceOf(ResponseCondition::class, $second->responseProcessing->elements[0]);
+    }
+
+    /**
+     * Verifies that an inline choice interaction embedded inside a paragraph
+     * survives a parse -> serialize -> re-parse cycle with its choices and
+     * attributes preserved. Inline interactions are nested within surrounding
+     * HTML content rather than sitting at item-body top level.
+     */
+    public function testSerializeItemWithInlineChoiceInteraction(): void
+    {
+        $xml = <<<XML
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
+                    identifier="inline-choice-001"
+                    title="Inline Choice Item"
+                    adaptive="false"
+                    time-dependent="false">
+    <qti-response-declaration identifier="RESPONSE" cardinality="single" base-type="identifier">
+        <qti-correct-response>
+            <qti-value>G</qti-value>
+        </qti-correct-response>
+    </qti-response-declaration>
+    <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float" />
+    <qti-item-body>
+        <p>Water vapour is in the
+            <qti-inline-choice-interaction response-identifier="RESPONSE" shuffle="true" required="true" min-choices="1"
+                class="dropdown" data-prompt="choose" not-allowed="dropped">
+                <qti-inline-choice identifier="G">gaseous</qti-inline-choice>
+                <qti-inline-choice identifier="L" fixed="true">liquid</qti-inline-choice>
+                <qti-inline-choice identifier="S">solid</qti-inline-choice>
+            </qti-inline-choice-interaction>
+            state.</p>
+    </qti-item-body>
+    <qti-response-processing template="https://www.imsglobal.org/question/qti_v3p0/rptemplates/match_correct" />
+</qti-assessment-item>
+XML;
+
+        $first = $this->parseItem($xml);
+        $serialized = $this->serializeItem($first);
+        $second = $this->parseItem($serialized);
+
+        // Spec-permitted shared and data-* attributes survive serialization; the
+        // unknown attribute is dropped and never re-emitted.
+        $this->assertStringContainsString('class="dropdown"', $serialized);
+        $this->assertStringContainsString('data-prompt="choose"', $serialized);
+        $this->assertStringContainsString('min-choices="1"', $serialized);
+        $this->assertStringNotContainsString('not-allowed', $serialized);
+
+        $this->assertSame('inline-choice-001', (string) $second->identifier);
+
+        // The interaction is nested inside the surrounding paragraph.
+        $body = $second->itemBody->content->all();
+        $paragraph = $body[0];
+        $this->assertInstanceOf(HTMLTag::class, $paragraph);
+        $this->assertSame('p', $paragraph->tagName());
+
+        $interactions = array_values(array_filter(
+            $paragraph->children(),
+            static fn($node): bool => $node instanceof InlineChoiceInteraction,
+        ));
+        $this->assertCount(1, $interactions);
+
+        $interaction = $interactions[0];
+        $this->assertSame('RESPONSE', $interaction->responseIdentifier);
+        $this->assertTrue($interaction->shuffle);
+        $this->assertTrue($interaction->required);
+        $this->assertSame(1, $interaction->minChoices);
+        $this->assertSame('dropdown', $interaction->class);
+        $this->assertSame(['data-prompt' => 'choose'], $interaction->dataAttributes);
+        $this->assertCount(3, $interaction->choices);
+        $this->assertSame('G', $interaction->choices[0]->identifier);
+        $this->assertSame('gaseous', $interaction->choices[0]->content->all()[0]->content);
+        $this->assertSame('L', $interaction->choices[1]->identifier);
+        $this->assertTrue($interaction->choices[1]->fixed);
+        $this->assertSame('S', $interaction->choices[2]->identifier);
     }
 
     /**
