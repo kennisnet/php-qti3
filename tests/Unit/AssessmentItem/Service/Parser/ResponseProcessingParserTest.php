@@ -140,6 +140,24 @@ class ResponseProcessingParserTest extends TestCase
     }
 
     /**
+     * Whichever spelling is authored, the emitted reference is always the
+     * canonical `.xml` template URL.
+     */
+    #[Test]
+    #[DataProvider('matchCorrectTemplateUrlProvider')]
+    public function parsedTemplateUrlAlwaysEndsWithTheXmlExtension(string $template): void
+    {
+        $element = $this->loadElement(
+            '<qti-response-processing template="' . $template . '"/>',
+        );
+
+        $result = $this->parser->parse($element);
+
+        $this->assertNotNull($result->template);
+        $this->assertStringEndsWith('.xml', $result->template);
+    }
+
+    /**
      * @return array<string, array{0: string}>
      */
     public static function unrelatedTemplateUrlProvider(): array
