@@ -158,6 +158,49 @@ class ResponseProcessingParserTest extends TestCase
     }
 
     /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function legacyV2p1TemplateUrlProvider(): array
+    {
+        return [
+            'match_correct' => [
+                'http://www.imsglobal.org/question/qti_v2p1/rptemplates/match_correct',
+                ResponseProcessing::TEMPLATE_MATCH_CORRECT,
+            ],
+            'map_response' => [
+                'http://www.imsglobal.org/question/qti_v2p1/rptemplates/map_response',
+                ResponseProcessing::TEMPLATE_MAP_RESPONSE,
+            ],
+            'map_response_point' => [
+                'http://www.imsglobal.org/question/qti_v2p1/rptemplates/map_response_point',
+                ResponseProcessing::TEMPLATE_MAP_RESPONSE_POINT,
+            ],
+            'match_correct with extension' => [
+                'http://www.imsglobal.org/question/qti_v2p1/rptemplates/match_correct.xml',
+                ResponseProcessing::TEMPLATE_MATCH_CORRECT,
+            ],
+        ];
+    }
+
+    /**
+     * A legacy v2p1 template URL refers to the same processing as its v3p0
+     * counterpart, so it is rewritten to the v3p0 URL.
+     */
+    #[Test]
+    #[DataProvider('legacyV2p1TemplateUrlProvider')]
+    public function parseRewritesLegacyV2p1TemplateUrlsToV3p0(string $template, string $expected): void
+    {
+        $element = $this->loadElement(
+            '<qti-response-processing template="' . $template . '"/>',
+        );
+
+        $result = $this->parser->parse($element);
+
+        $this->assertSame($expected, $result->template);
+        $this->assertStringContainsString('/v3p0/', (string) $result->template);
+    }
+
+    /**
      * @return array<string, array{0: string}>
      */
     public static function unrelatedTemplateUrlProvider(): array

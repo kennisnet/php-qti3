@@ -23,6 +23,9 @@ class ResponseProcessingParser extends AbstractParser
         $this->validateTag($element, ResponseProcessing::qtiTagName());
 
         if ($element->hasAttribute('template')) {
+            // Any spelling of a standard template - a legacy v2p1 URL, a
+            // different base URL, or a missing `.xml` extension - resolves to
+            // the same processing and is rewritten to the canonical v3p0 URL.
             $processing = match ($this->templateName($element->getAttribute('template'))) {
                 self::TEMPLATE_NAME_MATCH_CORRECT => ResponseProcessing::matchCorrect(),
                 self::TEMPLATE_NAME_MAP_RESPONSE => ResponseProcessing::mapResponse(),
