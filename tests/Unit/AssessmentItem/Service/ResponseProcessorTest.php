@@ -481,6 +481,26 @@ class ResponseProcessorTest extends TestCase
         );
     }
 
+    /**
+     * The `.xml` extension on a standard template URL is optional, so the
+     * template must be applied for the extensionless URL too.
+     */
+    #[Test]
+    public function processResponsesWithMatchCorrectTemplateWithoutXmlExtension(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/match-correct-template-no-extension.xml',
+            [
+                'RESPONSE' => 'Test',
+            ],
+            [
+                'completionStatus' => 'completed',
+                'SCORE' => 1.0,
+                'MAXSCORE' => 1.0,
+            ],
+        );
+    }
+
     #[Test]
     public function processResponsesWithMapResponseTemplate(): void
     {
