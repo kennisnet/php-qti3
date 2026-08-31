@@ -19,14 +19,20 @@ class ResponseProcessingParser extends AbstractParser
         $this->validateTag($element, ResponseProcessing::qtiTagName());
 
         if ($element->hasAttribute('template')) {
-            if ($element->getAttribute('template') === ResponseProcessing::TEMPLATE_MATCH_CORRECT) {
-                return ResponseProcessing::matchCorrect();
-            }
-            if ($element->getAttribute('template') === ResponseProcessing::TEMPLATE_MAP_RESPONSE) {
-                return ResponseProcessing::mapResponse();
-            }
-            if ($element->getAttribute('template') === ResponseProcessing::TEMPLATE_MAP_RESPONSE_POINT) {
-                return ResponseProcessing::mapResponsePoint();
+            $template = $element->getAttribute('template');
+
+            // The template URL is kept as authored: the base URL and the
+            // optional `.xml` extension vary between spec versions, only the
+            // template name identifies the processing.
+            $processing = match (ResponseProcessing::templateName($template)) {
+                ResponseProcessing::TEMPLATE_NAME_MATCH_CORRECT => ResponseProcessing::matchCorrect(template: $template),
+                ResponseProcessing::TEMPLATE_NAME_MAP_RESPONSE => ResponseProcessing::mapResponse($template),
+                ResponseProcessing::TEMPLATE_NAME_MAP_RESPONSE_POINT => ResponseProcessing::mapResponsePoint($template),
+                default => null,
+            };
+
+            if ($processing !== null) {
+                return $processing;
             }
         }
 
