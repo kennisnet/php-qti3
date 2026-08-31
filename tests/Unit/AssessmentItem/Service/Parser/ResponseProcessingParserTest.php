@@ -59,9 +59,9 @@ class ResponseProcessingParserTest extends TestCase
 
         $result = $this->parser->parse($element);
 
-        // The URL is re-emitted exactly as authored, so a round trip does not
-        // rewrite the reference.
-        $this->assertSame($template, $result->template);
+        // Whatever the authored spelling, the reference is normalised to the
+        // canonical template URL.
+        $this->assertSame(ResponseProcessing::TEMPLATE_MATCH_CORRECT, $result->template);
         $this->assertCount(1, $result->elements);
         $this->assertInstanceOf(ResponseCondition::class, $result->elements[0]);
     }
@@ -75,10 +75,7 @@ class ResponseProcessingParserTest extends TestCase
 
         $result = $this->parser->parse($element);
 
-        $this->assertSame(
-            'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response',
-            $result->template,
-        );
+        $this->assertSame(ResponseProcessing::TEMPLATE_MAP_RESPONSE, $result->template);
         $this->assertInstanceOf(ResponseCondition::class, $result->elements[0]);
     }
 
@@ -91,10 +88,7 @@ class ResponseProcessingParserTest extends TestCase
 
         $result = $this->parser->parse($element);
 
-        $this->assertSame(
-            'https://purl.imsglobal.org/spec/qti/v3p0/rptemplates/map_response_point',
-            $result->template,
-        );
+        $this->assertSame(ResponseProcessing::TEMPLATE_MAP_RESPONSE_POINT, $result->template);
         $this->assertInstanceOf(ResponseCondition::class, $result->elements[0]);
     }
 
@@ -145,11 +139,33 @@ class ResponseProcessingParserTest extends TestCase
         $this->assertInstanceOf(SetOutcomeValue::class, $result->elements[0]);
     }
 
-    #[Test]
-    public function templateNameIgnoresUnrelatedUrls(): void
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function unrelatedTemplateUrlProvider(): array
     {
-        $this->assertNull(ResponseProcessing::templateName(''));
-        $this->assertNull(ResponseProcessing::templateName('match_correct'));
-        $this->assertNull(ResponseProcessing::templateName('https://example.org/templates/match_correct'));
+        return [
+            'empty' => [''],
+            'bare template name' => ['match_correct'],
+            'other template directory' => ['https://example.org/templates/match_correct'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('unrelatedTemplateUrlProvider')]
+    public function parseIgnoresUnrelatedTemplateUrls(string $template): void
+    {
+        $element = $this->loadElement('
+            <qti-response-processing template="' . $template . '">
+                <qti-set-outcome-value identifier="SCORE">
+                    <qti-base-value base-type="float">1</qti-base-value>
+                </qti-set-outcome-value>
+            </qti-response-processing>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertNull($result->template);
+        $this->assertInstanceOf(SetOutcomeValue::class, $result->elements[0]);
     }
 }
