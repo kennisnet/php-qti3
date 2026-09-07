@@ -114,6 +114,14 @@ if ($errors->count() > 0) {
 
 By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`). To use the official **IMS Global QTI validator** (Docker image) instead, pass a custom `IQtiSyntaxValidator` implementation as the fourth argument to `QtiClient`. See [docs/ims-global-validator.md](docs/ims-global-validator.md) for setup instructions and a ready-to-use skeleton class.
 
+Besides schema conformance, every assessment item is checked for *scorability* (`ScoringOutcomeValidator`, also available on its own via `getScoringOutcomeValidator()`). For a question item this enforces that:
+
+- a `qti-response-processing` element — inline, empty or template-based — is matched by a `qti-outcome-declaration` with identifier `SCORE` (a player only enables checking an item when the `SCORE` variable exists);
+- inline response processing actually sets `SCORE` (unless the item is scored manually, i.e. only has a `qti-extended-text-interaction`);
+- `MAXSCORE` is declared with a numeric, non-negative default (again, unless scored manually).
+
+All violations of one item are reported together, each prefixed with the item's file path, e.g. `QUE_4_1.xml: Missing `qti-outcome-declaration` with identifier `SCORE``.
+
 **UC-P6: Add, update or reorder items in a package**
 
 `getPackageEditor()` returns a `PackageEditor` that edits the assessment items of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1). Adding an item assigns it the next free `ITEMnnn` identifier by default (or one you pass). Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are. Editing never refuses an imperfect package: a construct the model cannot hold is dropped on regeneration and reported through the returned `EditResult`'s `warnings` (parsing an item likewise returns an `ItemParseResult` with `item` + `warnings`).

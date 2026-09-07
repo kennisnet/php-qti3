@@ -29,7 +29,7 @@ final class InvalidAssessmentItemException extends DomainError implements HasVal
 
     protected function errorMessage(): string
     {
-        return 'Assessment item is invalid';
+        return 'Assessment item is invalid: ' . $this->validationErrors->join(', ');
     }
 
     public function validationErrors(): StringCollection

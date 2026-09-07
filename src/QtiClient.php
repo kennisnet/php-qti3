@@ -18,6 +18,7 @@ use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\AssessmentItem\Service\ScoringOutcomeValidator;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
@@ -64,6 +65,7 @@ final class QtiClient
     private ?PackageEditor $packageEditor = null;
     private ?IXmlBuilder $xmlBuilder = null;
     private ?ResponseProcessor $responseProcessor = null;
+    private ?ScoringOutcomeValidator $scoringOutcomeValidator = null;
     private ?QtiPackageValidator $qtiPackageValidator = null;
     private ?QtiSchemaValidator $qtiSchemaValidator = null;
     private ?IXmlReader $xmlReader = null;
@@ -233,6 +235,13 @@ final class QtiClient
                     new QtiExpressionParser(),
                 ),
             ),
+            $this->getScoringOutcomeValidator(),
+        );
+    }
+
+    public function getScoringOutcomeValidator(): ScoringOutcomeValidator
+    {
+        return $this->scoringOutcomeValidator ??= new ScoringOutcomeValidator(
             new AssessmentItemDeterminator(),
         );
     }
