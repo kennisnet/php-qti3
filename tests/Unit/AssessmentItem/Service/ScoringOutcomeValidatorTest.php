@@ -113,6 +113,23 @@ class ScoringOutcomeValidatorTest extends TestCase
     }
 
     #[Test]
+    public function missingMaxScoreDeclarationIsCollectedWithTheOtherViolations(): void
+    {
+        // Without a MAXSCORE declaration at all, the lookup used to throw before
+        // the collected SCORE violation could be reported.
+        $xml = preg_replace(
+            '~<qti-outcome-declaration identifier="MAXSCORE".*?</qti-outcome-declaration>~s',
+            '',
+            file_get_contents(self::RESOURCES . 'missing-score-declaration-empty-processing.xml'),
+        );
+
+        $this->assertScoringErrors($xml, [
+            self::MISSING_SCORE_DECLARATION,
+            'Outcome declaration with identifier MAXSCORE not found',
+        ]);
+    }
+
+    #[Test]
     public function existingScoreAndMaxScoreChecksStillApply(): void
     {
         $this->assertScoringErrors(

@@ -29,6 +29,12 @@ class ResponseProcessor
         private readonly ScoringOutcomeValidator $scoringOutcomeValidator,
     ) {}
 
+    /**
+     * Parses the item's declarations and response processing into an
+     * {@see ItemState} ready for {@see self::processResponses()}.
+     *
+     * @throws InvalidAssessmentItemException with every scoring and processing violation of the item at once
+     */
     public function initItemState(string $itemXml): ItemState
     {
         $xmlDocument = new DOMDocument();
@@ -72,9 +78,11 @@ class ResponseProcessor
         );
 
         // Root causes first (a missing declaration), then the processing
-        // elements that consequently cannot resolve their identifiers.
+        // elements that consequently cannot resolve their identifiers; several
+        // elements failing on the same identifier collapse into one line.
         $errors = $this->scoringOutcomeValidator->validate($xmlDocument, $itemState)
-            ->mergeWith($responseProcessing->validate($itemState));
+            ->mergeWith($responseProcessing->validate($itemState))
+            ->unique();
 
         if (!$errors->isEmpty()) {
             throw new InvalidAssessmentItemException($errors);

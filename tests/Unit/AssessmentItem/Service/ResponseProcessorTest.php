@@ -601,7 +601,8 @@ class ResponseProcessorTest extends TestCase
     {
         // The parser expands match_correct into real processing elements whose
         // SCORE target cannot resolve; the missing declaration is reported as the
-        // root cause ahead of those consequences.
+        // root cause ahead of that consequence, which is listed once even though
+        // two elements set SCORE.
         try {
             $this->getResponseProcessor()->initItemState(
                 file_get_contents(__DIR__ . '/resources/missing-score-declaration-match-correct.xml'),
@@ -609,7 +610,6 @@ class ResponseProcessorTest extends TestCase
         } catch (InvalidAssessmentItemException $exception) {
             $this->assertSame([
                 'Missing `qti-outcome-declaration` with identifier `SCORE`',
-                'Identifier SCORE not found for `qti-set-outcome-value`',
                 'Identifier SCORE not found for `qti-set-outcome-value`',
             ], $exception->validationErrors()->all());
 

@@ -114,13 +114,13 @@ if ($errors->count() > 0) {
 
 By default the library uses an XSD-based syntax validator (`QtiSchemaValidator`). To use the official **IMS Global QTI validator** (Docker image) instead, pass a custom `IQtiSyntaxValidator` implementation as the fourth argument to `QtiClient`. See [docs/ims-global-validator.md](docs/ims-global-validator.md) for setup instructions and a ready-to-use skeleton class.
 
-Besides schema conformance, every assessment item is checked for *scorability* (`ScoringOutcomeValidator`, also available on its own via `getScoringOutcomeValidator()`). For a question item this enforces that:
+Besides schema conformance, every assessment item is checked for *scorability* (`ScoringOutcomeValidator`, run by `initItemState()`, see UC-I3). For a question item this enforces that:
 
 - a `qti-response-processing` element — inline, empty or template-based — is matched by a `qti-outcome-declaration` with identifier `SCORE` (a player only enables checking an item when the `SCORE` variable exists);
 - inline response processing actually sets `SCORE` (unless the item is scored manually, i.e. only has a `qti-extended-text-interaction`);
 - `MAXSCORE` is declared with a numeric, non-negative default (again, unless scored manually).
 
-All violations of one item are reported together, each prefixed with the item's file path, e.g. `QUE_4_1.xml: Missing `qti-outcome-declaration` with identifier `SCORE``.
+All violations of one item are reported together, each prefixed with the item's file path, e.g. ``QUE_4_1.xml: Missing `qti-outcome-declaration` with identifier `SCORE` ``.
 
 **UC-P6: Add, update or reorder items in a package**
 
@@ -228,6 +228,8 @@ $responseProcessor->processResponses($itemState, $responses);
 $outcomes = $itemState->outcomeSet->outcomes;
 // $outcomes is now an associative array with outcome-identifier->value
 ```
+
+`initItemState()` validates the item before returning its state: every scoring violation (see UC-P5) and every response processing violation is collected and thrown at once as an `InvalidAssessmentItemException`, whose `validationErrors()` lists them. Malformed processing XML still throws a `ParseError`.
 
 ### Supported interactions
 

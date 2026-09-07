@@ -11,19 +11,8 @@ use DOMNodeList;
 use DOMXPath;
 
 /**
- * Guards the scoring outcomes of a single assessment item: a question that
- * declares response processing must declare a SCORE outcome for it to land in,
- * its processing must actually set SCORE, and it must carry a usable MAXSCORE.
- *
- * Every violation is collected and returned, never thrown: the caller (see
- * {@see ResponseProcessor::initItemState()}) merges them with the response
- * processing's own validation so an author sees everything at once.
- *
- * Works on the parsed {@see ItemState} for everything the typed model knows
- * (declarations, defaults) and falls back to the item DOM only for questions
- * about what the source file contains: which interactions are present and
- * whether a `qti-response-processing` element is declared at all. The latter
- * must be a DOM question because the parser drops unknown template URLs.
+ * Guards the scoring outcomes of a question item: response processing needs a
+ * SCORE outcome to land in and must set it, and MAXSCORE must carry a usable default.
  */
 final readonly class ScoringOutcomeValidator
 {
@@ -47,9 +36,10 @@ final readonly class ScoringOutcomeValidator
 
         $declared = $itemState->outcomeSet->outcomeDeclarations->getIdentifiers();
 
-        // Any response processing - inline, empty, or referring to a known or
-        // unknown template - needs a SCORE outcome to land in: the player only
-        // enables checking an item when the SCORE variable exists.
+        // Whether processing is declared is asked on the DOM, not the model: the
+        // parser drops unknown template URLs, so the model cannot tell. Any
+        // processing - inline, empty or template-based - needs a SCORE outcome,
+        // because the player only enables checking an item when SCORE exists.
         if ($this->xpathExists($document, '//ns:qti-response-processing') && !$declared->has(self::SCORE)) {
             $errors->add('Missing `qti-outcome-declaration` with identifier `SCORE`');
         }
@@ -64,10 +54,14 @@ final readonly class ScoringOutcomeValidator
         }
 
         if (!$this->assessmentItemDeterminator->determineManualScoring($document)) {
-            $maxScore = $itemState->outcomeSet->getOutcomeValue(self::MAXSCORE);
+            if (!$declared->has(self::MAXSCORE)) {
+                $errors->add('Outcome declaration with identifier MAXSCORE not found');
+            } else {
+                $maxScore = $itemState->outcomeSet->getOutcomeValue(self::MAXSCORE);
 
-            if (!is_numeric($maxScore) || (float) $maxScore < 0) {
-                $errors->add('Missing default value for MAXSCORE outcome declaration');
+                if (!is_numeric($maxScore) || (float) $maxScore < 0) {
+                    $errors->add('Missing default value for MAXSCORE outcome declaration');
+                }
             }
         }
 

@@ -65,7 +65,6 @@ final class QtiClient
     private ?PackageEditor $packageEditor = null;
     private ?IXmlBuilder $xmlBuilder = null;
     private ?ResponseProcessor $responseProcessor = null;
-    private ?ScoringOutcomeValidator $scoringOutcomeValidator = null;
     private ?QtiPackageValidator $qtiPackageValidator = null;
     private ?QtiSchemaValidator $qtiSchemaValidator = null;
     private ?IXmlReader $xmlReader = null;
@@ -235,14 +234,7 @@ final class QtiClient
                     new QtiExpressionParser(),
                 ),
             ),
-            $this->getScoringOutcomeValidator(),
-        );
-    }
-
-    public function getScoringOutcomeValidator(): ScoringOutcomeValidator
-    {
-        return $this->scoringOutcomeValidator ??= new ScoringOutcomeValidator(
-            new AssessmentItemDeterminator(),
+            new ScoringOutcomeValidator(new AssessmentItemDeterminator()),
         );
     }
 
