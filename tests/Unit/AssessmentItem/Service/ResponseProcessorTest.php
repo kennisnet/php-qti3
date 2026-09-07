@@ -236,7 +236,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/non-existing-outcome.xml',
             ['RESPONSE' => ['A1 B1', 'A2 B2']],
-            'Validation errors in response processing: Identifier NON-EXISTING not found',
+            'Identifier NON-EXISTING not found',
         );
     }
 
@@ -597,15 +597,26 @@ class ResponseProcessorTest extends TestCase
     }
 
     #[Test]
-    public function knownTemplateWithoutScoreDeclarationThrowsException(): void
+    public function knownTemplateWithoutScoreDeclarationReportsDeclarationFirst(): void
     {
-        // The parser expands match_correct into real processing elements, so the
-        // model's own validation already rejects the undeclared SCORE target.
-        $this->assertExceptionThrown(
-            __DIR__ . '/resources/missing-score-declaration-match-correct.xml',
-            ['RESPONSE' => 'Test'],
-            'Identifier SCORE not found for `qti-set-outcome-value`',
-        );
+        // The parser expands match_correct into real processing elements whose
+        // SCORE target cannot resolve; the missing declaration is reported as the
+        // root cause ahead of those consequences.
+        try {
+            $this->getResponseProcessor()->initItemState(
+                file_get_contents(__DIR__ . '/resources/missing-score-declaration-match-correct.xml'),
+            );
+        } catch (InvalidAssessmentItemException $exception) {
+            $this->assertSame([
+                'Missing `qti-outcome-declaration` with identifier `SCORE`',
+                'Identifier SCORE not found for `qti-set-outcome-value`',
+                'Identifier SCORE not found for `qti-set-outcome-value`',
+            ], $exception->validationErrors()->all());
+
+            return;
+        }
+
+        $this->fail('Expected InvalidAssessmentItemException');
     }
 
     #[Test]

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service;
 
+use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
@@ -70,7 +71,14 @@ class ResponseProcessor
             $adaptive,
         );
 
-        $this->scoringOutcomeValidator->validate($xmlDocument, $itemState);
+        // Root causes first (a missing declaration), then the processing
+        // elements that consequently cannot resolve their identifiers.
+        $errors = $this->scoringOutcomeValidator->validate($xmlDocument, $itemState)
+            ->mergeWith($responseProcessing->validate($itemState));
+
+        if (!$errors->isEmpty()) {
+            throw new InvalidAssessmentItemException($errors);
+        }
 
         return $itemState;
     }

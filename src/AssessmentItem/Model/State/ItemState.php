@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\State;
 
-use Qti3\Package\Validator\QtiPackageValidationError;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
@@ -18,9 +17,7 @@ class ItemState
         public OutcomeSet $outcomeSet,
         public ResponseProcessing $responseProcessing,
         public bool $adaptive = false,
-    ) {
-        $this->validate();
-    }
+    ) {}
 
     public function getValue(string $identifier): mixed
     {
@@ -54,15 +51,6 @@ class ItemState
         return $this->responseSet->responseDeclarations->getIdentifiers()->mergeWith(
             $this->outcomeSet->outcomeDeclarations->getIdentifiers(),
         );
-    }
-
-    private function validate(): void
-    {
-        $errors = $this->responseProcessing->validate($this);
-
-        if ($errors->count() > 0) {
-            throw new QtiPackageValidationError($errors, 'Validation errors in response processing');
-        }
     }
 
 }

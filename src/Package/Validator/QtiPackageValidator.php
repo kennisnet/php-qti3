@@ -16,7 +16,7 @@ readonly class QtiPackageValidator
 
     public function validate(QtiPackage $qtiPackage): StringCollection
     {
-        /** @var array<int, IQtiPackageValidator> $validators */
+        /** @var IQtiPackageValidator[] $validators */
         $validators = [
             $this->syntaxValidator,
             $this->responseProcessingValidator,

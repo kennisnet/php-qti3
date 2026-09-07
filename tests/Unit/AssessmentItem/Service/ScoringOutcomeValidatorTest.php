@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Qti3\Tests\Unit\AssessmentItem\Service;
 
-use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
@@ -23,9 +22,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Exercises the validator in isolation: the item state is built from the
- * declarations only, with empty response processing, so that the model's own
- * processing validation (which runs first in ResponseProcessor) does not get
- * in the way. The end-to-end behaviour is covered by ResponseProcessorTest.
+ * declarations only, with empty response processing. The merge with the
+ * processing's own validation is covered by ResponseProcessorTest.
  */
 class ScoringOutcomeValidatorTest extends TestCase
 {
@@ -130,24 +128,14 @@ class ScoringOutcomeValidatorTest extends TestCase
     {
         [$document, $itemState] = $this->buildItemState($itemXml);
 
-        try {
-            $this->validator->validate($document, $itemState);
-        } catch (InvalidAssessmentItemException $exception) {
-            $this->assertSame($expectedErrors, $exception->validationErrors()->all());
-
-            return;
-        }
-
-        $this->fail('Expected InvalidAssessmentItemException with: ' . implode(', ', $expectedErrors));
+        $this->assertSame($expectedErrors, $this->validator->validate($document, $itemState)->all());
     }
 
     private function assertNoScoringErrors(string $itemXml): void
     {
         [$document, $itemState] = $this->buildItemState($itemXml);
 
-        $this->validator->validate($document, $itemState);
-
-        $this->addToAssertionCount(1);
+        $this->assertTrue($this->validator->validate($document, $itemState)->isEmpty());
     }
 
     /**

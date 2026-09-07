@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service;
 
-use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
 use Qti3\AssessmentItem\Model\State\ItemState;
 use Qti3\Shared\Collection\StringCollection;
 use DOMDocument;
@@ -16,8 +15,9 @@ use DOMXPath;
  * declares response processing must declare a SCORE outcome for it to land in,
  * its processing must actually set SCORE, and it must carry a usable MAXSCORE.
  *
- * All violations of one item are collected and reported together, so an author
- * can repair the item in one go.
+ * Every violation is collected and returned, never thrown: the caller (see
+ * {@see ResponseProcessor::initItemState()}) merges them with the response
+ * processing's own validation so an author sees everything at once.
  *
  * Works on the parsed {@see ItemState} for everything the typed model knows
  * (declarations, defaults) and falls back to the item DOM only for questions
@@ -35,14 +35,14 @@ final readonly class ScoringOutcomeValidator
     ) {}
 
     /**
-     * @throws InvalidAssessmentItemException with every scoring violation of the item
+     * @return StringCollection every scoring violation of the item; empty when it is scorable as declared
      */
-    public function validate(DOMDocument $document, ItemState $itemState): void
+    public function validate(DOMDocument $document, ItemState $itemState): StringCollection
     {
         $errors = new StringCollection();
 
         if ($this->assessmentItemDeterminator->determineType($document) !== 'question') {
-            return;
+            return $errors;
         }
 
         $declared = $itemState->outcomeSet->outcomeDeclarations->getIdentifiers();
@@ -71,9 +71,7 @@ final readonly class ScoringOutcomeValidator
             }
         }
 
-        if (!$errors->isEmpty()) {
-            throw new InvalidAssessmentItemException($errors);
-        }
+        return $errors;
     }
 
     private function xpathExists(DOMDocument $document, string $path): bool

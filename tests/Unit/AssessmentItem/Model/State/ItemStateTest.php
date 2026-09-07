@@ -6,7 +6,6 @@ namespace Qti3\Tests\Unit\AssessmentItem\Model\State;
 
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
-use Qti3\Package\Validator\QtiPackageValidationError;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
@@ -25,35 +24,20 @@ use ReflectionClass;
 final class ItemStateTest extends TestCase
 {
     #[Test]
-    public function constructValidatesAndPassesWhenNoErrors(): void
+    public function constructIsPlainStateAndDoesNotValidate(): void
     {
+        // Validation of the processing is the ResponseProcessor's job, which
+        // merges it with the scoring checks; the state itself stays a value holder.
         $responseSet = $this->createResponseSetDouble();
         $outcomeSet = $this->createOutcomeSetDouble();
 
         /** @var ResponseProcessing&MockObject $responseProcessing */
         $responseProcessing = $this->createMock(ResponseProcessing::class);
-        $emptyErrors = $this->createConfiguredMock(StringCollection::class, ['count' => 0]);
-        $responseProcessing->method('validate')->willReturn($emptyErrors);
+        $responseProcessing->expects($this->never())->method('validate');
 
         $state = new ItemState($responseSet, $outcomeSet, $responseProcessing, adaptive: false);
 
         $this->assertFalse($state->adaptive);
-    }
-
-    #[Test]
-    public function constructThrowsWhenValidationErrors(): void
-    {
-        $responseSet = $this->createResponseSetDouble();
-        $outcomeSet = $this->createOutcomeSetDouble();
-
-        /** @var ResponseProcessing&MockObject $responseProcessing */
-        $responseProcessing = $this->createMock(ResponseProcessing::class);
-        $errors = $this->createConfiguredMock(StringCollection::class, ['count' => 1]);
-        $responseProcessing->method('validate')->willReturn($errors);
-
-        $this->expectException(QtiPackageValidationError::class);
-
-        new ItemState($responseSet, $outcomeSet, $responseProcessing);
     }
 
     #[Test]
