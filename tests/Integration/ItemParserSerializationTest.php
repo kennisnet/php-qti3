@@ -553,6 +553,60 @@ XML;
         $this->assertSame('fr-FR', $reparsed->language);
     }
 
+    /**
+     * FLEX-692: special characters in attributes (alt text, item title) were
+     * escaped twice, so every parse → serialize cycle grew the value:
+     * "&" → "&amp;" → "&amp;amp;", and accents turned into literal entities.
+     * Two full cycles must leave both attributes and body text untouched.
+     */
+    public function testSerializeEscapesAttributesAndTextExactlyOnce(): void
+    {
+        $xml = <<<XML
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
+                    identifier="escape-001"
+                    title="Kat &amp; hond &lt;b&gt; in een caf&#233;"
+                    adaptive="false"
+                    time-dependent="false">
+    <qti-item-body>
+        <p>Tekst met &amp; en &lt;haakjes&gt; en een café</p>
+        <p><img src="img/kat.png" alt="Kat &amp; hond in een café"/></p>
+    </qti-item-body>
+</qti-assessment-item>
+XML;
+
+        $first = $this->parseItem($xml);
+        $serialized = $this->serializeItem($first);
+        $second = $this->parseItem($serialized);
+        $reserialized = $this->serializeItem($second);
+        $third = $this->parseItem($reserialized);
+
+        $this->assertSame('Kat & hond <b> in een café', $third->title);
+        $this->assertStringNotContainsString('&amp;amp;', $reserialized);
+        $this->assertStringNotContainsString('&amp;eacute;', $reserialized);
+        $this->assertSame($serialized, $reserialized);
+
+        $body = $third->itemBody->content->all();
+        $this->assertStringContainsString('Tekst met & en <haakjes> en een café', $this->collectText($body[0]));
+
+        $img = $body[1]->children()[0];
+        $this->assertSame('Kat & hond in een café', $img->attributes()['alt']);
+    }
+
+    private function collectText(object $node): string
+    {
+        $text = '';
+        foreach ($node->children() as $child) {
+            if ($child === null) {
+                continue;
+            }
+            $text .= method_exists($child, 'getContentForXml')
+                ? $child->getContentForXml()
+                : $this->collectText($child);
+        }
+
+        return $text;
+    }
+
     private function parseItem(string $xml): AssessmentItem
     {
         $client = $this->createClient();

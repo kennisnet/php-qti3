@@ -63,4 +63,86 @@ class RecursiveXMLSerializerTest extends TestCase
         $this->assertSame('abc', $dom->childNodes->item(0)->getAttribute('id'));
         $this->assertSame('test', $dom->childNodes->item(0)->getAttribute('class'));
     }
+
+    /**
+     * FLEX-692: attribute values must be escaped exactly once. Before the fix
+     * htmlentities() ran before setAttribute(), which escapes itself, so
+     * "&" became "&amp;amp;" and accented characters were mangled into
+     * literal entities.
+     */
+    #[Test]
+    public function serializeEscapesAttributeValuesExactlyOnce(): void
+    {
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $serializer = new RecursiveXMLSerializer($dom);
+
+        $element = $this->createMock(IXmlElement::class);
+        $element->method('tagName')->willReturn('img');
+        $element->method('attributes')->willReturn(['alt' => 'Kat & hond in een café']);
+        $element->method('children')->willReturn([]);
+
+        $serializer->serialize($element);
+
+        $node = $dom->childNodes->item(0);
+        $this->assertSame('Kat & hond in een café', $node->getAttribute('alt'));
+        $this->assertStringContainsString('alt="Kat &amp; hond in een café"', $dom->saveXML());
+    }
+
+    #[Test]
+    public function serializeKeepsMarkupCharactersInAttributeValuesIntact(): void
+    {
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $serializer = new RecursiveXMLSerializer($dom);
+
+        $element = $this->createMock(IXmlElement::class);
+        $element->method('tagName')->willReturn('test-element');
+        $element->method('attributes')->willReturn(['title' => 'a & b < c > d " e \' f']);
+        $element->method('children')->willReturn([]);
+
+        $serializer->serialize($element);
+
+        $this->assertSame('a & b < c > d " e \' f', $dom->childNodes->item(0)->getAttribute('title'));
+    }
+
+    /**
+     * FLEX-692: re-serializing an already-serialized value must be stable —
+     * the double escaping grew the value on every autosave cycle.
+     */
+    #[Test]
+    public function serializeIsStableAcrossRepeatedCycles(): void
+    {
+        $value = 'Kat & hond in een café';
+
+        foreach ([1, 2, 3] as $ignored) {
+            $dom = new DOMDocument('1.0', 'UTF-8');
+            $serializer = new RecursiveXMLSerializer($dom);
+
+            $element = $this->createMock(IXmlElement::class);
+            $element->method('tagName')->willReturn('img');
+            $element->method('attributes')->willReturn(['alt' => $value]);
+            $element->method('children')->willReturn([]);
+
+            $serializer->serialize($element);
+
+            $reparsed = new DOMDocument('1.0', 'UTF-8');
+            $reparsed->loadXML($dom->saveXML());
+            $value = $reparsed->documentElement->getAttribute('alt');
+        }
+
+        $this->assertSame('Kat & hond in een café', $value);
+    }
+
+    #[Test]
+    public function serializeEscapesTextNodeContentExactlyOnce(): void
+    {
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $root = $dom->createElement('p');
+        $dom->appendChild($root);
+
+        $serializer = new RecursiveXMLSerializer($dom);
+        $serializer->serialize(new TextNode('Tekst met & en een café'), $root);
+
+        $this->assertSame('Tekst met & en een café', $root->textContent);
+        $this->assertStringContainsString('<p>Tekst met &amp; en een café</p>', $dom->saveXML());
+    }
 }

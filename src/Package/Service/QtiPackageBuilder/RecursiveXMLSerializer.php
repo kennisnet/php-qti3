@@ -58,7 +58,7 @@ readonly class RecursiveXMLSerializer
             if ($value === null) {
                 continue; // Ignore null values
             }
-            $elementNode->setAttribute($key, htmlentities($value));
+            $elementNode->setAttribute($key, $value);
         }
 
         foreach ($object->children() as $child) {
