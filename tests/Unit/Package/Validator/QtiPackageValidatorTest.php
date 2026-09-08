@@ -11,6 +11,7 @@ use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\AssessmentItem\Service\ScoringOutcomeValidator;
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\PackageFile\PackageFileCollection;
@@ -52,7 +53,7 @@ class QtiPackageValidatorTest extends TestCase
                             new QtiExpressionParser(),
                         ),
                     ),
-                    new AssessmentItemDeterminator(),
+                    new ScoringOutcomeValidator(new AssessmentItemDeterminator()),
                 ),
             ),
         );
@@ -107,7 +108,7 @@ class QtiPackageValidatorTest extends TestCase
                             new QtiExpressionParser(),
                         ),
                     ),
-                    new AssessmentItemDeterminator(),
+                    new ScoringOutcomeValidator(new AssessmentItemDeterminator()),
                 ),
             ),
         );

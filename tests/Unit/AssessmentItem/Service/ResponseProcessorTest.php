@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Tests\Unit\AssessmentItem\Service;
 
+use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
 use Qti3\AssessmentItem\Service\AssessmentItemDeterminator;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ProcessingElementParser;
@@ -11,6 +12,7 @@ use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\ResponseProcessor;
+use Qti3\AssessmentItem\Service\ScoringOutcomeValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -234,7 +236,7 @@ class ResponseProcessorTest extends TestCase
         $this->assertExceptionThrown(
             __DIR__ . '/resources/non-existing-outcome.xml',
             ['RESPONSE' => ['A1 B1', 'A2 B2']],
-            'Validation errors in response processing: Identifier NON-EXISTING not found',
+            'Identifier NON-EXISTING not found',
         );
     }
 
@@ -574,6 +576,74 @@ class ResponseProcessorTest extends TestCase
         ], $outcomes);
     }
 
+    #[Test]
+    public function emptyResponseProcessingWithoutScoreDeclarationThrowsException(): void
+    {
+        $this->assertExceptionThrown(
+            __DIR__ . '/resources/missing-score-declaration-empty-processing.xml',
+            ['RESPONSE' => 'Test'],
+            'Missing `qti-outcome-declaration` with identifier `SCORE`',
+        );
+    }
+
+    #[Test]
+    public function unknownTemplateWithoutScoreDeclarationThrowsException(): void
+    {
+        $this->assertExceptionThrown(
+            __DIR__ . '/resources/missing-score-declaration-unknown-template.xml',
+            ['RESPONSE' => 'Test'],
+            'Missing `qti-outcome-declaration` with identifier `SCORE`',
+        );
+    }
+
+    #[Test]
+    public function knownTemplateWithoutScoreDeclarationReportsDeclarationFirst(): void
+    {
+        // The parser expands match_correct into real processing elements whose
+        // SCORE target cannot resolve; the missing declaration is reported as the
+        // root cause ahead of that consequence, which is listed once even though
+        // two elements set SCORE.
+        try {
+            $this->getResponseProcessor()->initItemState(
+                file_get_contents(__DIR__ . '/resources/missing-score-declaration-match-correct.xml'),
+            );
+        } catch (InvalidAssessmentItemException $exception) {
+            $this->assertSame([
+                'Missing `qti-outcome-declaration` with identifier `SCORE`',
+                'Identifier SCORE not found for `qti-set-outcome-value`',
+            ], $exception->validationErrors()->all());
+
+            return;
+        }
+
+        $this->fail('Expected InvalidAssessmentItemException');
+    }
+
+    #[Test]
+    public function scoringViolationsAreReportedTogether(): void
+    {
+        // Empty processing without a SCORE declaration, and additionally strip
+        // the MAXSCORE default: both scoring violations must come out at once.
+        $itemXml = preg_replace(
+            '~(identifier="MAXSCORE"[^>]*>)\s*<qti-default-value>.*?</qti-default-value>~s',
+            '$1',
+            file_get_contents(__DIR__ . '/resources/missing-score-declaration-empty-processing.xml'),
+        );
+
+        try {
+            $this->getResponseProcessor()->initItemState($itemXml);
+        } catch (InvalidAssessmentItemException $exception) {
+            $this->assertSame([
+                'Missing `qti-outcome-declaration` with identifier `SCORE`',
+                'Missing default value for MAXSCORE outcome declaration',
+            ], $exception->validationErrors()->all());
+
+            return;
+        }
+
+        $this->fail('Expected InvalidAssessmentItemException');
+    }
+
     private function getResponseProcessor(): ResponseProcessor
     {
         $responseDeclarationParser = new ResponseDeclarationParser();
@@ -589,7 +659,7 @@ class ResponseProcessorTest extends TestCase
             $responseDeclarationParser,
             $outcomeDeclarationParser,
             $responseProcessingParser,
-            $assessmentItemDeterminator,
+            new ScoringOutcomeValidator($assessmentItemDeterminator),
         );
     }
 

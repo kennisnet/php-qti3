@@ -10,6 +10,7 @@ use Qti3\Package\Model\QtiPackage;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
 use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Exception\HasValidationErrors;
 use Exception;
 
 readonly class ResponseProcessingValidator implements IQtiPackageValidator
@@ -31,7 +32,7 @@ readonly class ResponseProcessingValidator implements IQtiPackageValidator
 
             try {
                 $this->responseProcessor->initItemState((string) $itemFile);
-            } catch (QtiPackageValidationError $error) {
+            } catch (HasValidationErrors $error) {
                 /** @var string $validationError */
                 foreach ($error->validationErrors() as $validationError) {
                     $errors->add($itemFile->getFilepath() . ': ' . $validationError);

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Service;
 
+use Qti3\AssessmentItem\Exception\InvalidAssessmentItemException;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclaration;
 use Qti3\AssessmentItem\Model\ResponseDeclaration\ResponseDeclarationCollection;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
-use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\ResponseDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
@@ -19,8 +19,6 @@ use Qti3\AssessmentItem\Model\State\OutcomeSet;
 use Qti3\AssessmentItem\Model\State\ResponseSet;
 use DOMDocument;
 use DOMElement;
-use DOMNodeList;
-use DOMXPath;
 
 class ResponseProcessor
 {
@@ -28,9 +26,15 @@ class ResponseProcessor
         private readonly ResponseDeclarationParser $responseDeclarationParser,
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
         private readonly ResponseProcessingParser $responseProcessingParser,
-        private readonly AssessmentItemDeterminator $assessmentItemDeterminator,
+        private readonly ScoringOutcomeValidator $scoringOutcomeValidator,
     ) {}
 
+    /**
+     * Parses the item's declarations and response processing into an
+     * {@see ItemState} ready for {@see self::processResponses()}.
+     *
+     * @throws InvalidAssessmentItemException with every scoring and processing violation of the item at once
+     */
     public function initItemState(string $itemXml): ItemState
     {
         $xmlDocument = new DOMDocument();
@@ -73,7 +77,16 @@ class ResponseProcessor
             $adaptive,
         );
 
-        $this->validateItem($xmlDocument, $itemState);
+        // Root causes first (a missing declaration), then the processing
+        // elements that consequently cannot resolve their identifiers; several
+        // elements failing on the same identifier collapse into one line.
+        $errors = $this->scoringOutcomeValidator->validate($xmlDocument, $itemState)
+            ->mergeWith($responseProcessing->validate($itemState))
+            ->unique();
+
+        if (!$errors->isEmpty()) {
+            throw new InvalidAssessmentItemException($errors);
+        }
 
         return $itemState;
     }
@@ -99,44 +112,4 @@ class ResponseProcessor
         }
     }
 
-    private function validateItem(DOMDocument $document, ItemState $itemState): void
-    {
-        $isQuestion = $this->assessmentItemDeterminator->determineType($document) === 'question';
-        $hasInteractionNotText = $this->xpathExists($document, '//ns:qti-item-body//*[starts-with(name(), "qti-") and substring(name(), string-length(name()) - 11) = "-interaction" and name() != "qti-extended-text-interaction"]');
-        $hasProcessingScore = $this->xpathExists($document, '//ns:qti-response-processing//ns:qti-set-outcome-value[@identifier="SCORE"]');
-        $processingTemplate = $this->xpathExists($document, '//ns:qti-response-processing[string-length(@template) > 2]');
-        $hasResponseProcessingContent = $this->xpathExists($document, '//ns:qti-response-processing[*]');
-
-        if ($isQuestion && $hasInteractionNotText && $hasResponseProcessingContent && !$hasProcessingScore && !$processingTemplate) {
-            throw new ParseError('Missing `set-outcome-value` with identifier `SCORE` in `response-processing`');
-        }
-
-        if (
-            $isQuestion
-            && !$this->assessmentItemDeterminator->determineManualScoring($document)
-        ) {
-            $maxScore = $itemState->outcomeSet->getOutcomeValue('MAXSCORE');
-
-            if (!is_numeric($maxScore) || (float) $maxScore < 0) {
-                throw new ParseError('Missing default value for MAXSCORE outcome declaration');
-            }
-        }
-    }
-
-    private function xpathExists(DOMDocument $document, string $path): bool
-    {
-        if ($document->documentElement === null) {
-            return false; // @codeCoverageIgnore
-        }
-
-        $xpath = new DOMXPath($document);
-        $xpath->registerNamespace('ns', $document->documentElement->getAttribute('xmlns'));
-        $result = $xpath->query($path);
-
-        if (!$result instanceof DOMNodeList) {
-            return false; // @codeCoverageIgnore
-        }
-
-        return (bool) $result->length;
-    }
 }
