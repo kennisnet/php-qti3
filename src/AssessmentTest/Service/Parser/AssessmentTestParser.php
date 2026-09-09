@@ -24,7 +24,7 @@ class AssessmentTestParser extends AbstractParser
     public function __construct(
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
         private readonly TestPartParser $testPartParser,
-        private readonly RubricBlockParser $rubricBlockParser
+        private readonly RubricBlockParser $rubricBlockParser,
     ) {}
 
     /**
