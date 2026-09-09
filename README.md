@@ -161,7 +161,7 @@ $editor->reorderItemsInTest($package, $testId, ['ITEM002', 'ITEM001']);
 $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/folder')->write($package);
 ```
 
-Removing an item drops its ref from the named test and, unless another test still references it, deletes the item resource and its file; media the item introduced is left in place. Because editing is surgical, untouched items, media and metadata are left as they are — an unrelated item that uses a construct the typed models cannot represent does not affect editing. A construct the model cannot hold (outcome processing, test feedback, rubric blocks, nested sections, a template declaration, an unconsumed attribute, ...) is not refused: it is dropped when the XML is regenerated and reported via the `warnings` on `EditResult`/`ItemParseResult`. An unsupported *interaction type* still fails earlier, in the parser, with a `ParseError` (see *Supported interactions* below).
+Removing an item drops its ref from the named test and, unless another test still references it, deletes the item resource and its file; media the item introduced is left in place. Because editing is surgical, untouched items, media and metadata are left as they are — an unrelated item that uses a construct the typed models cannot represent does not affect editing. A construct the model cannot hold (outcome processing, test feedback, nested sections, a template declaration, an unconsumed attribute, ...) is not refused: it is dropped when the XML is regenerated and reported via the `warnings` on `EditResult`/`ItemParseResult`. Test-level rubric blocks are kept: they are parsed into `AssessmentTest::$rubricBlocks` and re-emitted unchanged. An unsupported *interaction type* still fails earlier, in the parser, with a `ParseError` (see *Supported interactions* below).
 
 Adding an item whose identifier already exists in the package throws `InvalidAssessmentTestException`; editing a non-existent test or updating a non-existent item throws `ResourceNotFoundException`; an order that does not match the items in the test throws `InvalidItemOrderException`. Media that the added or updated item references is carried over (files already in the package) or registered as new webcontent, without duplicating resources.
 
@@ -178,7 +178,7 @@ $warnings = $result->warnings;  // constructs the model could not keep
 // in a multi-test package: buildFromPackage($qtiPackage, $testId).
 ```
 
-`buildFromPackage()` returns a `TestParseResult` (`test` + `warnings`). A construct the model cannot represent losslessly (outcome processing, test feedback, rubric blocks, nested sections, ...) is not refused: it is dropped on the round-trip and reported in `warnings`.
+`buildFromPackage()` returns a `TestParseResult` (`test` + `warnings`). A construct the model cannot represent losslessly (outcome processing, test feedback, nested sections, ...) is not refused: it is dropped on the round-trip and reported in `warnings`. Test-level `qti-rubric-block` elements are represented: they are kept in `AssessmentTest::$rubricBlocks` and survive the round-trip.
 
 **UC-T2: Generate package from test**
 

@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Qti3\Tests\Unit\AssessmentTest\Model;
 
 use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
+use Qti3\AssessmentItem\Model\RubricBlock\View;
+use Qti3\AssessmentItem\Model\RubricBlock\qtiUse;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
@@ -15,7 +19,11 @@ use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
 use Qti3\AssessmentTest\Model\TestPart\SubmissionMode;
 use Qti3\AssessmentTest\Model\TestPart\TestPart;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
+use Qti3\Shared\Model\ContentBody;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
+use Qti3\Shared\Model\TextNode;
 
 class AssessmentTestStub
 {
@@ -76,6 +84,32 @@ class AssessmentTestStub
                 ),
             ]),
             'title',
+        );
+    }
+
+    /** A test carrying an outcome declaration, two rubric blocks and a test part. */
+    public static function assessmentTestWithRubricBlocks(): AssessmentTest
+    {
+        $base = self::assessmentTest();
+
+        return new AssessmentTest(
+            identifier: $base->identifier,
+            outcomeDeclarations: new OutcomeDeclarationCollection([OutcomeDeclaration::scoreDeclaration()]),
+            testParts: $base->testParts,
+            title: $base->title,
+            rubricBlocks: new RubricBlockCollection([
+                self::rubricBlock(View::CANDIDATE, 'Welkom'),
+                self::rubricBlock(View::SCORER, 'Nakijkmodel'),
+            ]),
+        );
+    }
+
+    private static function rubricBlock(View $view, string $text): RubricBlock
+    {
+        return new RubricBlock(
+            qtiUse::INSTRUCTIONS,
+            $view,
+            new ContentBody(new ContentNodeCollection([new TextNode($text)])),
         );
     }
 }

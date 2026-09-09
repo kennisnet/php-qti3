@@ -128,6 +128,7 @@ final class QtiClient
         return $this->assessmentTestParser ??= new AssessmentTestParser(
             new OutcomeDeclarationParser(),
             $this->getTestPartParser(),
+            new RubricBlockParser(),
         );
     }
 

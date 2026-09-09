@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Qti3\Tests\Unit\AssessmentTest\Service\Parser;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentItem\Model\RubricBlock\View;
+use Qti3\AssessmentItem\Model\RubricBlock\qtiUse;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\Section\AssessmentSection;
 use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
@@ -15,6 +20,9 @@ use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
 use Qti3\AssessmentTest\Service\Parser\TestPartParser;
+use Qti3\Shared\Model\HTMLTag;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
+use Qti3\Shared\Model\TextNode;
 use DOMDocument;
 
 class AssessmentTestParserTest extends TestCase
@@ -30,7 +38,8 @@ class AssessmentTestParserTest extends TestCase
 
         $this->parser = new AssessmentTestParser(
             $outcomeDeclarationParser,
-            $testPartParser
+            $testPartParser,
+            new RubricBlockParser()
         );
     }
 
@@ -94,5 +103,114 @@ XML;
         $this->assertEquals('item2', (string) $itemRef2->identifier);
         $this->assertEquals('item2.xml', $itemRef2->href);
         $this->assertEquals('easy', $itemRef2->category);
+    }
+
+    #[Test]
+    public function testLevelRubricBlocksAreParsedInOrder(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-rubric-block use="instructions" view="candidate" class="qti-rubric-discretionary-placement">
+        <qti-content-body><p>Welkom</p></qti-content-body>
+    </qti-rubric-block>
+    <qti-rubric-block use="scoring" view="scorer">
+        <qti-content-body><p>Nakijkmodel</p></qti-content-body>
+    </qti-rubric-block>
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $result = $this->parser->parse($dom->documentElement);
+
+        $this->assertSame([], $result->warnings->all());
+        $this->assertCount(2, $result->test->rubricBlocks);
+
+        /** @var RubricBlock $first */
+        $first = $result->test->rubricBlocks->all()[0];
+        $this->assertSame(qtiUse::INSTRUCTIONS, $first->use);
+        $this->assertSame(View::CANDIDATE, $first->view);
+        $this->assertSame('qti-rubric-discretionary-placement', $first->class);
+        $this->assertStringContainsString('Welkom', $this->textOf($first));
+
+        /** @var RubricBlock $second */
+        $second = $result->test->rubricBlocks->all()[1];
+        $this->assertSame(qtiUse::SCORING, $second->use);
+        $this->assertSame(View::SCORER, $second->view);
+        $this->assertNull($second->class);
+        $this->assertStringContainsString('Nakijkmodel', $this->textOf($second));
+    }
+
+    #[Test]
+    public function testWithoutRubricBlocksYieldsAnEmptyCollection(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $this->assertTrue($this->parser->parse($dom->documentElement)->test->rubricBlocks->isEmpty());
+    }
+
+    #[Test]
+    public function rubricBlocksArePlacedBetweenOutcomeDeclarationsAndTestParts(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float"/>
+    <qti-rubric-block use="instructions" view="candidate">
+        <qti-content-body><p>Welkom</p></qti-content-body>
+    </qti-rubric-block>
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $children = $this->parser->parse($dom->documentElement)->test->children();
+
+        $this->assertInstanceOf(OutcomeDeclaration::class, $children[0]);
+        $this->assertInstanceOf(RubricBlock::class, $children[1]);
+        $this->assertInstanceOf(TestPart::class, $children[2]);
+    }
+
+    private function textOf(RubricBlock $rubricBlock): string
+    {
+        $text = '';
+        foreach ($rubricBlock->contentBody->content as $node) {
+            $text .= $this->render($node);
+        }
+
+        return $text;
+    }
+
+    private function render(mixed $node): string
+    {
+        if ($node instanceof TextNode) {
+            return $node->content;
+        }
+        if ($node instanceof HTMLTag) {
+            $text = '';
+            foreach ($node->children() as $child) {
+                $text .= $this->render($child);
+            }
+
+            return $text;
+        }
+
+        return '';
     }
 }
