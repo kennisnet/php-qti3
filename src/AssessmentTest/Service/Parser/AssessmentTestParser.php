@@ -64,11 +64,11 @@ class AssessmentTestParser extends AbstractParser
         );
 
         $test = new AssessmentTest(
-            $identifier,
-            $outcomeDeclarations,
-            $testParts,
-            $title,
-            rubricBlocks: $rubricBlocks
+            identifier: $identifier,
+            outcomeDeclarations: $outcomeDeclarations,
+            testParts: $testParts,
+            title: $title,
+            rubricBlocks: $rubricBlocks,
         );
 
         return new TestParseResult($test, $warnings);

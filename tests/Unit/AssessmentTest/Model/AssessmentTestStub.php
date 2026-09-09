@@ -93,10 +93,10 @@ class AssessmentTestStub
         $base = self::assessmentTest();
 
         return new AssessmentTest(
-            $base->identifier,
-            new OutcomeDeclarationCollection([OutcomeDeclaration::scoreDeclaration()]),
-            $base->testParts,
-            $base->title,
+            identifier: $base->identifier,
+            outcomeDeclarations: new OutcomeDeclarationCollection([OutcomeDeclaration::scoreDeclaration()]),
+            testParts: $base->testParts,
+            title: $base->title,
             rubricBlocks: new RubricBlockCollection([
                 self::rubricBlock(View::CANDIDATE, 'Welkom'),
                 self::rubricBlock(View::SCORER, 'Nakijkmodel'),
