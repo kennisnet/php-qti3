@@ -43,7 +43,7 @@ The library parses, builds, and validates QTI 3.0 assessment packages. The centr
 
 **Package handling** (`src/Package/`): `QtiPackageReader` reads ZIP or folder-based packages via `IFilesystemPackageFactory`. `QtiPackageBuilder` writes them back. `QtiPackageValidator` and `QtiSchemaValidator` validate structure and XML schema.
 
-**Assessment tests** (`src/AssessmentTest/`): `TestBuilder` assembles an `AssessmentTest` from a parsed package.
+**Assessment tests** (`src/AssessmentTest/`): `TestBuilder` assembles an `AssessmentTest` from a parsed package. `AssessmentTestParser` delegates to `OutcomeDeclarationParser`, `TestPartParser` and `RubricBlockParser` (test-level `qti-rubric-block`).
 
 **Response processing** (`src/AssessmentItem/Service/`): `ResponseProcessor` evaluates QTI response processing expressions using models from `QtiExpressionParser`.
 

@@ -252,10 +252,11 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 | Reorder list that does not match the items in the test | `Qti3\AssessmentTest\Exception\InvalidItemOrderException` |
 | Adding/updating an item whose content references a resource not in the package (or a path outside it) | `Qti3\Package\Exception\InvalidResourceReferenceException` |
 
-A construct the model cannot hold (outcome processing, test feedback, rubric
-blocks, nested sections, a template declaration, an unconsumed attribute, ...)
-is **not** an error: it is dropped on regeneration and reported through the
-`warnings` on `ItemParseResult` / `EditResult`.
+A construct the model cannot hold (outcome processing, test feedback, nested
+sections, a template declaration, an unconsumed attribute, ...) is **not** an
+error: it is dropped on regeneration and reported through the `warnings` on
+`ItemParseResult` / `EditResult`. Test-level rubric blocks are kept in
+`AssessmentTest::$rubricBlocks` and survive regeneration.
 
 ## Notes
 
