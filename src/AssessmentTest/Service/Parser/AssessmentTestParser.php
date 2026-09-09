@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentTest\Service\Parser;
 
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentItem\Service\Parser\AbstractParser;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\TestPart\TestPart;
@@ -20,7 +23,8 @@ class AssessmentTestParser extends AbstractParser
 {
     public function __construct(
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
-        private readonly TestPartParser $testPartParser
+        private readonly TestPartParser $testPartParser,
+        private readonly RubricBlockParser $rubricBlockParser
     ) {}
 
     /**
@@ -39,11 +43,14 @@ class AssessmentTestParser extends AbstractParser
         $title = $element->getAttribute('title') ?: null;
 
         $outcomeDeclarations = new OutcomeDeclarationCollection();
+        $rubricBlocks = new RubricBlockCollection();
         $testParts = new TestPartCollection();
 
         foreach ($this->getChildren($element) as $child) {
             if ($child->nodeName === OutcomeDeclaration::qtiTagName()) {
                 $outcomeDeclarations->add($this->outcomeDeclarationParser->parse($child));
+            } elseif ($child->nodeName === RubricBlock::qtiTagName()) {
+                $rubricBlocks->add($this->rubricBlockParser->parse($child));
             } elseif ($child->nodeName === TestPart::qtiTagName()) {
                 $testParts->add($this->testPartParser->parse($child, $warnings));
             }
@@ -52,7 +59,7 @@ class AssessmentTestParser extends AbstractParser
         $this->warnUnconsumed(
             $element,
             ['identifier', 'title'],
-            [OutcomeDeclaration::qtiTagName(), TestPart::qtiTagName()],
+            [OutcomeDeclaration::qtiTagName(), RubricBlock::qtiTagName(), TestPart::qtiTagName()],
             $warnings,
         );
 
@@ -60,7 +67,8 @@ class AssessmentTestParser extends AbstractParser
             $identifier,
             $outcomeDeclarations,
             $testParts,
-            $title
+            $title,
+            rubricBlocks: $rubricBlocks
         );
 
         return new TestParseResult($test, $warnings);
