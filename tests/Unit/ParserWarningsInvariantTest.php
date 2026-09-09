@@ -90,6 +90,14 @@ final class ParserWarningsInvariantTest extends TestCase
                     . self::testPart('')),
                 ['qti-outcome-declaration', 'SCORE'],
             ],
+            'rubric block' => [
+                self::test(self::rubricBlock('candidate') . self::testPart('')),
+                ['qti-rubric-block', 'use="instructions"', 'view="candidate"', 'qti-rubric-discretionary-placement', 'Welkom'],
+            ],
+            'two rubric blocks' => [
+                self::test(self::rubricBlock('candidate') . self::rubricBlock('scorer', 'Nakijkmodel') . self::testPart('')),
+                ['view="candidate"', 'view="scorer"', 'Welkom', 'Nakijkmodel'],
+            ],
         ];
     }
 
@@ -217,6 +225,16 @@ final class ParserWarningsInvariantTest extends TestCase
         return sprintf(
             '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">%s</qti-test-part>',
             $sections,
+        );
+    }
+
+    private static function rubricBlock(string $view, string $text = 'Welkom'): string
+    {
+        return sprintf(
+            '<qti-rubric-block use="instructions" view="%s" class="qti-rubric-discretionary-placement">'
+            . '<qti-content-body><p>%s</p></qti-content-body></qti-rubric-block>',
+            $view,
+            $text,
         );
     }
 

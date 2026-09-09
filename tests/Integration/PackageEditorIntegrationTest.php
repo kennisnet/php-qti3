@@ -66,6 +66,51 @@ class PackageEditorIntegrationTest extends TestCase
     }
 
     #[Test]
+    public function aTestLevelRubricBlockSurvivesAddReorderAndRemove(): void
+    {
+        $rubricBlock = '<qti-rubric-block use="instructions" view="candidate" class="qti-rubric-discretionary-placement">'
+            . '<qti-content-body><p>Welkom bij deze toets</p></qti-content-body></qti-rubric-block>';
+        $this->seedPackageOnDisk($rubricBlock);
+        $client = $this->createClient();
+        $editor = $client->getPackageEditor();
+
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+
+        // Every edit below rewrites the test XML from the model.
+        $results = [
+            $editor->addItemToTest(
+                $package,
+                self::TEST_ID,
+                $client->getAssessmentItemParser()->parseFromString($this->itemXml('new', 'Nieuwe vraag'))->item,
+            ),
+            $editor->reorderItemsInTest($package, self::TEST_ID, ['ITEM003', 'ITEM001', 'ITEM002']),
+            $editor->removeItemFromTest($package, self::TEST_ID, 'ITEM001'),
+        ];
+
+        foreach ($results as $result) {
+            foreach ($result->warnings as $warning) {
+                $this->assertStringNotContainsString('qti-rubric-block', $warning);
+            }
+        }
+
+        $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package);
+
+        // Reload: the edits persisted and the rubric block is still there.
+        $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $testXml = (string) $reloaded->getFile('AssessmentTest.xml');
+
+        $this->assertStringContainsString('<qti-rubric-block', $testXml);
+        $this->assertStringContainsString('use="instructions"', $testXml);
+        $this->assertStringContainsString('view="candidate"', $testXml);
+        $this->assertStringContainsString('class="qti-rubric-discretionary-placement"', $testXml);
+        $this->assertStringContainsString('Welkom bij deze toets', $testXml);
+
+        $parsed = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID);
+        $this->assertSame(['ITEM003', 'ITEM002'], $parsed->test->getItemIdentifiers());
+        $this->assertCount(1, $parsed->test->rubricBlocks);
+    }
+
+    #[Test]
     public function inPlaceWriteSkippingUnmodifiedFilesStillProducesACompletePackage(): void
     {
         $this->seedPackageOnDisk();
@@ -168,7 +213,7 @@ class PackageEditorIntegrationTest extends TestCase
         $this->assertStringNotContainsString('never-uploaded', (string) $reloaded->getFile('ITEM001.xml'));
     }
 
-    private function seedPackageOnDisk(): void
+    private function seedPackageOnDisk(string $testRubricBlock = ''): void
     {
         $dir = $this->tempDataDir . '/' . self::PACKAGE_DIR;
         mkdir($dir, 0777, true);
@@ -188,12 +233,14 @@ class PackageEditorIntegrationTest extends TestCase
         $test = sprintf(
             '<?xml version="1.0" encoding="UTF-8"?>'
             . '<qti-assessment-test xmlns="%s" identifier="test-1" title="Toets">'
+            . '%s'
             . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
             . '<qti-assessment-section identifier="s" title="" visible="true">'
             . '<qti-assessment-item-ref identifier="ITEM001" href="ITEM001.xml"/>'
             . '<qti-assessment-item-ref identifier="ITEM002" href="ITEM002.xml"/>'
             . '</qti-assessment-section></qti-test-part></qti-assessment-test>',
             self::ASI_NAMESPACE,
+            $testRubricBlock,
         );
 
         file_put_contents($dir . '/imsmanifest.xml', $manifest);
