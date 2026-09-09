@@ -6,7 +6,7 @@ namespace Qti3\AssessmentTest\Model;
 
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentItem\Model\AssessmentItemId;
-use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentTest\Model\Feedback\TestFeedbackCollection;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\Section\AssessmentSection;
@@ -28,7 +28,7 @@ class AssessmentTest extends QtiElement
         public readonly ?string $title = null,
         public readonly ?OutcomeProcessing $outcomeProcessing = null,
         public readonly TestFeedbackCollection $testFeedback = new TestFeedbackCollection(),
-        public readonly ?RubricBlock $rubricBlock = null,
+        public readonly RubricBlockCollection $rubricBlocks = new RubricBlockCollection(),
     ) {}
 
     /**
@@ -52,7 +52,7 @@ class AssessmentTest extends QtiElement
     {
         return [
             ...$this->outcomeDeclarations->all(),
-            $this->rubricBlock,
+            ...$this->rubricBlocks->all(),
             ...$this->testParts->all(),
             $this->outcomeProcessing,
             ...$this->testFeedback->all(),

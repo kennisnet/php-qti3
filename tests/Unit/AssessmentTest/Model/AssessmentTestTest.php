@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Qti3\Tests\Unit\AssessmentTest\Model;
 
 use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
 use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
+use Qti3\AssessmentTest\Model\TestPart\TestPart;
+use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\Tests\Unit\AssessmentItem\Model\AssessmentItemStub;
 use PHPUnit\Framework\Attributes\Test;
@@ -38,6 +41,24 @@ class AssessmentTestTest extends TestCase
     {
         $assessmentTest = AssessmentTestStub::assessmentTest();
         $this->assertCount(0, $assessmentTest->outcomeDeclarations);
+    }
+
+    #[Test]
+    public function rubricBlocksAreEmptyByDefault(): void
+    {
+        $assessmentTest = AssessmentTestStub::assessmentTest();
+        $this->assertTrue($assessmentTest->rubricBlocks->isEmpty());
+    }
+
+    #[Test]
+    public function rubricBlocksArePlacedBetweenOutcomeDeclarationsAndTestParts(): void
+    {
+        $children = AssessmentTestStub::assessmentTestWithRubricBlocks()->children();
+
+        $this->assertInstanceOf(OutcomeDeclaration::class, $children[0]);
+        $this->assertInstanceOf(RubricBlock::class, $children[1]);
+        $this->assertInstanceOf(RubricBlock::class, $children[2]);
+        $this->assertInstanceOf(TestPart::class, $children[3]);
     }
 
     #[Test]
