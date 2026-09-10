@@ -256,7 +256,10 @@ A construct the model cannot hold (outcome processing, test feedback, nested
 sections, a template declaration, an unconsumed attribute, ...) is **not** an
 error: it is dropped on regeneration and reported through the `warnings` on
 `ItemParseResult` / `EditResult`. Test-level rubric blocks are kept in
-`AssessmentTest::$rubricBlocks` and survive regeneration.
+`AssessmentTest::$rubricBlocks` and survive regeneration; the one thing a rubric
+block can lose is an extension `use` value (`use="ext:…"`, permitted by the
+schema but not by the model), which is dropped with a warning, as is a `view`
+token outside the enumeration.
 
 ## Notes
 

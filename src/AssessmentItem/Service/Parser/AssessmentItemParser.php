@@ -104,7 +104,7 @@ class AssessmentItemParser extends AbstractParser
             } elseif ($child->nodeName === OutcomeDeclaration::qtiTagName()) {
                 $outcomeDeclarations->add($this->outcomeDeclarationParser->parse($child));
             } elseif ($child->nodeName === ItemBody::qtiTagName()) {
-                $itemBody = $this->itemBodyParser->parse($child);
+                $itemBody = $this->itemBodyParser->parse($child, $warnings);
             } elseif ($child->nodeName === ResponseProcessing::qtiTagName()) {
                 $responseProcessing = $this->responseProcessingParser->parse($child);
             } elseif ($child->nodeName === Stylesheet::qtiTagName()) {

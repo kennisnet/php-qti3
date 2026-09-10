@@ -98,6 +98,14 @@ final class ParserWarningsInvariantTest extends TestCase
                 self::test(self::rubricBlock('candidate') . self::rubricBlock('scorer', 'Nakijkmodel') . self::testPart('')),
                 ['view="candidate"', 'view="scorer"', 'Welkom', 'Nakijkmodel'],
             ],
+            'rubric block with a view list' => [
+                self::test(self::rubricBlock('candidate scorer') . self::testPart('')),
+                ['view="candidate scorer"', 'Welkom'],
+            ],
+            'rubric block without a use' => [
+                self::test(self::rubricBlock('candidate', use: null) . self::testPart('')),
+                ['qti-rubric-block', 'view="candidate"', 'Welkom'],
+            ],
         ];
     }
 
@@ -122,6 +130,14 @@ final class ParserWarningsInvariantTest extends TestCase
             'unknown section attribute' => [
                 self::testWithSection('', extraSectionAttribute: 'keep-together="true"'),
                 'keep-together="true"',
+            ],
+            'rubric block with an extension use' => [
+                self::test(self::rubricBlock('candidate', use: 'ext:hint') . self::testPart('')),
+                'ext:hint',
+            ],
+            'rubric block with an unknown view' => [
+                self::test(self::rubricBlock('candidate reviewer') . self::testPart('')),
+                'reviewer',
             ],
             'item ref with child' => [
                 self::testWithSection('<qti-assessment-item-ref identifier="I1" href="I1.xml"><qti-weight identifier="W" value="2"/></qti-assessment-item-ref>'),
@@ -173,6 +189,20 @@ final class ParserWarningsInvariantTest extends TestCase
     }
 
     #[Test]
+    public function itemLevelRubricBlockWithAViewListParsesWithoutWarningsAndSurvives(): void
+    {
+        $result = $this->client->getAssessmentItemParser()->parse($this->element(
+            self::item('<qti-item-body>' . self::rubricBlock('candidate scorer', use: null) . '</qti-item-body>'),
+        ));
+
+        $this->assertSame([], $result->warnings->all());
+
+        $regenerated = $this->regenerate($result->item);
+        $this->assertStringContainsString('view="candidate scorer"', $regenerated);
+        $this->assertStringNotContainsString('use=', $regenerated);
+    }
+
+    #[Test]
     #[DataProvider('lossyItemConstructs')]
     public function lossyItemConstructRaisesAWarning(string $itemXml): void
     {
@@ -195,6 +225,12 @@ final class ParserWarningsInvariantTest extends TestCase
             ],
             'unknown item attribute' => [
                 self::item('<qti-item-body><p>x</p></qti-item-body>', extraItemAttribute: 'label="x"'),
+            ],
+            'rubric block with an extension use' => [
+                self::item('<qti-item-body>' . self::rubricBlock('candidate', use: 'ext:hint') . '</qti-item-body>'),
+            ],
+            'rubric block with an unknown view' => [
+                self::item('<qti-item-body>' . self::rubricBlock('candidate reviewer') . '</qti-item-body>'),
             ],
         ];
     }
@@ -228,11 +264,12 @@ final class ParserWarningsInvariantTest extends TestCase
         );
     }
 
-    private static function rubricBlock(string $view, string $text = 'Welkom'): string
+    private static function rubricBlock(string $view, string $text = 'Welkom', ?string $use = 'instructions'): string
     {
         return sprintf(
-            '<qti-rubric-block use="instructions" view="%s" class="qti-rubric-discretionary-placement">'
+            '<qti-rubric-block %s view="%s" class="qti-rubric-discretionary-placement">'
             . '<qti-content-body><p>%s</p></qti-content-body></qti-rubric-block>',
+            $use === null ? '' : sprintf('use="%s"', $use),
             $view,
             $text,
         );
