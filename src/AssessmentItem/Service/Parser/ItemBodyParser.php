@@ -7,6 +7,7 @@ namespace Qti3\AssessmentItem\Service\Parser;
 use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
 use Qti3\AssessmentItem\Model\ItemBody;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
@@ -22,13 +23,14 @@ class ItemBodyParser extends AbstractParser
         private readonly FeedbackBlockParser $feedbackBlockParser,
     ) {}
 
-    public function parse(DOMElement $element): ItemBody
+    /** `$warnings` is handed to the child parsers that report what they drop. */
+    public function parse(DOMElement $element, ?StringCollection $warnings = null): ItemBody
     {
         $this->validateTag($element, ItemBody::qtiTagName());
 
         $content = new ContentNodeCollection();
         foreach ($element->childNodes as $child) {
-            $node = $this->parseNode($child);
+            $node = $this->parseNode($child, $warnings);
             if ($node !== null) {
                 $content->add($node);
             }
@@ -37,7 +39,7 @@ class ItemBodyParser extends AbstractParser
         return new ItemBody($content);
     }
 
-    private function parseNode(DOMNode $node): mixed
+    private function parseNode(DOMNode $node, ?StringCollection $warnings): mixed
     {
         if ($node instanceof DOMText) {
             $text = $node->textContent;
@@ -55,7 +57,7 @@ class ItemBodyParser extends AbstractParser
             }
 
             if ($tagName === RubricBlock::qtiTagName()) {
-                return $this->rubricBlockParser->parse($node);
+                return $this->rubricBlockParser->parse($node, $warnings);
             }
 
             if ($tagName === FeedbackBlock::qtiTagName()) {
@@ -70,7 +72,7 @@ class ItemBodyParser extends AbstractParser
 
             $children = [];
             foreach ($node->childNodes as $child) {
-                $parsedChild = $this->parseNode($child);
+                $parsedChild = $this->parseNode($child, $warnings);
                 if ($parsedChild !== null) {
                     $children[] = $parsedChild;
                 }

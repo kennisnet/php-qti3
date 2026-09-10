@@ -133,14 +133,14 @@ XML;
         /** @var RubricBlock $first */
         $first = $result->test->rubricBlocks->all()[0];
         $this->assertSame(qtiUse::INSTRUCTIONS, $first->use);
-        $this->assertSame(View::CANDIDATE, $first->view);
+        $this->assertSame([View::CANDIDATE], $first->views->all());
         $this->assertSame('qti-rubric-discretionary-placement', $first->class);
         $this->assertStringContainsString('Welkom', $this->textOf($first));
 
         /** @var RubricBlock $second */
         $second = $result->test->rubricBlocks->all()[1];
         $this->assertSame(qtiUse::SCORING, $second->use);
-        $this->assertSame(View::SCORER, $second->view);
+        $this->assertSame([View::SCORER], $second->views->all());
         $this->assertNull($second->class);
         $this->assertStringContainsString('Nakijkmodel', $this->textOf($second));
     }

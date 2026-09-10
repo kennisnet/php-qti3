@@ -50,7 +50,7 @@ class AssessmentTestParser extends AbstractParser
             if ($child->nodeName === OutcomeDeclaration::qtiTagName()) {
                 $outcomeDeclarations->add($this->outcomeDeclarationParser->parse($child));
             } elseif ($child->nodeName === RubricBlock::qtiTagName()) {
-                $rubricBlocks->add($this->rubricBlockParser->parse($child));
+                $rubricBlocks->add($this->rubricBlockParser->parse($child, $warnings));
             } elseif ($child->nodeName === TestPart::qtiTagName()) {
                 $testParts->add($this->testPartParser->parse($child, $warnings));
             }

@@ -7,6 +7,7 @@ namespace Qti3\Tests\Integration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Qti3\AssessmentItem\Model\RubricBlock\View;
 use Qti3\Package\Exception\InvalidResourceReferenceException;
 use Qti3\Package\Model\FileContent\MemoryFileContent;
 
@@ -108,6 +109,46 @@ class PackageEditorIntegrationTest extends TestCase
         $parsed = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID);
         $this->assertSame(['ITEM003', 'ITEM002'], $parsed->test->getItemIdentifiers());
         $this->assertCount(1, $parsed->test->rubricBlocks);
+    }
+
+    #[Test]
+    public function aTestLevelRubricBlockWithAViewListSurvivesAddReorderAndRemove(): void
+    {
+        $rubricBlock = '<qti-rubric-block view="candidate scorer">'
+            . '<qti-content-body><p>Welkom bij deze toets</p></qti-content-body></qti-rubric-block>';
+        $this->seedPackageOnDisk($rubricBlock);
+        $client = $this->createClient();
+        $editor = $client->getPackageEditor();
+
+        $package = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+
+        $results = [
+            $editor->addItemToTest(
+                $package,
+                self::TEST_ID,
+                $client->getAssessmentItemParser()->parseFromString($this->itemXml('new', 'Nieuwe vraag'))->item,
+            ),
+            $editor->reorderItemsInTest($package, self::TEST_ID, ['ITEM003', 'ITEM001', 'ITEM002']),
+            $editor->removeItemFromTest($package, self::TEST_ID, 'ITEM001'),
+        ];
+
+        foreach ($results as $result) {
+            foreach ($result->warnings as $warning) {
+                $this->assertStringNotContainsString('qti-rubric-block', $warning);
+            }
+        }
+
+        $client->getFilesystemPackageFactory()->getWriter(self::PACKAGE_DIR)->write($package);
+
+        $reloaded = $client->getQtiPackageReader()->fromFilesystem(self::PACKAGE_DIR);
+        $testXml = (string) $reloaded->getFile('AssessmentTest.xml');
+
+        $this->assertStringContainsString('view="candidate scorer"', $testXml);
+        $this->assertStringNotContainsString('use=', $testXml);
+
+        $parsed = $client->getTestBuilder()->buildFromPackage($reloaded, self::TEST_ID);
+        $this->assertCount(1, $parsed->test->rubricBlocks);
+        $this->assertTrue($parsed->test->rubricBlocks[0]->hasView(View::SCORER));
     }
 
     #[Test]

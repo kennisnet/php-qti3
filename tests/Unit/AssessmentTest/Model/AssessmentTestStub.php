@@ -8,6 +8,7 @@ use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentItem\Model\RubricBlock\View;
+use Qti3\AssessmentItem\Model\RubricBlock\ViewCollection;
 use Qti3\AssessmentItem\Model\RubricBlock\qtiUse;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
@@ -108,7 +109,7 @@ class AssessmentTestStub
     {
         return new RubricBlock(
             qtiUse::INSTRUCTIONS,
-            $view,
+            new ViewCollection([$view]),
             new ContentBody(new ContentNodeCollection([new TextNode($text)])),
         );
     }
