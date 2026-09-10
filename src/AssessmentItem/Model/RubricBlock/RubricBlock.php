@@ -10,10 +10,7 @@ use Qti3\Shared\Model\QtiElement;
 
 class RubricBlock extends QtiElement
 {
-    /**
-     * `use` is optional in the QTI 3.0 ASI schema, `view` is a required list of
-     * views — hence the nullable `$use` and the {@see ViewCollection}.
-     */
+    /** `use` is optional in the schema, `view` a required list of views. */
     public function __construct(
         public readonly ?qtiUse $use,
         public readonly ViewCollection $views,
@@ -25,10 +22,6 @@ class RubricBlock extends QtiElement
         }
     }
 
-    /**
-     * Whether this rubric block is addressed to `$view`, e.g. to select the
-     * blocks a candidate gets to see.
-     */
     public function hasView(View $view): bool
     {
         return $this->views->has($view);

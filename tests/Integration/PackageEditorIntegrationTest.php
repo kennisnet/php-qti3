@@ -114,7 +114,6 @@ class PackageEditorIntegrationTest extends TestCase
     #[Test]
     public function aTestLevelRubricBlockWithAViewListSurvivesAddReorderAndRemove(): void
     {
-        // `view` is an xs:list in the schema; a package may address several views at once.
         $rubricBlock = '<qti-rubric-block view="candidate scorer">'
             . '<qti-content-body><p>Welkom bij deze toets</p></qti-content-body></qti-rubric-block>';
         $this->seedPackageOnDisk($rubricBlock);

@@ -19,13 +19,6 @@ use Qti3\Shared\Model\TextNode;
 
 class RubricBlockParser extends AbstractParser
 {
-    /**
-     * Parse a `qti-rubric-block`. Both enumerated attributes are read
-     * tolerantly: `view` is an `xs:list` in the schema and `use` is optional
-     * there and open to `ext:` extension values, so neither is cast with a
-     * strict `from()` — what the model cannot hold is reported through
-     * `$warnings` and dropped, never refused.
-     */
     public function parse(DOMElement $element, ?StringCollection $warnings = null): RubricBlock
     {
         $this->validateTag($element, RubricBlock::qtiTagName());
@@ -47,11 +40,7 @@ class RubricBlockParser extends AbstractParser
         return new RubricBlock($use, $views, new ContentBody($content), $class);
     }
 
-    /**
-     * `use` is optional in the schema and its type is a union of the
-     * enumeration and `UseExtensionStringDType` (`ext:…`). An extension value
-     * cannot be represented, so it is dropped with a warning.
-     */
+    /** Optional in the schema, and open to `ext:` values the model cannot hold. */
     private function parseUse(DOMElement $element, ?StringCollection $warnings): ?qtiUse
     {
         $raw = trim($element->getAttribute('use'));
@@ -67,11 +56,7 @@ class RubricBlockParser extends AbstractParser
         return $use;
     }
 
-    /**
-     * `view` is a required whitespace-separated list of views. Unknown tokens
-     * are dropped with a warning; a block left without any known view cannot be
-     * represented at all, so that is a parse error.
-     */
+    /** A required whitespace-separated list; at least one view must survive. */
     private function parseViews(DOMElement $element, ?StringCollection $warnings): ViewCollection
     {
         $raw = trim($element->getAttribute('view'));

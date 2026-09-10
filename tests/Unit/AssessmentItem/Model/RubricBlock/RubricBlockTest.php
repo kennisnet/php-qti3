@@ -65,7 +65,6 @@ class RubricBlockTest extends TestCase
             contentBody: $this->contentBody(),
         );
 
-        // The serializer skips null attributes, so `use` is not emitted at all.
         $this->assertNull($rubricBlock->attributes()['use']);
     }
 

@@ -23,11 +23,7 @@ class ItemBodyParser extends AbstractParser
         private readonly FeedbackBlockParser $feedbackBlockParser,
     ) {}
 
-    /**
-     * Parse a `qti-item-body`. `$warnings` is handed to the child parsers that
-     * report constructs they cannot represent, so item-level warnings reach the
-     * {@see ItemParseResult} like the test-level ones do.
-     */
+    /** `$warnings` is handed to the child parsers that report what they drop. */
     public function parse(DOMElement $element, ?StringCollection $warnings = null): ItemBody
     {
         $this->validateTag($element, ItemBody::qtiTagName());
