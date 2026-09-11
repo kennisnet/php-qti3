@@ -133,6 +133,15 @@ class QtiClientTest extends TestCase
         );
     }
 
+    public function testGetContentNodeParserReturnsSameInstance(): void
+    {
+        $container = $this->createClient();
+        $this->assertSame(
+            $container->getContentNodeParser(),
+            $container->getContentNodeParser(),
+        );
+    }
+
     public function testGetResponseProcessorReturnsInstance(): void
     {
         $container = $this->createClient();

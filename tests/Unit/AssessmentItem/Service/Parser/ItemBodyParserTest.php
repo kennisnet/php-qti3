@@ -17,6 +17,7 @@ use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ItemBodyParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
+use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
@@ -27,9 +28,10 @@ class ItemBodyParserTest extends TestCase
     protected function setUp(): void
     {
         $this->parser = new ItemBodyParser(
-            new InteractionParser(),
-            new RubricBlockParser(),
-            new FeedbackBlockParser(),
+            new InteractionParser(new ContentNodeParser()),
+            new RubricBlockParser(new ContentNodeParser()),
+            new FeedbackBlockParser(new ContentNodeParser()),
+            new ContentNodeParser(),
         );
     }
 

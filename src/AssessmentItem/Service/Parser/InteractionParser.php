@@ -31,13 +31,15 @@ use Qti3\AssessmentItem\Model\Interaction\Prompt;
 use Qti3\AssessmentItem\Model\Interaction\SelectPointInteraction\SelectPointInteraction;
 use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteraction;
 use Qti3\AssessmentItem\Model\Shape\ShapeFactory;
+use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\IXmlElement;
-use Qti3\Shared\Model\TextNode;
 
 class InteractionParser extends AbstractParser
 {
+    public function __construct(private readonly ContentNodeParser $contentNodeParser) {}
+
     public function parse(DOMElement $element): IXmlElement
     {
         return match ($element->nodeName) {
@@ -426,11 +428,7 @@ class InteractionParser extends AbstractParser
     private function parseContentNode(DOMNode $node): mixed
     {
         if ($node instanceof DOMText) {
-            $text = $node->textContent;
-            if (trim($text) === '') {
-                return null;
-            }
-            return new TextNode($text);
+            return $this->contentNodeParser->parseText($node);
         }
 
         if ($node instanceof DOMElement) {

@@ -14,6 +14,7 @@ use Qti3\AssessmentItem\Model\RubricBlock\View;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
@@ -23,7 +24,7 @@ class RubricBlockParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->parser = new RubricBlockParser();
+        $this->parser = new RubricBlockParser(new ContentNodeParser());
     }
 
     private function loadElement(string $xml): DOMElement
