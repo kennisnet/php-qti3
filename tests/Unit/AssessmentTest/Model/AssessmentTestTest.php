@@ -6,6 +6,7 @@ namespace Qti3\Tests\Unit\AssessmentTest\Model;
 
 use Qti3\AssessmentItem\Model\AssessmentItemId;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
@@ -59,6 +60,25 @@ class AssessmentTestTest extends TestCase
         $this->assertInstanceOf(RubricBlock::class, $children[1]);
         $this->assertInstanceOf(RubricBlock::class, $children[2]);
         $this->assertInstanceOf(TestPart::class, $children[3]);
+    }
+
+    #[Test]
+    public function withRubricBlocksReturnsANewInstanceLeavingTheOriginalUntouched(): void
+    {
+        $original = AssessmentTestStub::assessmentTestWithRubricBlocks();
+        $newRubricBlocks = new RubricBlockCollection();
+
+        $copy = $original->withRubricBlocks($newRubricBlocks);
+
+        $this->assertNotSame($original, $copy);
+        $this->assertCount(2, $original->rubricBlocks);
+        $this->assertSame($newRubricBlocks, $copy->rubricBlocks);
+        $this->assertSame($original->identifier, $copy->identifier);
+        $this->assertSame($original->outcomeDeclarations, $copy->outcomeDeclarations);
+        $this->assertSame($original->testParts, $copy->testParts);
+        $this->assertSame($original->title, $copy->title);
+        $this->assertSame($original->outcomeProcessing, $copy->outcomeProcessing);
+        $this->assertSame($original->testFeedback, $copy->testFeedback);
     }
 
     #[Test]

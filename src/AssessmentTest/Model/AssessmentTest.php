@@ -59,6 +59,20 @@ class AssessmentTest extends QtiElement
         ];
     }
 
+    /** Immutable copy carrying a different set of test-level rubric blocks. */
+    public function withRubricBlocks(RubricBlockCollection $rubricBlocks): self
+    {
+        return new self(
+            identifier: $this->identifier,
+            outcomeDeclarations: $this->outcomeDeclarations,
+            testParts: $this->testParts,
+            title: $this->title,
+            outcomeProcessing: $this->outcomeProcessing,
+            testFeedback: $this->testFeedback,
+            rubricBlocks: $rubricBlocks,
+        );
+    }
+
     /**
      * Add an item ref to the first section. Position -1 appends; a zero-based
      * position inserts at that index.
