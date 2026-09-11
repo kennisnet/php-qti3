@@ -20,6 +20,7 @@ use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
 use Qti3\AssessmentTest\Service\Parser\TestPartParser;
+use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\TextNode;
@@ -39,7 +40,7 @@ class AssessmentTestParserTest extends TestCase
         $this->parser = new AssessmentTestParser(
             $outcomeDeclarationParser,
             $testPartParser,
-            new RubricBlockParser()
+            new RubricBlockParser(new ContentNodeParser())
         );
     }
 

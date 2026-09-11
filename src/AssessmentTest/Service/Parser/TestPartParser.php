@@ -25,8 +25,8 @@ class TestPartParser extends AbstractParser
         $warnings ??= new StringCollection();
 
         $identifier = $element->getAttribute('identifier');
-        $navigationMode = NavigationMode::from($element->getAttribute('navigation-mode'));
-        $submissionMode = SubmissionMode::from($element->getAttribute('submission-mode'));
+        $navigationMode = $this->parseNavigationMode($element, $warnings);
+        $submissionMode = $this->parseSubmissionMode($element, $warnings);
 
         $sections = new AssessmentSectionCollection();
         foreach ($this->getChildren($element) as $child) {
@@ -48,5 +48,34 @@ class TestPartParser extends AbstractParser
             $submissionMode,
             $sections
         );
+    }
+
+    /**
+     * Required by the XSD, but packages arrive unvalidated, so a missing or
+     * unknown value falls back to the schema's default rather than throwing a
+     * raw ValueError. The next edit writes that default back explicitly.
+     */
+    private function parseNavigationMode(DOMElement $element, StringCollection $warnings): NavigationMode
+    {
+        $raw = $element->getAttribute('navigation-mode');
+        $navigationMode = NavigationMode::tryFrom($raw);
+        if ($navigationMode === null) {
+            $warnings->add(sprintf('%s: defaults missing or unknown navigation-mode "%s" to "linear"', $this->locate($element), $raw));
+            return NavigationMode::LINEAR;
+        }
+
+        return $navigationMode;
+    }
+
+    private function parseSubmissionMode(DOMElement $element, StringCollection $warnings): SubmissionMode
+    {
+        $raw = $element->getAttribute('submission-mode');
+        $submissionMode = SubmissionMode::tryFrom($raw);
+        if ($submissionMode === null) {
+            $warnings->add(sprintf('%s: defaults missing or unknown submission-mode "%s" to "individual"', $this->locate($element), $raw));
+            return SubmissionMode::INDIVIDUAL;
+        }
+
+        return $submissionMode;
     }
 }

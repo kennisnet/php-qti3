@@ -9,9 +9,10 @@ use Qti3\Shared\Collection\StringCollection;
 
 /**
  * The outcome of a {@see PackageEditor} operation: the affected item resource
- * (null for reorder) plus the warnings raised while editing. Warnings surface
- * data loss — e.g. the edited test contained constructs the model cannot hold
- * and that were dropped when its XML was regenerated.
+ * (null for reorder and for {@see PackageEditor::setTestRubricBlocks()}) plus
+ * the warnings raised while editing. Warnings surface data loss — e.g. the
+ * edited test contained constructs the model cannot hold and that were
+ * dropped when its XML was regenerated.
  */
 final readonly class EditResult
 {

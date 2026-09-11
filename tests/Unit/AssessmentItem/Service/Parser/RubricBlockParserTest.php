@@ -14,6 +14,7 @@ use Qti3\AssessmentItem\Model\RubricBlock\View;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
@@ -23,7 +24,7 @@ class RubricBlockParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->parser = new RubricBlockParser();
+        $this->parser = new RubricBlockParser(new ContentNodeParser());
     }
 
     private function loadElement(string $xml): DOMElement
@@ -183,6 +184,17 @@ class RubricBlockParserTest extends TestCase
 
         $this->assertNull($result->use);
         $this->assertSame([View::CANDIDATE], $result->views->all());
+    }
+
+    /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
+    #[Test]
+    public function parseKeepsATagThatCannotStandOnItsOwn(): void
+    {
+        $element = $this->loadElement('<qti-rubric-block use="instructions" view="candidate"><qti-content-body><li>los</li></qti-content-body></qti-rubric-block>');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertSame('li', $result->contentBody->children()[0]->tagName());
     }
 
     #[Test]

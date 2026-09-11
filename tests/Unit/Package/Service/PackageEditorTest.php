@@ -14,8 +14,12 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\AssessmentItem;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
+use Qti3\AssessmentItem\Model\RubricBlock\View;
 use Qti3\AssessmentTest\Exception\InvalidAssessmentTestException;
 use Qti3\AssessmentTest\Exception\InvalidItemOrderException;
+use Qti3\AssessmentTest\Service\TestParseResult;
 use Qti3\Package\Exception\InvalidResourceReferenceException;
 use Qti3\Package\Filesystem\FlysystemPackageFactory;
 use Qti3\Package\Model\FileContent\MemoryFileContent;
@@ -27,6 +31,7 @@ use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Downloader\Resource\IResourceDownloader;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\QtiClient;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Exception\ResourceNotFoundException;
 
 final class PackageEditorTest extends TestCase
@@ -325,6 +330,161 @@ final class PackageEditorTest extends TestCase
         } catch (InvalidItemOrderException) {
             $this->assertSame($before, (string) $package->getFile('AssessmentTest.xml'));
         }
+    }
+
+    #[Test]
+    public function setTestRubricBlocksReplacesTheExistingBlock(): void
+    {
+        $package = $this->draftWithRubricBlock();
+        $newBlock = $this->rubricBlock('candidate', 'Nieuw');
+
+        $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection([$newBlock]));
+
+        $dom = new DOMDocument();
+        $dom->loadXML((string) $package->getFile('AssessmentTest.xml'));
+
+        $rubricBlocks = $dom->getElementsByTagNameNS(self::ASI_NAMESPACE, 'qti-rubric-block');
+        $this->assertSame(1, $rubricBlocks->length);
+        $rubricBlock = $rubricBlocks->item(0);
+        $this->assertInstanceOf(DOMElement::class, $rubricBlock);
+        $this->assertStringContainsString('<p>Nieuw</p>', $this->elementXml($rubricBlock));
+
+        $root = $dom->documentElement;
+        $this->assertInstanceOf(DOMElement::class, $root);
+        $childNames = [];
+        foreach ($root->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $childNames[] = $child->localName;
+            }
+        }
+        $this->assertSame(['qti-outcome-declaration', 'qti-rubric-block', 'qti-test-part'], $childNames);
+    }
+
+    #[Test]
+    public function setTestRubricBlocksWithAnEmptyCollectionRemovesAllBlocks(): void
+    {
+        $package = $this->draftWithRubricBlock();
+
+        $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection());
+
+        $xml = (string) $package->getFile('AssessmentTest.xml');
+        $this->assertStringNotContainsString('qti-rubric-block', $xml);
+        $this->assertStringContainsString('qti-test-part', $xml);
+    }
+
+    #[Test]
+    public function callerCanKeepOnlyTheNonCandidateRubricBlock(): void
+    {
+        $package = $this->draftWithTwoRubricBlocks();
+
+        $parsed = $this->editor->parseTest($package, self::TEST_ID);
+        $kept = array_filter(
+            $parsed->test->rubricBlocks->all(),
+            static fn(RubricBlock $rubricBlock): bool => !$rubricBlock->hasView(View::CANDIDATE),
+        );
+
+        $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection(array_values($kept)));
+
+        $dom = new DOMDocument();
+        $dom->loadXML((string) $package->getFile('AssessmentTest.xml'));
+        $rubricBlocks = $dom->getElementsByTagNameNS(self::ASI_NAMESPACE, 'qti-rubric-block');
+        $this->assertSame(1, $rubricBlocks->length);
+        $remaining = $rubricBlocks->item(0);
+        $this->assertInstanceOf(DOMElement::class, $remaining);
+        $this->assertSame('tutor', $remaining->getAttribute('view'));
+    }
+
+    #[Test]
+    public function setTestRubricBlocksRegistersMediaTheNewBlockReferences(): void
+    {
+        $package = $this->draftWithRubricBlock();
+        $uploaded = $this->editor->addResource($package, 'resources/pic.png', new MemoryFileContent('PNGDATA123'));
+
+        $this->editor->setTestRubricBlocks(
+            $package,
+            self::TEST_ID,
+            new RubricBlockCollection([$this->rubricBlockWithImage('candidate', 'resources/pic.png')]),
+        );
+
+        $this->assertStringContainsString(
+            sprintf('<dependency identifierref="%s"/>', $uploaded->resource->identifier),
+            (string) $package->manifest,
+        );
+        $this->assertStringContainsString('resources/pic.png', (string) $package->getFile('AssessmentTest.xml'));
+    }
+
+    #[Test]
+    public function setTestRubricBlocksRetiresMediaNoBlockReferencesAnyMore(): void
+    {
+        $package = $this->draftWithRubricBlock();
+        $uploaded = $this->editor->addResource($package, 'resources/pic.png', new MemoryFileContent('PNGDATA123'));
+        $this->editor->setTestRubricBlocks(
+            $package,
+            self::TEST_ID,
+            new RubricBlockCollection([$this->rubricBlockWithImage('candidate', 'resources/pic.png')]),
+        );
+
+        $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection());
+
+        $this->assertStringNotContainsString(
+            sprintf('<dependency identifierref="%s"/>', $uploaded->resource->identifier),
+            (string) $package->manifest,
+        );
+        // The file itself stays in the package: media is never deleted on an edit.
+        $this->assertTrue($package->hasResource($uploaded->resource->identifier));
+    }
+
+    #[Test]
+    public function setTestRubricBlocksRejectsAReferenceToAResourceNotInThePackage(): void
+    {
+        $package = $this->draftWithRubricBlock();
+
+        try {
+            $this->editor->setTestRubricBlocks(
+                $package,
+                self::TEST_ID,
+                new RubricBlockCollection([$this->rubricBlockWithImage('candidate', 'resources/missing.png')]),
+            );
+            $this->fail('Expected InvalidResourceReferenceException');
+        } catch (InvalidResourceReferenceException $exception) {
+            $this->assertStringContainsString('resources/missing.png', implode("\n", $exception->validationErrors()->all()));
+            // The rejected edit wrote nothing: the old block is still there.
+            $testXml = (string) $package->getFile('AssessmentTest.xml');
+            $this->assertStringContainsString('<p>Oud</p>', $testXml);
+            $this->assertStringNotContainsString('missing.png', $testXml);
+        }
+    }
+
+    #[Test]
+    public function setTestRubricBlocksReturnsAnEditResultWithNoResource(): void
+    {
+        $package = $this->draftWithRubricBlock();
+
+        $result = $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection());
+
+        $this->assertNull($result->resource);
+        $this->assertInstanceOf(StringCollection::class, $result->warnings);
+    }
+
+    #[Test]
+    public function parseTestIsPublicAndReturnsTheTestModelWithItsRubricBlocks(): void
+    {
+        $package = $this->draftWithRubricBlock();
+
+        $parsed = $this->editor->parseTest($package, self::TEST_ID);
+
+        $this->assertInstanceOf(TestParseResult::class, $parsed);
+        $this->assertCount(1, $parsed->test->rubricBlocks);
+    }
+
+    #[Test]
+    public function setTestRubricBlocksThrowsWhenTheTestDoesNotExist(): void
+    {
+        $package = $this->draftWithRubricBlock();
+
+        $this->expectException(ResourceNotFoundException::class);
+
+        $this->editor->setTestRubricBlocks($package, 'does-not-exist', new RubricBlockCollection());
     }
 
     #[Test]
@@ -702,6 +862,50 @@ final class PackageEditorTest extends TestCase
         return $this->client->getAssessmentItemParser()->parse($element)->item;
     }
 
+    /** Parses a one-off rubric block, e.g. to hand a new block to setTestRubricBlocks(). */
+    private function rubricBlock(string $view, string $text): RubricBlock
+    {
+        $xml = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="tmp" title="">'
+            . '<qti-rubric-block use="instructions" view="%s"><qti-content-body><p>%s</p></qti-content-body></qti-rubric-block>'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part></qti-assessment-test>',
+            self::ASI_NAMESPACE,
+            $view,
+            $text,
+        );
+
+        $element = $this->client->getXmlReader()->read($xml)->documentElement;
+        self::assertInstanceOf(DOMElement::class, $element);
+
+        return $this->client->getAssessmentTestParser()->parse($element)->test->rubricBlocks->all()[0];
+    }
+
+    /** A rubric block whose content references an image, to exercise media handling. */
+    private function rubricBlockWithImage(string $view, string $src): RubricBlock
+    {
+        $xml = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="tmp" title="">'
+            . '<qti-rubric-block use="instructions" view="%s"><qti-content-body>'
+            . '<p><img src="%s" alt="plaatje"/></p>'
+            . '</qti-content-body></qti-rubric-block>'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part></qti-assessment-test>',
+            self::ASI_NAMESPACE,
+            $view,
+            $src,
+        );
+
+        $element = $this->client->getXmlReader()->read($xml)->documentElement;
+        self::assertInstanceOf(DOMElement::class, $element);
+
+        return $this->client->getAssessmentTestParser()->parse($element)->test->rubricBlocks->all()[0];
+    }
+
     // --- seeding helpers -----------------------------------------------------
 
     private function emptyDraft(string $testHref = 'AssessmentTest.xml'): QtiPackage
@@ -761,6 +965,63 @@ final class PackageEditorTest extends TestCase
             . '</qti-test-part>'
             . '<qti-outcome-processing/>'
             . '</qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+
+        return $this->readPackage();
+    }
+
+    private function draftWithRubricBlock(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float"/>'
+            . '<qti-rubric-block use="instructions" view="candidate"><qti-content-body><p>Oud</p></qti-content-body></qti-rubric-block>'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part></qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+
+        return $this->readPackage();
+    }
+
+    private function draftWithTwoRubricBlocks(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float"/>'
+            . '<qti-rubric-block use="instructions" view="candidate"><qti-content-body><p>Kandidaat</p></qti-content-body></qti-rubric-block>'
+            . '<qti-rubric-block use="instructions" view="tutor"><qti-content-body><p>Docent</p></qti-content-body></qti-rubric-block>'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part></qti-assessment-test>',
             self::ASI_NAMESPACE,
         );
 

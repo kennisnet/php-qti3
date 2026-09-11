@@ -8,7 +8,7 @@ use Qti3\Package\Model\Manifest\Manifest;
 use Qti3\Package\Model\Manifest\ManifestResource;
 use Qti3\Package\Model\Manifest\ManifestResourceCollection;
 use Qti3\Package\Model\Resource\ResourceCollection;
-use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
+use Qti3\Shared\Xml\Builder\IXmlBuilder;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use DOMDocument;
 use DOMElement;
