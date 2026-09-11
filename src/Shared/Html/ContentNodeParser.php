@@ -15,28 +15,19 @@ use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\TextNode;
 
 /**
- * Parses a single DOM node into the {@see IContentNode} model tree used inside
- * a {@see \Qti3\Shared\Model\ContentBody}: a `DOMText` becomes a
- * {@see TextNode} (dropped when it is layout whitespace, see
- * {@see self::parseText()}), a `DOMComment` becomes a {@see Comment}, a
- * `DOMElement` becomes an {@see HTMLTag} carrying its attributes and its
- * recursively parsed children (children that parse to null are dropped), and
- * any other node type (processing instructions, ...) is dropped.
+ * Parses a DOM node into the {@see IContentNode} tree of a
+ * {@see \Qti3\Shared\Model\ContentBody}. Node types the model has no place for
+ * are dropped.
  *
- * @throws InvalidArgumentException when an element's tag name, or one of its
- *         attributes, falls outside the QTI HTML whitelist enforced by
- *         {@see HTMLTag}'s constructor; the exception propagates unchanged.
+ * @throws InvalidArgumentException from {@see HTMLTag} for a tag or attribute
+ *         outside the QTI HTML whitelist.
  */
 final readonly class ContentNodeParser
 {
     /**
      * The tags whose surrounding whitespace is layout rather than content.
-     *
-     * This is deliberately not {@see HTMLTag::getBlockTags()}: that list splits
-     * tags by the QTI content model (where `p` and `blockquote` sit among the
-     * inline group), while whitespace significance follows CSS display — a
-     * newline between two `</p><p>` renders as nothing, a space between
-     * `</strong>` and `<em>` renders as a word boundary.
+     * Deliberately not {@see HTMLTag::getBlockTags()}, which splits tags by the
+     * QTI content model; whitespace significance follows CSS display instead.
      *
      * @var array<int,string>
      */
@@ -48,10 +39,8 @@ final readonly class ContentNodeParser
     ];
 
     /**
-     * The QTI elements that flow inline with the surrounding words, so that the
-     * whitespace around them is a word boundary. Every other QTI element — an
-     * item body, a rubric block, a block-level interaction — is a container
-     * whose surrounding whitespace is layout.
+     * The QTI elements that flow inline with the surrounding words. Every other
+     * one is a container, whose surrounding whitespace is layout.
      *
      * @var array<int,string>
      */
@@ -67,8 +56,6 @@ final readonly class ContentNodeParser
         }
 
         if ($node instanceof DOMComment) {
-            // The model can hold a comment, so keep it rather than silently
-            // dropping content the author wrote.
             return new Comment($node->textContent);
         }
 
@@ -81,15 +68,10 @@ final readonly class ContentNodeParser
 
     /**
      * A text node, or null when it carries nothing but layout whitespace.
-     *
-     * Whitespace-only text is content wherever it separates inline content —
-     * `<strong>a</strong> <em>b</em>` is two words, and dropping the space
-     * glues them together. It is layout wherever a block element sits on
-     * either side (`</p>\n  <p>`, or `<p>\n  <strong>x</strong>\n</p>`, which
-     * renders without either newline), and only those are dropped. Shared with the parsers that do
-     * their own element dispatch ({@see \Qti3\AssessmentItem\Service\Parser\ItemBodyParser},
-     * {@see \Qti3\AssessmentItem\Service\Parser\InteractionParser}) so the rule
-     * lives in one place.
+     * Whitespace-only text is content where it separates inline content —
+     * `<strong>a</strong> <em>b</em>` is two words — and layout where a block
+     * element sits on either side. Public because the parsers that do their own
+     * element dispatch call it, so the rule lives in one place.
      */
     public function parseText(DOMText $node): ?TextNode
     {
@@ -133,13 +115,7 @@ final readonly class ContentNodeParser
         return $attributes;
     }
 
-    /**
-     * Whether the whitespace-only `$node` separates two pieces of inline
-     * content. Both sides have to be inline: whitespace with a block element on
-     * either side renders as nothing — a newline between `</div>` and the next
-     * element, or between `<p>` and the `<strong>` that opens it — while
-     * whitespace between two inline pieces is the word boundary between them.
-     */
+    /** Both sides have to be inline for the whitespace to be a word boundary. */
     private function separatesInlineContent(DOMText $node): bool
     {
         $parent = $node->parentNode;
@@ -150,11 +126,8 @@ final readonly class ContentNodeParser
     }
 
     /**
-     * Whether whitespace next to `$sibling` separates inline content.
-     *
      * A missing sibling means the whitespace sits at an edge of its parent,
-     * which is content only inside an inline parent (`a<em> </em>b`) — hence
-     * `$atInlineEdge`.
+     * which is content only inside an inline parent (`a<em> </em>b`).
      */
     private function isInlineNeighbour(?DOMNode $sibling, bool $atInlineEdge): bool
     {
@@ -170,10 +143,8 @@ final readonly class ContentNodeParser
     }
 
     /**
-     * Inline is the narrow set: an HTML tag that is not block-level, or one of
-     * the inline QTI elements. Everything else — a MathML root, a QTI container,
-     * an unknown tag — counts as block-level, so unrecognised markup keeps the
-     * whitespace handling the library had before this rule existed.
+     * Anything unrecognised — a MathML root, a QTI container, an unknown tag —
+     * counts as block-level, keeping the whitespace handling it had before.
      */
     private function isInlineTag(string $tagName): bool
     {
@@ -184,7 +155,6 @@ final readonly class ContentNodeParser
         return $this->isHtmlTag($tagName) && !in_array($tagName, self::WHITESPACE_INSIGNIFICANT_TAGS, true);
     }
 
-    /** Whether `$tagName` is HTML the QTI content model knows (MathML is not). */
     private function isHtmlTag(string $tagName): bool
     {
         static $htmlTags = null;

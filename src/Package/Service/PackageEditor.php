@@ -215,38 +215,25 @@ final readonly class PackageEditor
     }
 
     /**
-     * Replace every test-level rubric block of test `$testId` with
-     * `$rubricBlocks` and regenerate the test XML. Passing an empty collection
-     * removes every test-level rubric block; the caller decides which existing
-     * blocks to keep by reading {@see self::parseTest()}`->test->rubricBlocks`
-     * first (e.g. to drop only the candidate-view instructions block). The XSD
-     * order (rubric blocks after outcome declarations, before the first test
-     * part) is produced by {@see AssessmentTest::children()}. Media referenced
-     * by the blocks is handled as it is for an item: an unresolvable reference
-     * fails the edit, a new file is added to the package and the manifest
-     * dependencies are reconciled. As with the item operations, warnings
-     * surface constructs of the test the model cannot hold, which are dropped
-     * on regeneration.
+     * Replace *every* test-level rubric block, so the caller reads
+     * {@see self::parseTest()} first to decide which to keep; an empty
+     * collection removes them all. Schema order comes from
+     * {@see AssessmentTest::children()}, media is handled as it is for an item.
      */
     public function setTestRubricBlocks(QtiPackage $package, string $testId, RubricBlockCollection $rubricBlocks): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
         $parsed = $this->parseTest($package, $testId);
 
-        // Which media the test referenced *before* this edit, so media that only
-        // a replaced rubric block used is retired from the manifest below.
+        // Media only a replaced block used is retired from the manifest below.
         [$previousMediaDependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $parsed->test, new StringCollection());
 
         $test = $parsed->test->withRubricBlocks($rubricBlocks);
 
-        // Every resource the new blocks reference must resolve against the
-        // package before anything is mutated; an unresolvable reference fails
-        // the edit, exactly as it does when an item is added or updated.
+        // Before anything is mutated, so a rejected edit leaves the package be.
         $this->assertResourceReferencesResolve($package, $test);
 
-        // Resolving before the rewrite is what makes the regenerated XML point
-        // at the file's path inside the package; media-resolution warnings join
-        // the test-parse warnings because both are data loss the caller must see.
+        // Resolving first is what points the regenerated XML at the in-package path.
         [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $test, $parsed->warnings);
 
         $this->rewriteTestXml($test, $testResource);
@@ -258,11 +245,8 @@ final readonly class PackageEditor
     }
 
     /**
-     * Parse the test `$testId` to its typed model plus the warnings for any
-     * construct the model cannot hold, for callers that need to read the model
-     * (e.g. to decide which rubric block to replace) before editing. Throws
-     * {@see InvalidAssessmentTestException} exactly as the mutating operations
-     * do.
+     * The same parse the mutating operations do, exposed for callers that need
+     * to read the model before editing.
      */
     public function parseTest(QtiPackage $package, string $testId): TestParseResult
     {
@@ -289,9 +273,7 @@ final readonly class PackageEditor
 
     /**
      * Fail the edit when `$element` — an item, or a test carrying rubric blocks
-     * — references a resource that cannot be resolved against the package (a
-     * relative path not present in it, or a path that escapes it). Called
-     * before any mutation, so a rejected edit leaves the package untouched.
+     * — references a resource that cannot be resolved against the package.
      * In-package files, `data:` URIs, `http(s)` URLs and trusted library assets
      * are all valid references.
      */

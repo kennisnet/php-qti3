@@ -51,10 +51,9 @@ class TestPartParser extends AbstractParser
     }
 
     /**
-     * Required by the XSD, but packages reach this library without schema
-     * validation, so a missing or unknown value falls back to "linear" rather
-     * than throwing a raw ValueError. rewriteTestXml() then writes the default
-     * explicitly, so the next edit repairs the package.
+     * Required by the XSD, but packages arrive unvalidated, so a missing or
+     * unknown value falls back to the schema's default rather than throwing a
+     * raw ValueError. The next edit writes that default back explicitly.
      */
     private function parseNavigationMode(DOMElement $element, StringCollection $warnings): NavigationMode
     {
@@ -68,12 +67,6 @@ class TestPartParser extends AbstractParser
         return $navigationMode;
     }
 
-    /**
-     * Required by the XSD, but packages reach this library without schema
-     * validation, so a missing or unknown value falls back to "individual"
-     * rather than throwing a raw ValueError. rewriteTestXml() then writes the
-     * default explicitly, so the next edit repairs the package.
-     */
     private function parseSubmissionMode(DOMElement $element, StringCollection $warnings): SubmissionMode
     {
         $raw = $element->getAttribute('submission-mode');

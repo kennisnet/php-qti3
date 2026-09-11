@@ -22,22 +22,12 @@ final readonly class HtmlFragmentParser
     public function __construct(private ContentNodeParser $contentNodeParser) {}
 
     /**
-     * Parses an HTML fragment string into a {@see ContentBody}: every top-level
-     * node of the fragment is run through {@see ContentNodeParser::parse()},
-     * dropping nulls — which means layout whitespace between block elements is
-     * dropped too, per {@see ContentNodeParser::parseText()}'s rule.
+     * Lenient about markup, strict about content: libxml's complaints land in
+     * `$warnings`, a tag outside the QTI whitelist throws.
      *
-     * Parsing is lenient about markup (libxml's HTML parser) but strict about
-     * content: libxml's own errors and warnings are collected into `$warnings`
-     * rather than thrown, while a tag or attribute outside the QTI whitelist
-     * throws.
-     *
-     * @throws InvalidArgumentException from {@see ContentNodeParser::parse()}
-     *         (via {@see HTMLTag}'s constructor) when the fragment uses a tag
-     *         or attribute outside the QTI HTML whitelist, and from this method
-     *         when a top-level tag is valid HTML but cannot stand as a direct
-     *         child of a content body (see {@see ContentBody::allowsAsDirectChild()}).
-     * @throws HtmlParsingException from {@see self::loadFragment()}.
+     * @throws InvalidArgumentException for a tag or attribute outside the QTI
+     *         HTML whitelist, or a top-level tag that cannot stand as a direct
+     *         child of a content body.
      */
     public function parse(string $html, ?StringCollection $warnings = null): ContentBody
     {
@@ -61,24 +51,10 @@ final readonly class HtmlFragmentParser
     }
 
     /**
-     * Leniently parses an HTML fragment with libxml and returns the `<body>`
-     * element holding the fragment's top-level nodes.
-     *
-     * The fragment is wrapped as `<html><body>...</body></html>` with a leading
-     * XML declaration — that declaration is what makes libxml read the fragment
-     * as UTF-8 instead of defaulting to ISO-8859-1. Parsing uses
-     * `LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD` so libxml adds no wrapper
-     * of its own: bare text stays a bare text node instead of being wrapped in
-     * an implied `<p>`.
-     *
-     * Parse errors and warnings are appended to `$warnings`, each formatted as
-     * `sprintf('line %d: %s', $error->line, trim($error->message))`; they do not
-     * stop parsing. The global libxml internal-error-handling flag is saved
-     * before parsing and restored afterwards, and the internal error buffer is
-     * cleared, so this call leaves no state behind for the rest of the process.
-     *
-     * @throws HtmlParsingException if no `<body>` element results; unreachable
-     *         given the fixed wrapper markup above.
+     * The leading XML declaration is what makes libxml read the fragment as
+     * UTF-8 instead of ISO-8859-1; `NOIMPLIED|NODEFDTD` stops it wrapping bare
+     * text in an implied `<p>`. The global libxml error flag is restored and
+     * the buffer cleared, so the call leaves no state behind.
      */
     private function loadFragment(string $html, ?StringCollection $warnings = null): DOMElement
     {
@@ -111,11 +87,9 @@ final readonly class HtmlFragmentParser
     }
 
     /**
-     * libxml's HTML parser knows only HTML, so it reports every MathML element
-     * as "Tag mi invalid" even though the QTI content model accepts MathML and
-     * this parser keeps it. Suppressing that noise keeps `$warnings` a list of
-     * things the caller can act on; a tag the model does *not* accept is left
-     * in, and is thrown on later by {@see HTMLTag} anyway.
+     * libxml knows no MathML and reports every MathML element as "Tag mi
+     * invalid". The model accepts it, so that noise would make `$warnings`
+     * unusable; a tag the model rejects is thrown on by {@see HTMLTag} anyway.
      */
     private function isKnownTagComplaint(LibXMLError $error): bool
     {

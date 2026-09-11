@@ -54,11 +54,7 @@ class ContentBodyTest extends TestCase
         $this->assertTrue(ContentBody::allowsAsDirectChild('object'));
     }
 
-    /**
-     * Packages reach this library without having been schema-validated, so
-     * reading one must not fail over a misplaced tag; the check above is for
-     * the entry points that author content.
-     */
+    /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
     #[Test]
     public function constructorAcceptsATagThatCannotStandOnItsOwn(): void
     {

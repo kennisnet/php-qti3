@@ -11,11 +11,8 @@ use InvalidArgumentException;
 class ItemBody extends QtiElement
 {
     /**
-     * The HTML an item body may hold as a *direct* child: the block content of
-     * the XSD's `ItemBodyDType` group. Deliberately narrower than
-     * {@see \Qti3\Shared\Model\ContentBody::ALLOWED_HTML_TAGS}, which is flow
-     * content — an item body takes blocks only, so no `<em>` or `<img>` of its
-     * own.
+     * Block content per the XSD's `ItemBodyDType` group — narrower than
+     * {@see \Qti3\Shared\Model\ContentBody::ALLOWED_HTML_TAGS}, which is flow.
      *
      * @var array<int,string>
      */
@@ -27,26 +24,16 @@ class ItemBody extends QtiElement
     public function __construct(
         public readonly ContentNodeCollection $content,
     ) {
-        // Unlike the content model below, an item body with nothing in it is
-        // not a tag out of place but a body that cannot be presented at all,
-        // and the rest of the library assumes it has content.
+        // Not a tag out of place but a body that cannot be presented at all,
+        // and the rest of the library assumes an item body has content.
         if (count($content) === 0) {
             throw new InvalidArgumentException('ItemBody must have at least one child element');
         }
     }
 
     /**
-     * Whether `$tagName` may stand as a direct child of an item body.
-     *
-     * Like {@see \Qti3\Shared\Model\ContentBody::allowsAsDirectChild()}, this is
-     * for entry points that *author* content. Parsing stays tolerant: a package
-     * reaches this library without having been schema-validated, and refusing to
-     * read one over a single misplaced tag would make it unreadable rather than
-     * repairable. The tag is kept as it was authored, so nothing is lost on the
-     * way back out.
-     *
-     * `ItemBodyDType` lists `m3:math` alongside the HTML, so the `math` root is
-     * a block here too; its inner elements are not.
+     * Authoring-side check, as {@see \Qti3\Shared\Model\ContentBody::allowsAsDirectChild()}.
+     * `ItemBodyDType` lists `m3:math`, so the `math` root is a block here too.
      */
     public static function allowsAsDirectChild(string $tagName): bool
     {

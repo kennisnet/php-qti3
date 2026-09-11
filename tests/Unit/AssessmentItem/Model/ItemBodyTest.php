@@ -58,11 +58,7 @@ class ItemBodyTest extends TestCase
         $this->assertFalse(ItemBody::allowsAsDirectChild('mi'));
     }
 
-    /**
-     * A package reaches this library without having been schema-validated, so
-     * reading one must not fail over a tag out of place; the check above is for
-     * the entry points that author content.
-     */
+    /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
     #[Test]
     public function constructorAcceptsATagThatIsNotBlockContent(): void
     {

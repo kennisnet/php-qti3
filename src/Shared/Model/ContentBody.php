@@ -7,11 +7,8 @@ namespace Qti3\Shared\Model;
 final class ContentBody extends QtiElement
 {
     /**
-     * The HTML a content body may hold as a *direct* child: the flow content of
-     * the XSD's `*ContentBodyDType` groups, which are identical across rubric
-     * blocks, test rubric blocks and the feedback variants but for `details`,
-     * which only the rubric blocks allow and which is kept here for all of them
-     * rather than splitting the model into five.
+     * Flow content per the XSD's `*ContentBodyDType` groups, which differ only
+     * in `details` — allowed by the rubric blocks and kept here for all of them.
      *
      * @var array<int,string>
      */
@@ -27,21 +24,10 @@ final class ContentBody extends QtiElement
     ) {}
 
     /**
-     * Whether `$tagName` may stand as a direct child of a content body. A tag
-     * can be valid HTML and still be meaningless on its own — a stray `<li>` or
-     * `<td>` outside its list or table serializes to schema-invalid QTI — so an
-     * entry point that *authors* content, such as
-     * {@see \Qti3\Shared\Html\HtmlFragmentParser::parse()}, checks this before
-     * building a body.
-     *
-     * Parsing deliberately does not: a package reaches this library without
-     * having been schema-validated, and refusing to read one over a single
-     * misplaced tag would make it unreadable rather than repairable — the same
-     * reason the parsers warn instead of throwing elsewhere. The tag is kept as
-     * it was authored, so nothing is lost on the way back out.
-     *
-     * Of MathML only the `math` root is flow content; its inner elements are no
-     * more free-standing than an `<li>` is.
+     * Checked where content is *authored*, not where it is parsed: a package
+     * arrives without having been schema-validated, and one stray `<li>` should
+     * leave it repairable rather than unreadable. Of MathML only the `math`
+     * root is flow content.
      */
     public static function allowsAsDirectChild(string $tagName): bool
     {
