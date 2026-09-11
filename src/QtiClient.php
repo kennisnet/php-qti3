@@ -39,6 +39,8 @@ use Qti3\Package\Service\WebcontentProcessor;
 use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Validator\Resource\IResourceValidator;
 use Qti3\Shared\Html\ContentNodeParser;
+use Qti3\Shared\Html\HtmlFragmentParser;
+use Qti3\Shared\Html\HtmlFragmentSerializer;
 use Qti3\Shared\Xml\Builder\IXmlBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
@@ -66,6 +68,8 @@ final class QtiClient
     private ?PackageEditor $packageEditor = null;
     private ?IXmlBuilder $xmlBuilder = null;
     private ?ContentNodeParser $contentNodeParser = null;
+    private ?HtmlFragmentParser $htmlFragmentParser = null;
+    private ?HtmlFragmentSerializer $htmlFragmentSerializer = null;
     private ?ResponseProcessor $responseProcessor = null;
     private ?QtiPackageValidator $qtiPackageValidator = null;
     private ?QtiSchemaValidator $qtiSchemaValidator = null;
@@ -231,6 +235,16 @@ final class QtiClient
     public function getContentNodeParser(): ContentNodeParser
     {
         return $this->contentNodeParser ??= new ContentNodeParser();
+    }
+
+    public function getHtmlFragmentParser(): HtmlFragmentParser
+    {
+        return $this->htmlFragmentParser ??= new HtmlFragmentParser($this->getContentNodeParser());
+    }
+
+    public function getHtmlFragmentSerializer(): HtmlFragmentSerializer
+    {
+        return $this->htmlFragmentSerializer ??= new HtmlFragmentSerializer($this->getXmlBuilder());
     }
 
     public function getResponseProcessor(): ResponseProcessor

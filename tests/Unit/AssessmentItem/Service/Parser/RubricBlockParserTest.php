@@ -186,6 +186,21 @@ class RubricBlockParserTest extends TestCase
         $this->assertSame([View::CANDIDATE], $result->views->all());
     }
 
+    /**
+     * A package reaches this library without having been schema-validated, so
+     * reading one must not fail over a tag that cannot stand on its own; it is
+     * kept as authored rather than dropped.
+     */
+    #[Test]
+    public function parseKeepsATagThatCannotStandOnItsOwn(): void
+    {
+        $element = $this->loadElement('<qti-rubric-block use="instructions" view="candidate"><qti-content-body><li>los</li></qti-content-body></qti-rubric-block>');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertSame('li', $result->contentBody->children()[0]->tagName());
+    }
+
     #[Test]
     public function parseWrongTagThrows(): void
     {

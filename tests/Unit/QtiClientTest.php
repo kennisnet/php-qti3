@@ -142,6 +142,24 @@ class QtiClientTest extends TestCase
         );
     }
 
+    public function testGetHtmlFragmentParserReturnsSameInstance(): void
+    {
+        $container = $this->createClient();
+        $this->assertSame(
+            $container->getHtmlFragmentParser(),
+            $container->getHtmlFragmentParser(),
+        );
+    }
+
+    public function testGetHtmlFragmentSerializerReturnsSameInstance(): void
+    {
+        $container = $this->createClient();
+        $this->assertSame(
+            $container->getHtmlFragmentSerializer(),
+            $container->getHtmlFragmentSerializer(),
+        );
+    }
+
     public function testGetResponseProcessorReturnsInstance(): void
     {
         $container = $this->createClient();
