@@ -51,9 +51,8 @@ class TestPartParser extends AbstractParser
     }
 
     /**
-     * Required by the XSD, but packages arrive unvalidated, so a missing or
-     * unknown value falls back to the schema's default rather than throwing a
-     * raw ValueError. The next edit writes that default back explicitly.
+     * Required by the XSD, but packages arrive unvalidated, so a missing or unknown value
+     * warns and falls back rather than throwing a raw ValueError.
      */
     private function parseNavigationMode(DOMElement $element, StringCollection $warnings): NavigationMode
     {

@@ -4,23 +4,48 @@ declare(strict_types=1);
 
 namespace Qti3\Tests\Unit\Shared\Model;
 
+use DOMDocument;
 use Qti3\Shared\Model\Comment;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class CommentTest extends TestCase
 {
-    private Comment $comment;
-
-    protected function setUp(): void
-    {
-        $content = '<!--This is a comment-->';
-        $this->comment = new Comment($content);
-    }
-
     #[Test]
     public function aCommentCanBeCreatedWithContent(): void
     {
-        $this->assertEquals($this->comment->getContentForXml(), '<!--This is a comment-->');
+        // A comment holds the text between the delimiters, as the parser reads
+        // it off a DOMComment.
+        $comment = new Comment('This is a comment');
+
+        $this->assertEquals('This is a comment', $comment->getContentForXml());
+    }
+
+    #[Test]
+    public function aDoubleHyphenIsSeparatedSoTheCommentStaysWellFormed(): void
+    {
+        $comment = new Comment(' TODO: fix -- see ticket ');
+
+        $this->assertEquals(' TODO: fix - - see ticket ', $comment->getContentForXml());
+    }
+
+    #[Test]
+    public function aTrailingHyphenIsSeparatedFromTheClosingDelimiter(): void
+    {
+        $comment = new Comment('ends with -');
+
+        $this->assertEquals('ends with - ', $comment->getContentForXml());
+    }
+
+    #[Test]
+    public function aSanitizedCommentCanBeWrittenAndParsedBack(): void
+    {
+        $document = new DOMDocument();
+        $root = $document->appendChild($document->createElement('root'));
+        $root->appendChild($document->createComment((new Comment('a -- b ---'))->getContentForXml()));
+
+        $reparsed = new DOMDocument();
+
+        $this->assertTrue($reparsed->loadXML((string) $document->saveXML()));
     }
 }

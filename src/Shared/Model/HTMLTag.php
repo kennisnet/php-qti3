@@ -63,7 +63,8 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
             'requiredAttributes' => [],
         ],
         [
-            'tags' => ['dd', 'div', 'dl', 'dt', 'li', 'nav', 'ol', 'section', 'summary', 'tbody', 'tfoot', 'thead', 'tr', 'ul'],
+            'tags' => ['article', 'aside', 'dd', 'div', 'dl', 'dt', 'footer', 'header', 'li', 'nav', 'ol', 'section',
+                'summary', 'tbody', 'tfoot', 'thead', 'tr', 'ul'],
             'type' => self::BLOCK,
             'allowedAttributes' => [],
             'requiredAttributes' => [],
@@ -146,9 +147,10 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
         /** @var array<int,IContentNode> */
         private readonly array $children = [],
     ) {
-        if (!in_array($tagName, $this->getAllowedTags())) {
+        if (!in_array($tagName, self::allowedTagNames())) {
             throw new InvalidArgumentException(sprintf('Invalid HTML tag name: %s', $tagName));
         }
+        $this->attributes = self::normaliseBooleanAttributes($attributes);
         $this->validateAttributes();
     }
 
@@ -247,16 +249,16 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
     }
 
     /**
+     * The QTI HTML whitelist plus MathML.
+     *
      * @return array<int,string>
      */
-    private function getAllowedTags(): array
+    public static function allowedTagNames(): array
     {
-        $htmlTags = [];
-        foreach (self::HTML_TAG_GROUPS as $tagGroup) {
-            $htmlTags = array_merge($htmlTags, $tagGroup['tags']);
-        }
-        return [
-            ...$htmlTags,
+        static $tagNames = null;
+
+        return $tagNames ??= [
+            ...array_merge(...array_column(self::HTML_TAG_GROUPS, 'tags')),
             ...self::MATHML_TAGS,
         ];
     }
@@ -311,12 +313,38 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
         $tagInfo = self::getHtmlTagInfo($tagName);
         if (in_array($attribute, $tagInfo['allowedAttributes'])) {
             if (in_array($attribute, self::BOOLEAN_ATTRIBUTES)) {
-                return $value === 'true' || $value === 'false';
+                return self::normaliseBooleanValue($attribute, $value) !== null;
             }
             // HTML Tag specific attribute
             return true;
         }
         return false;
+    }
+
+    /**
+     * HTML writes a boolean attribute valueless or echoing its own name; QTI wants `true`/`false`.
+     *
+     * @param array<string,string|null> $attributes
+     * @return array<string,string|null>
+     */
+    private static function normaliseBooleanAttributes(array $attributes): array
+    {
+        foreach ($attributes as $attribute => $value) {
+            if (in_array($attribute, self::BOOLEAN_ATTRIBUTES)) {
+                $attributes[$attribute] = self::normaliseBooleanValue($attribute, $value) ?? $value;
+            }
+        }
+
+        return $attributes;
+    }
+
+    private static function normaliseBooleanValue(string $attribute, ?string $value): ?string
+    {
+        if ($value === 'true' || $value === 'false') {
+            return $value;
+        }
+
+        return $value === '' || $value === $attribute ? 'true' : null;
     }
 
     /**

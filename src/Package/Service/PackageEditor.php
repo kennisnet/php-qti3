@@ -35,9 +35,8 @@ use Qti3\Shared\Model\IXmlElement;
 use ValueError;
 
 /**
- * Edits the assessment items and test-level rubric blocks of a {@see QtiPackage}
- * in place, without doing any filesystem I/O: the caller loads the package and
- * saves it afterwards.
+ * Edits the assessment items and test-level rubric blocks of a {@see QtiPackage} in place,
+ * without filesystem I/O: the caller loads the package and saves it afterwards.
  *
  * Every operation is surgical — it touches only the test it must (selected by
  * `$testId`, so multi-test packages are supported) and the single item added or
@@ -215,17 +214,14 @@ final readonly class PackageEditor
     }
 
     /**
-     * Replace *every* test-level rubric block, so the caller reads
-     * {@see self::parseTest()} first to decide which to keep; an empty
-     * collection removes them all. Schema order comes from
-     * {@see AssessmentTest::children()}, media is handled as it is for an item.
+     * Replaces *every* test-level rubric block, so read {@see self::parseTest()} first to
+     * decide which to keep; an empty collection removes them all.
      */
     public function setTestRubricBlocks(QtiPackage $package, string $testId, RubricBlockCollection $rubricBlocks): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
         $parsed = $this->parseTest($package, $testId);
 
-        // Media only a replaced block used is retired from the manifest below.
         [$previousMediaDependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $parsed->test, new StringCollection());
 
         $test = $parsed->test->withRubricBlocks($rubricBlocks);
@@ -244,10 +240,7 @@ final readonly class PackageEditor
         return new EditResult(null, $parsed->warnings);
     }
 
-    /**
-     * The same parse the mutating operations do, exposed for callers that need
-     * to read the model before editing.
-     */
+    /** The same parse the mutating operations do, for callers that read before editing. */
     public function parseTest(QtiPackage $package, string $testId): TestParseResult
     {
         try {
@@ -272,10 +265,8 @@ final readonly class PackageEditor
     }
 
     /**
-     * Fail the edit when `$element` — an item, or a test carrying rubric blocks
-     * — references a resource that cannot be resolved against the package.
-     * In-package files, `data:` URIs, `http(s)` URLs and trusted library assets
-     * are all valid references.
+     * Fails the edit when `$element` references a resource that cannot be resolved against
+     * the package; in-package files, `data:` URIs, `http(s)` URLs and library assets all resolve.
      */
     private function assertResourceReferencesResolve(QtiPackage $package, IXmlElement $element): void
     {

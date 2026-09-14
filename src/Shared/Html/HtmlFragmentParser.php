@@ -6,6 +6,7 @@ namespace Qti3\Shared\Html;
 
 use DOMDocument;
 use DOMElement;
+use DOMNode;
 use InvalidArgumentException;
 use LibXMLError;
 use Qti3\Shared\Collection\StringCollection;
@@ -22,25 +23,26 @@ final readonly class HtmlFragmentParser
     public function __construct(private ContentNodeParser $contentNodeParser) {}
 
     /**
-     * Lenient about markup, strict about content: libxml's complaints land in
-     * `$warnings`, a tag outside the QTI whitelist throws.
+     * Lenient about markup, strict about content. Defaults to a content body's flow content;
+     * pass `$allowsAsDirectChild` for a narrower target, such as `ItemBody::allowsAsDirectChild(...)`.
      *
-     * @throws InvalidArgumentException for a tag or attribute outside the QTI
-     *         HTML whitelist, or a top-level tag that cannot stand as a direct
-     *         child of a content body.
+     * @param (callable(string): bool)|null $allowsAsDirectChild
+     *
+     * @throws InvalidArgumentException for a tag or attribute outside the QTI whitelist,
+     *         or a top-level tag the target body cannot hold.
      */
-    public function parse(string $html, ?StringCollection $warnings = null): ContentBody
+    public function parse(string $html, ?StringCollection $warnings = null, ?callable $allowsAsDirectChild = null): ContentBody
     {
-        $body = $this->loadFragment($html, $warnings);
+        $allowsAsDirectChild ??= ContentBody::allowsAsDirectChild(...);
 
         $content = new ContentNodeCollection();
-        foreach ($body->childNodes as $child) {
+        foreach ($this->loadFragment($html, $warnings) as $child) {
             $node = $this->contentNodeParser->parse($child);
             if ($node === null) {
                 continue;
             }
 
-            if ($node instanceof HTMLTag && !ContentBody::allowsAsDirectChild($node->tagName())) {
+            if ($node instanceof HTMLTag && !$allowsAsDirectChild($node->tagName())) {
                 throw new InvalidArgumentException(sprintf('HTML tag %s is not allowed as direct child of a content body', $node->tagName()));
             }
 
@@ -51,12 +53,12 @@ final readonly class HtmlFragmentParser
     }
 
     /**
-     * The leading XML declaration is what makes libxml read the fragment as
-     * UTF-8 instead of ISO-8859-1; `NOIMPLIED|NODEFDTD` stops it wrapping bare
-     * text in an implied `<p>`. The global libxml error flag is restored and
-     * the buffer cleared, so the call leaves no state behind.
+     * The leading XML declaration makes libxml read the fragment as UTF-8 instead of
+     * ISO-8859-1; `NOIMPLIED|NODEFDTD` stops it wrapping bare text in an implied `<p>`.
+     *
+     * @return array<int,DOMNode>
      */
-    private function loadFragment(string $html, ?StringCollection $warnings = null): DOMElement
+    private function loadFragment(string $html, ?StringCollection $warnings = null): array
     {
         $document = new DOMDocument();
 
@@ -74,22 +76,36 @@ final readonly class HtmlFragmentParser
                 $warnings?->add(sprintf('line %d: %s', $error->line, trim($error->message)));
             }
         } finally {
-            libxml_clear_errors();
+            if ($previous === false) {
+                libxml_clear_errors();
+            }
             libxml_use_internal_errors($previous);
         }
 
-        $body = $document->getElementsByTagName('body')->item(0);
-        if (!$body instanceof DOMElement) {
-            throw new HtmlParsingException('Failed to parse HTML fragment: no <body> element found'); // @codeCoverageIgnore
+        $root = $document->documentElement;
+        if (!$root instanceof DOMElement) {
+            throw new HtmlParsingException('Failed to parse HTML fragment: no root element found'); // @codeCoverageIgnore
         }
 
-        return $body;
+        // A `</body>` in the fragment closes the wrapper early and leaves the rest beside it.
+        $nodes = [];
+        foreach ($root->childNodes as $child) {
+            if ($child instanceof DOMElement && $child->nodeName === 'body') {
+                foreach ($child->childNodes as $grandchild) {
+                    $nodes[] = $grandchild;
+                }
+                continue;
+            }
+
+            $nodes[] = $child;
+        }
+
+        return $nodes;
     }
 
     /**
-     * libxml knows no MathML and reports every MathML element as "Tag mi
-     * invalid". The model accepts it, so that noise would make `$warnings`
-     * unusable; a tag the model rejects is thrown on by {@see HTMLTag} anyway.
+     * libxml's HTML parser predates HTML5 and knows no MathML, so it reports `<figure>`
+     * and `<mi>` as "Tag x invalid"; a tag the model rejects is thrown on by {@see HTMLTag}.
      */
     private function isKnownTagComplaint(LibXMLError $error): bool
     {
@@ -97,6 +113,6 @@ final readonly class HtmlFragmentParser
             return false;
         }
 
-        return in_array($matches[1], HTMLTag::MATHML_TAGS, true);
+        return in_array($matches[1], HTMLTag::allowedTagNames(), true);
     }
 }

@@ -15,19 +15,15 @@ use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\TextNode;
 
 /**
- * Parses a DOM node into the {@see IContentNode} tree of a
- * {@see \Qti3\Shared\Model\ContentBody}. Node types the model has no place for
- * are dropped.
+ * Parses a DOM node into an {@see IContentNode} tree; node types the model has no place for are dropped.
  *
- * @throws InvalidArgumentException from {@see HTMLTag} for a tag or attribute
- *         outside the QTI HTML whitelist.
+ * @throws InvalidArgumentException from {@see HTMLTag} for a tag or attribute outside the QTI whitelist.
  */
 final readonly class ContentNodeParser
 {
     /**
-     * The tags whose surrounding whitespace is layout rather than content.
-     * Deliberately not {@see HTMLTag::getBlockTags()}, which splits tags by the
-     * QTI content model; whitespace significance follows CSS display instead.
+     * Tags whose surrounding whitespace is layout. Follows CSS display, not
+     * {@see HTMLTag::getBlockTags()}, which splits tags by the QTI content model.
      *
      * @var array<int,string>
      */
@@ -39,8 +35,7 @@ final readonly class ContentNodeParser
     ];
 
     /**
-     * The QTI elements that flow inline with the surrounding words. Every other
-     * one is a container, whose surrounding whitespace is layout.
+     * The QTI elements that flow inline with the surrounding words.
      *
      * @var array<int,string>
      */
@@ -67,11 +62,8 @@ final readonly class ContentNodeParser
     }
 
     /**
-     * A text node, or null when it carries nothing but layout whitespace.
-     * Whitespace-only text is content where it separates inline content —
-     * `<strong>a</strong> <em>b</em>` is two words — and layout where a block
-     * element sits on either side. Public because the parsers that do their own
-     * element dispatch call it, so the rule lives in one place.
+     * Whitespace-only text is content where it separates inline content
+     * (`<strong>a</strong> <em>b</em>` is two words) and layout next to a block.
      */
     public function parseText(DOMText $node): ?TextNode
     {
@@ -125,10 +117,7 @@ final readonly class ContentNodeParser
             && $this->isInlineNeighbour($node->nextSibling, $atInlineEdge);
     }
 
-    /**
-     * A missing sibling means the whitespace sits at an edge of its parent,
-     * which is content only inside an inline parent (`a<em> </em>b`).
-     */
+    /** A missing sibling is an edge of the parent, which is content only inside an inline parent. */
     private function isInlineNeighbour(?DOMNode $sibling, bool $atInlineEdge): bool
     {
         if ($sibling === null) {
@@ -142,10 +131,7 @@ final readonly class ContentNodeParser
         return $sibling instanceof DOMElement && $this->isInlineTag($sibling->nodeName);
     }
 
-    /**
-     * Anything unrecognised — a MathML root, a QTI container, an unknown tag —
-     * counts as block-level, keeping the whitespace handling it had before.
-     */
+    /** Anything unrecognised — MathML, a QTI container, an unknown tag — counts as block. */
     private function isInlineTag(string $tagName): bool
     {
         if (in_array($tagName, self::INLINE_QTI_TAGS, true)) {

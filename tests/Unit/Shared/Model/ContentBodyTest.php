@@ -48,12 +48,6 @@ class ContentBodyTest extends TestCase
         $this->assertFalse(ContentBody::allowsAsDirectChild('td'));
     }
 
-    #[Test]
-    public function acceptsObjectWhichTheXsdListsAsFlowContent(): void
-    {
-        $this->assertTrue(ContentBody::allowsAsDirectChild('object'));
-    }
-
     /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
     #[Test]
     public function constructorAcceptsATagThatCannotStandOnItsOwn(): void

@@ -8,9 +8,8 @@ use Qti3\Shared\Model\ContentBody;
 use Qti3\Shared\Xml\Builder\IXmlBuilder;
 
 /**
- * The inverse of {@see HtmlFragmentParser::parse()}. Output is XML-serialized:
- * childless elements self-close (`<br/>`) and U+00A0 stays a raw character
- * rather than becoming `&nbsp;`.
+ * The inverse of {@see HtmlFragmentParser::parse()}: childless elements self-close (`<br/>`)
+ * and U+00A0 stays a raw character rather than becoming `&nbsp;`.
  */
 final readonly class HtmlFragmentSerializer
 {

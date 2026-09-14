@@ -167,6 +167,10 @@ Adding an item whose identifier already exists in the package throws `InvalidAss
 
 ### Assessment Test Level
 
+Model properties are `readonly`. A method that changes a *nested* collection mutates in place and is
+named `add…()` (`AssessmentTest::addItemRef()`); a method that replaces a property returns a copy and
+is named `with…()` (`AssessmentTest::withRubricBlocks()`, `AssessmentItem::withIdentifier()`).
+
 **UC-T1: Generate test from package**
 
 ```php
@@ -206,9 +210,16 @@ $editor->setTestRubricBlocks($package, $testId, new RubricBlockCollection([...$k
 $html = $qtiClient->getHtmlFragmentSerializer()->serialize($block->contentBody); // '<p>Lees eerst de <strong>hele</strong> vraag.</p>'
 ```
 
-`parse()` is lenient about markup (libxml's HTML parser, UTF-8) but strict about content: a tag or attribute outside the QTI HTML whitelist throws `InvalidArgumentException` — including a tag that cannot stand on its own at the top of a content body (a stray `<li>`, `<td>`, or a MathML element other than the `<math>` root). That strictness is specific to authoring: *parsing a package* stays tolerant and keeps such a tag as authored, so an imperfect package is never unreadable. Note that `style` is not a QTI attribute, so strip presentational markup in the editor before calling `parse()`. Pass a `StringCollection` as the second argument to collect libxml's parse warnings (MathML, which libxml does not know, is filtered out of them).
+`parse()` is lenient about markup (libxml's HTML parser, UTF-8) but strict about content: a tag or attribute outside the QTI HTML whitelist throws `InvalidArgumentException` — including a tag that cannot stand on its own at the top of a content body (a stray `<li>`, `<td>`, or a MathML element other than the `<math>` root). That strictness is specific to authoring: *parsing a package* stays tolerant and keeps such a tag as authored, so an imperfect package is never unreadable. A content body holds flow content; pass a rule as the third argument to author for a target with a narrower content model — an item body takes block content only:
 
-Whitespace is treated the way a browser renders it: the space between two inline elements (`<strong>vet</strong> <em>cursief</em>`) is content and is kept, while whitespace around block elements — indentation between `</p>` and `<p>`, or just inside a `<p>` — is layout and is dropped. Comments are preserved.
+```php
+$contentBody = $qtiClient->getHtmlFragmentParser()->parse($html, $warnings, ItemBody::allowsAsDirectChild(...));
+$itemBody = new ItemBody($contentBody->content); // <strong>vet</strong> at the top would have thrown
+```
+
+Note that `style` is not a QTI attribute, so strip presentational markup in the editor before calling `parse()`. A boolean attribute in HTML's valueless form (`<details open>`, `<audio controls>`) is normalised to `open="true"`, which is what QTI expects. Pass a `StringCollection` as the second argument to collect libxml's parse warnings; tags libxml's pre-HTML5 parser does not know but the model accepts — `<figure>`, `<details>`, MathML — are filtered out of them.
+
+Whitespace is treated the way a browser renders it: the space between two inline elements (`<strong>vet</strong> <em>cursief</em>`) is content and is kept, while whitespace around block elements — indentation between `</p>` and `<p>`, or just inside a `<p>` — is layout and is dropped. Comments are preserved; a `--` inside one is written back as `- -`, because XML cannot represent it and the package would otherwise no longer parse.
 
 `serialize()` emits XHTML-style markup (`<br/>`, raw U+00A0 rather than `&nbsp;`) and never re-indents. A round trip is faithful rather than byte-identical: an `<img>` without `alt` comes back with `alt=""`, because QTI requires it.
 
