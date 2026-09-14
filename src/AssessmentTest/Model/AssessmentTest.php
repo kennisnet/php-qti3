@@ -59,18 +59,10 @@ class AssessmentTest extends QtiElement
         ];
     }
 
-    /** Immutable copy carrying a different set of test-level rubric blocks. */
-    public function withRubricBlocks(RubricBlockCollection $rubricBlocks): self
+    /** Replaces the test-level rubric blocks; an empty collection removes them all. */
+    public function setRubricBlocks(RubricBlockCollection $rubricBlocks): void
     {
-        return new self(
-            identifier: $this->identifier,
-            outcomeDeclarations: $this->outcomeDeclarations,
-            testParts: $this->testParts,
-            title: $this->title,
-            outcomeProcessing: $this->outcomeProcessing,
-            testFeedback: $this->testFeedback,
-            rubricBlocks: $rubricBlocks,
-        );
+        $this->rubricBlocks->replaceAll($rubricBlocks->all());
     }
 
     /**

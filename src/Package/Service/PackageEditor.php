@@ -224,9 +224,10 @@ final readonly class PackageEditor
 
         [$previousMediaDependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $parsed->test, new StringCollection());
 
-        $test = $parsed->test->withRubricBlocks($rubricBlocks);
+        $test = $parsed->test;
+        $test->setRubricBlocks($rubricBlocks);
 
-        // Before anything is mutated, so a rejected edit leaves the package be.
+        // Before the package itself is touched, so a rejected edit leaves it as it was.
         $this->assertResourceReferencesResolve($package, $test);
 
         // Resolving first is what points the regenerated XML at the in-package path.

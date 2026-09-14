@@ -5,8 +5,14 @@ declare(strict_types=1);
 namespace Qti3\Tests\Unit\AssessmentTest\Model;
 
 use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Model\RubricBlock\qtiUse;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
+use Qti3\AssessmentItem\Model\RubricBlock\View;
+use Qti3\AssessmentItem\Model\RubricBlock\ViewCollection;
+use Qti3\Shared\Model\ContentBody;
+use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\TextNode;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
 use Qti3\AssessmentTest\Model\ItemRef\AssessmentItemRef;
@@ -63,22 +69,30 @@ class AssessmentTestTest extends TestCase
     }
 
     #[Test]
-    public function withRubricBlocksReturnsANewInstanceLeavingTheOriginalUntouched(): void
+    public function setRubricBlocksReplacesTheBlocksInPlace(): void
     {
-        $original = AssessmentTestStub::assessmentTestWithRubricBlocks();
-        $newRubricBlocks = new RubricBlockCollection();
+        $assessmentTest = AssessmentTestStub::assessmentTestWithRubricBlocks();
+        $rubricBlocks = $assessmentTest->rubricBlocks;
+        $replacement = new RubricBlock(
+            qtiUse::INSTRUCTIONS,
+            new ViewCollection([View::CANDIDATE]),
+            new ContentBody(new ContentNodeCollection([new TextNode('Nieuw')])),
+        );
 
-        $copy = $original->withRubricBlocks($newRubricBlocks);
+        $assessmentTest->setRubricBlocks(new RubricBlockCollection([$replacement]));
 
-        $this->assertNotSame($original, $copy);
-        $this->assertCount(2, $original->rubricBlocks);
-        $this->assertSame($newRubricBlocks, $copy->rubricBlocks);
-        $this->assertSame($original->identifier, $copy->identifier);
-        $this->assertSame($original->outcomeDeclarations, $copy->outcomeDeclarations);
-        $this->assertSame($original->testParts, $copy->testParts);
-        $this->assertSame($original->title, $copy->title);
-        $this->assertSame($original->outcomeProcessing, $copy->outcomeProcessing);
-        $this->assertSame($original->testFeedback, $copy->testFeedback);
+        $this->assertSame($rubricBlocks, $assessmentTest->rubricBlocks);
+        $this->assertSame([$replacement], $assessmentTest->rubricBlocks->all());
+    }
+
+    #[Test]
+    public function setRubricBlocksWithAnEmptyCollectionRemovesThemAll(): void
+    {
+        $assessmentTest = AssessmentTestStub::assessmentTestWithRubricBlocks();
+
+        $assessmentTest->setRubricBlocks(new RubricBlockCollection());
+
+        $this->assertCount(0, $assessmentTest->rubricBlocks);
     }
 
     #[Test]

@@ -167,10 +167,6 @@ Adding an item whose identifier already exists in the package throws `InvalidAss
 
 ### Assessment Test Level
 
-Model properties are `readonly`. A method that changes a *nested* collection mutates in place and is
-named `add…()` (`AssessmentTest::addItemRef()`); a method that replaces a property returns a copy and
-is named `with…()` (`AssessmentTest::withRubricBlocks()`, `AssessmentItem::withIdentifier()`).
-
 **UC-T1: Generate test from package**
 
 ```php
