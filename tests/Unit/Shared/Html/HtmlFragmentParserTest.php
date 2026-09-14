@@ -89,19 +89,32 @@ class HtmlFragmentParserTest extends TestCase
         $this->assertSame(' ', $children[1]->content);
     }
 
+    /** A stray end tag is what a browser repairs silently, and so does the parser. */
     #[Test]
-    public function parseWarnsOnMalformedMarkupWithoutThrowing(): void
+    public function parseRepairsMalformedMarkupWithoutThrowingOrWarning(): void
     {
         $warnings = new StringCollection();
 
         $contentBody = $this->parser->parse('<p>a</b>', $warnings);
+
+        $this->assertSame([], $warnings->all());
+        $this->assertCount(1, $contentBody->content->all());
+    }
+
+    /** Markup the HTML5 tree construction cannot place is dropped — that is worth a warning. */
+    #[Test]
+    public function parseWarnsWhenMarkupCannotBePlaced(): void
+    {
+        $warnings = new StringCollection();
+
+        $contentBody = $this->parser->parse('<td>los</td>', $warnings);
 
         $this->assertNotEmpty($warnings->all());
         $this->assertCount(1, $contentBody->content->all());
     }
 
     #[Test]
-    public function parseDoesNotWarnAboutMathMlLibxmlDoesNotKnow(): void
+    public function parseDoesNotWarnAboutMathMlOrHtml5Elements(): void
     {
         $warnings = new StringCollection();
 

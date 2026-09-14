@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Qti3\Shared\Html;
 
-use DOMDocument;
-use DOMElement;
-use DOMNode;
+use Dom\Element;
+use Dom\HTMLDocument;
+use Dom\Node;
 use InvalidArgumentException;
-use LibXMLError;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\ContentBody;
 use Qti3\Shared\Model\ContentNodeCollection;
@@ -53,26 +52,21 @@ final readonly class HtmlFragmentParser
     }
 
     /**
-     * The leading XML declaration makes libxml read the fragment as UTF-8 instead of
-     * ISO-8859-1; `NOIMPLIED|NODEFDTD` stops it wrapping bare text in an implied `<p>`.
+     * PHP's HTML5 parser repairs what an editor emits — unclosed tags, valueless attributes,
+     * `&nbsp;`, a stray `</body>` — and knows MathML and the HTML5 elements, so its complaints
+     * are real ones and go to `$warnings` unfiltered.
      *
-     * @return array<int,DOMNode>
+     * @return array<int,Node>
      */
     private function loadFragment(string $html, ?StringCollection $warnings = null): array
     {
-        $document = new DOMDocument();
-
         $previous = libxml_use_internal_errors(true);
         try {
-            $document->loadHTML(
-                '<?xml encoding="UTF-8"><html><body>' . $html . '</body></html>',
-                LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD,
-            );
+            // The doctype keeps the parser out of quirks mode, whose complaint would otherwise
+            // open every fragment; the explicit <body> keeps a <script> or <style> out of the head.
+            $document = HTMLDocument::createFromString('<!DOCTYPE html><html><body>' . $html . '</body></html>', 0, 'UTF-8');
 
             foreach (libxml_get_errors() as $error) {
-                if ($this->isKnownTagComplaint($error)) {
-                    continue;
-                }
                 $warnings?->add(sprintf('line %d: %s', $error->line, trim($error->message)));
             }
         } finally {
@@ -82,37 +76,11 @@ final readonly class HtmlFragmentParser
             libxml_use_internal_errors($previous);
         }
 
-        $root = $document->documentElement;
-        if (!$root instanceof DOMElement) {
-            throw new HtmlParsingException('Failed to parse HTML fragment: no root element found'); // @codeCoverageIgnore
+        $body = $document->body;
+        if (!$body instanceof Element) {
+            throw new HtmlParsingException('Failed to parse HTML fragment: no <body> element found'); // @codeCoverageIgnore
         }
 
-        // A `</body>` in the fragment closes the wrapper early and leaves the rest beside it.
-        $nodes = [];
-        foreach ($root->childNodes as $child) {
-            if ($child instanceof DOMElement && $child->nodeName === 'body') {
-                foreach ($child->childNodes as $grandchild) {
-                    $nodes[] = $grandchild;
-                }
-                continue;
-            }
-
-            $nodes[] = $child;
-        }
-
-        return $nodes;
-    }
-
-    /**
-     * libxml's HTML parser predates HTML5 and knows no MathML, so it reports `<figure>`
-     * and `<mi>` as "Tag x invalid"; a tag the model rejects is thrown on by {@see HTMLTag}.
-     */
-    private function isKnownTagComplaint(LibXMLError $error): bool
-    {
-        if (preg_match('/^Tag (\S+) invalid$/', trim($error->message), $matches) !== 1) {
-            return false;
-        }
-
-        return in_array($matches[1], HTMLTag::allowedTagNames(), true);
+        return iterator_to_array($body->childNodes);
     }
 }

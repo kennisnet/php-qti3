@@ -8,6 +8,10 @@ use DOMComment;
 use DOMElement;
 use DOMNode;
 use DOMText;
+use Dom\Comment as HtmlComment;
+use Dom\Element as HtmlElement;
+use Dom\Node as HtmlNode;
+use Dom\Text as HtmlText;
 use InvalidArgumentException;
 use Qti3\Shared\Model\Comment;
 use Qti3\Shared\Model\HTMLTag;
@@ -16,6 +20,7 @@ use Qti3\Shared\Model\TextNode;
 
 /**
  * Parses a DOM node into an {@see IContentNode} tree; node types the model has no place for are dropped.
+ * Reads both DOM APIs: the QTI parsers hand it classic `DOM*` nodes, the HTML5 parser `Dom\*` ones.
  *
  * @throws InvalidArgumentException from {@see HTMLTag} for a tag or attribute outside the QTI whitelist.
  */
@@ -44,18 +49,19 @@ final readonly class ContentNodeParser
         'qti-text-entry-interaction',
     ];
 
-    public function parse(DOMNode $node): ?IContentNode
+    public function parse(DOMNode|HtmlNode $node): ?IContentNode
     {
-        if ($node instanceof DOMText) {
+        if ($node instanceof DOMText || $node instanceof HtmlText) {
             return $this->parseText($node);
         }
 
-        if ($node instanceof DOMComment) {
+        if ($node instanceof DOMComment || $node instanceof HtmlComment) {
             return new Comment($node->textContent);
         }
 
-        if ($node instanceof DOMElement) {
-            return new HTMLTag($node->nodeName, $this->attributesOf($node), $this->parseChildren($node));
+        if ($node instanceof DOMElement || $node instanceof HtmlElement) {
+            // `localName`, not `nodeName`: the HTML5 parser reports element names uppercased.
+            return new HTMLTag($node->localName, $this->attributesOf($node), $this->parseChildren($node));
         }
 
         return null;
@@ -65,7 +71,7 @@ final readonly class ContentNodeParser
      * Whitespace-only text is content where it separates inline content
      * (`<strong>a</strong> <em>b</em>` is two words) and layout next to a block.
      */
-    public function parseText(DOMText $node): ?TextNode
+    public function parseText(DOMText|HtmlText $node): ?TextNode
     {
         if (trim($node->textContent) !== '') {
             return new TextNode($node->textContent);
@@ -81,7 +87,7 @@ final readonly class ContentNodeParser
     /**
      * @return array<int,IContentNode>
      */
-    private function parseChildren(DOMElement $element): array
+    private function parseChildren(DOMElement|HtmlElement $element): array
     {
         $children = [];
         foreach ($element->childNodes as $child) {
@@ -97,7 +103,7 @@ final readonly class ContentNodeParser
     /**
      * @return array<string,string|null>
      */
-    private function attributesOf(DOMElement $element): array
+    private function attributesOf(DOMElement|HtmlElement $element): array
     {
         $attributes = [];
         foreach ($element->attributes as $attribute) {
@@ -108,27 +114,29 @@ final readonly class ContentNodeParser
     }
 
     /** Both sides have to be inline for the whitespace to be a word boundary. */
-    private function separatesInlineContent(DOMText $node): bool
+    private function separatesInlineContent(DOMText|HtmlText $node): bool
     {
         $parent = $node->parentNode;
-        $atInlineEdge = $parent instanceof DOMElement && $this->isInlineTag($parent->nodeName);
+        $atInlineEdge = ($parent instanceof DOMElement || $parent instanceof HtmlElement)
+            && $this->isInlineTag($parent->localName);
 
         return $this->isInlineNeighbour($node->previousSibling, $atInlineEdge)
             && $this->isInlineNeighbour($node->nextSibling, $atInlineEdge);
     }
 
     /** A missing sibling is an edge of the parent, which is content only inside an inline parent. */
-    private function isInlineNeighbour(?DOMNode $sibling, bool $atInlineEdge): bool
+    private function isInlineNeighbour(DOMNode|HtmlNode|null $sibling, bool $atInlineEdge): bool
     {
         if ($sibling === null) {
             return $atInlineEdge;
         }
 
-        if ($sibling instanceof DOMText) {
+        if ($sibling instanceof DOMText || $sibling instanceof HtmlText) {
             return trim($sibling->textContent) !== '';
         }
 
-        return $sibling instanceof DOMElement && $this->isInlineTag($sibling->nodeName);
+        return ($sibling instanceof DOMElement || $sibling instanceof HtmlElement)
+            && $this->isInlineTag($sibling->localName);
     }
 
     /** Anything unrecognised — MathML, a QTI container, an unknown tag — counts as block. */

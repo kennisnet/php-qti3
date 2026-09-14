@@ -210,14 +210,14 @@ $editor->setTestRubricBlocks($package, $testId, new RubricBlockCollection([...$k
 $html = $qtiClient->getHtmlFragmentSerializer()->serialize($block->contentBody); // '<p>Lees eerst de <strong>hele</strong> vraag.</p>'
 ```
 
-`parse()` is lenient about markup (libxml's HTML parser, UTF-8) but strict about content: a tag or attribute outside the QTI HTML whitelist throws `InvalidArgumentException` — including a tag that cannot stand on its own at the top of a content body (a stray `<li>`, `<td>`, or a MathML element other than the `<math>` root). That strictness is specific to authoring: *parsing a package* stays tolerant and keeps such a tag as authored, so an imperfect package is never unreadable. A content body holds flow content; pass a rule as the third argument to author for a target with a narrower content model — an item body takes block content only:
+`parse()` is lenient about markup but strict about content. Markup goes through PHP's HTML5 parser (`Dom\HTMLDocument`), which repairs an editor's output the way a browser does: unclosed tags, valueless boolean attributes (`<details open>` becomes `open="true"`), `&nbsp;`, a stray `</body>`. Content is then checked against the model: a tag or attribute outside the QTI HTML whitelist throws `InvalidArgumentException`, including a tag that cannot stand on its own at the top of a content body (a stray `<li>`, or a MathML element other than the `<math>` root). That strictness is specific to authoring: *parsing a package* stays tolerant and keeps such a tag as authored, so an imperfect package is never unreadable. A content body holds flow content; pass a rule as the third argument to author for a target with a narrower content model — an item body takes block content only:
 
 ```php
 $contentBody = $qtiClient->getHtmlFragmentParser()->parse($html, $warnings, ItemBody::allowsAsDirectChild(...));
 $itemBody = new ItemBody($contentBody->content); // <strong>vet</strong> at the top would have thrown
 ```
 
-Note that `style` is not a QTI attribute, so strip presentational markup in the editor before calling `parse()`. A boolean attribute in HTML's valueless form (`<details open>`, `<audio controls>`) is normalised to `open="true"`, which is what QTI expects. Pass a `StringCollection` as the second argument to collect libxml's parse warnings; tags libxml's pre-HTML5 parser does not know but the model accepts — `<figure>`, `<details>`, MathML — are filtered out of them.
+Note that `style` is not a QTI attribute, so strip presentational markup in the editor before calling `parse()`. Pass a `StringCollection` as the second argument to collect the parser's warnings. Those report markup the HTML5 tree construction could not place and therefore dropped — a `<td>` outside a table, for instance; markup a browser repairs silently is repaired silently here too, and MathML and HTML5 elements parse without complaint.
 
 Whitespace is treated the way a browser renders it: the space between two inline elements (`<strong>vet</strong> <em>cursief</em>`) is content and is kept, while whitespace around block elements — indentation between `</p>` and `<p>`, or just inside a `<p>` — is layout and is dropped. Comments are preserved; a `--` inside one is written back as `- -`, because XML cannot represent it and the package would otherwise no longer parse.
 

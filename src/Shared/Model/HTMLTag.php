@@ -253,7 +253,7 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
      *
      * @return array<int,string>
      */
-    public static function allowedTagNames(): array
+    private static function allowedTagNames(): array
     {
         static $tagNames = null;
 
