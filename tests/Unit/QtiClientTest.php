@@ -13,7 +13,7 @@ use Qti3\Package\Service\QtiPackageBuilder;
 use Qti3\Package\Validator\IQtiSyntaxValidator;
 use Qti3\Package\Validator\QtiPackageValidator;
 use Qti3\Package\Validator\Resource\IResourceValidator;
-use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
+use Qti3\Shared\Xml\Builder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
 use Qti3\Package\Validator\QtiSchemaValidator;
 use Qti3\QtiClient;
@@ -130,6 +130,33 @@ class QtiClientTest extends TestCase
         $this->assertSame(
             $container->getXmlBuilder(),
             $container->getXmlBuilder(),
+        );
+    }
+
+    public function testGetContentNodeParserReturnsSameInstance(): void
+    {
+        $container = $this->createClient();
+        $this->assertSame(
+            $container->getContentNodeParser(),
+            $container->getContentNodeParser(),
+        );
+    }
+
+    public function testGetHtmlFragmentParserReturnsSameInstance(): void
+    {
+        $container = $this->createClient();
+        $this->assertSame(
+            $container->getHtmlFragmentParser(),
+            $container->getHtmlFragmentParser(),
+        );
+    }
+
+    public function testGetHtmlFragmentSerializerReturnsSameInstance(): void
+    {
+        $container = $this->createClient();
+        $this->assertSame(
+            $container->getHtmlFragmentSerializer(),
+            $container->getHtmlFragmentSerializer(),
         );
     }
 

@@ -59,6 +59,12 @@ class AssessmentTest extends QtiElement
         ];
     }
 
+    /** Replaces the test-level rubric blocks; an empty collection removes them all. */
+    public function setRubricBlocks(RubricBlockCollection $rubricBlocks): void
+    {
+        $this->rubricBlocks->replaceAll($rubricBlocks->all());
+    }
+
     /**
      * Add an item ref to the first section. Position -1 appends; a zero-based
      * position inserts at that index.

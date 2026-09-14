@@ -16,7 +16,7 @@ use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\OrganizationsBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
+use Qti3\Shared\Xml\Builder\XmlBuilder;
 use Qti3\Shared\Xml\Reader\XmlReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

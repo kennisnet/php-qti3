@@ -8,6 +8,7 @@ use DOMElement;
 use InvalidArgumentException;
 use Qti3\AssessmentItem\Model\AssessmentItem;
 use Qti3\AssessmentItem\Model\AssessmentItemId;
+use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentItem\Service\ItemIdentifierGenerator;
 use Qti3\AssessmentItem\Service\Parser\AssessmentItemParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
@@ -30,11 +31,12 @@ use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Exception\ResourceNotFoundException;
+use Qti3\Shared\Model\IXmlElement;
 use ValueError;
 
 /**
- * Edits the assessment items of a {@see QtiPackage} in place, without doing any
- * filesystem I/O: the caller loads the package and saves it afterwards.
+ * Edits the assessment items and test-level rubric blocks of a {@see QtiPackage} in place,
+ * without filesystem I/O: the caller loads the package and saves it afterwards.
  *
  * Every operation is surgical — it touches only the test it must (selected by
  * `$testId`, so multi-test packages are supported) and the single item added or
@@ -104,7 +106,7 @@ final readonly class PackageEditor
     public function addItemToTest(QtiPackage $package, string $testId, AssessmentItem $item, ?string $identifier = null, int $position = -1): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
-        $parsed = $this->buildTest($package, $testId);
+        $parsed = $this->parseTest($package, $testId);
         $test = $parsed->test;
 
         $identifier ??= $this->getAvailableItemIdentifier($package);
@@ -176,7 +178,7 @@ final readonly class PackageEditor
     public function removeItemFromTest(QtiPackage $package, string $testId, string $identifier): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
-        $parsed = $this->buildTest($package, $testId);
+        $parsed = $this->parseTest($package, $testId);
         $test = $parsed->test;
 
         $itemId = AssessmentItemId::fromString($identifier);
@@ -201,7 +203,7 @@ final readonly class PackageEditor
     public function reorderItemsInTest(QtiPackage $package, string $testId, array $orderedIdentifiers): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
-        $parsed = $this->buildTest($package, $testId);
+        $parsed = $this->parseTest($package, $testId);
         $test = $parsed->test;
 
         $test->reorderItemRefs($orderedIdentifiers);
@@ -211,7 +213,36 @@ final readonly class PackageEditor
         return new EditResult(null, $parsed->warnings);
     }
 
-    private function buildTest(QtiPackage $package, string $testId): TestParseResult
+    /**
+     * Replaces *every* test-level rubric block, so read {@see self::parseTest()} first to
+     * decide which to keep; an empty collection removes them all.
+     */
+    public function setTestRubricBlocks(QtiPackage $package, string $testId, RubricBlockCollection $rubricBlocks): EditResult
+    {
+        $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
+        $parsed = $this->parseTest($package, $testId);
+
+        [$previousMediaDependencies] = $this->webcontentProcessor->resolveNewWebcontent($package, $parsed->test, new StringCollection());
+
+        $test = $parsed->test;
+        $test->setRubricBlocks($rubricBlocks);
+
+        // Before the package itself is touched, so a rejected edit leaves it as it was.
+        $this->assertResourceReferencesResolve($package, $test);
+
+        // Resolving first is what points the regenerated XML at the in-package path.
+        [$dependencies, $newWebcontent] = $this->webcontentProcessor->resolveNewWebcontent($package, $test, $parsed->warnings);
+
+        $this->rewriteTestXml($test, $testResource);
+
+        $this->registerWebcontent($package, $newWebcontent);
+        $this->reconcileMediaDependencies($package, $testResource, $previousMediaDependencies, $dependencies);
+
+        return new EditResult(null, $parsed->warnings);
+    }
+
+    /** The same parse the mutating operations do, for callers that read before editing. */
+    public function parseTest(QtiPackage $package, string $testId): TestParseResult
     {
         try {
             return $this->testBuilder->buildFromPackage($package, $testId);
@@ -235,15 +266,12 @@ final readonly class PackageEditor
     }
 
     /**
-     * Fail the edit when the item references a resource that cannot be resolved
-     * against the package (a relative path not present in it, or a path that
-     * escapes it). Called before any mutation, so a rejected edit leaves the
-     * package untouched. In-package files, `data:` URIs, `http(s)` URLs and
-     * trusted library assets are all valid references.
+     * Fails the edit when `$element` references a resource that cannot be resolved against
+     * the package; in-package files, `data:` URIs, `http(s)` URLs and library assets all resolve.
      */
-    private function assertResourceReferencesResolve(QtiPackage $package, AssessmentItem $item): void
+    private function assertResourceReferencesResolve(QtiPackage $package, IXmlElement $element): void
     {
-        $invalidReferences = $this->webcontentProcessor->findInvalidReferences($item, $package);
+        $invalidReferences = $this->webcontentProcessor->findInvalidReferences($element, $package);
         if ($invalidReferences !== []) {
             throw new InvalidResourceReferenceException(new StringCollection($invalidReferences));
         }

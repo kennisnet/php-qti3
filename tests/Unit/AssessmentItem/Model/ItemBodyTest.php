@@ -45,9 +45,25 @@ class ItemBodyTest extends TestCase
     }
 
     #[Test]
-    public function anItemBodyWithAnInvalidChildThrowsAnException(): void
+    public function rejectsAnInlineTagAsDirectChild(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        new ItemBody(new ContentNodeCollection([new HTMLTag('strong')]));
+        $this->assertFalse(ItemBody::allowsAsDirectChild('strong'));
+    }
+
+    /** `ItemBodyDType` lists `m3:math`, but not the elements inside it. */
+    #[Test]
+    public function acceptsAMathMlRootButNotItsInnerElements(): void
+    {
+        $this->assertTrue(ItemBody::allowsAsDirectChild('math'));
+        $this->assertFalse(ItemBody::allowsAsDirectChild('mi'));
+    }
+
+    /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
+    #[Test]
+    public function constructorAcceptsATagThatIsNotBlockContent(): void
+    {
+        $itemBody = new ItemBody(new ContentNodeCollection([new HTMLTag('strong')]));
+
+        $this->assertSame('strong', $itemBody->children()[0]->tagName());
     }
 }

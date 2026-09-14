@@ -38,14 +38,17 @@ use Qti3\Package\Service\WebcontentIdentifierGenerator;
 use Qti3\Package\Service\WebcontentProcessor;
 use Qti3\Package\Service\PackageEditor;
 use Qti3\Package\Validator\Resource\IResourceValidator;
-use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
+use Qti3\Shared\Html\ContentNodeParser;
+use Qti3\Shared\Html\HtmlFragmentParser;
+use Qti3\Shared\Html\HtmlFragmentSerializer;
+use Qti3\Shared\Xml\Builder\IXmlBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\ItemResourceBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ManifestBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\MetadataBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\OrganizationsBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\Manifest\ResourcesBuilder;
 use Qti3\Package\Service\QtiPackageBuilder\TestResourceBuilder;
-use Qti3\Package\Service\QtiPackageBuilder\XmlBuilder;
+use Qti3\Shared\Xml\Builder\XmlBuilder;
 use Qti3\Package\Service\QtiPackageReader;
 use Qti3\AssessmentItem\Service\AssessmentItemValidator;
 use Qti3\AssessmentItem\Service\IAssessmentItemValidator;
@@ -64,6 +67,9 @@ final class QtiClient
     private ?WebcontentProcessor $webcontentProcessor = null;
     private ?PackageEditor $packageEditor = null;
     private ?IXmlBuilder $xmlBuilder = null;
+    private ?ContentNodeParser $contentNodeParser = null;
+    private ?HtmlFragmentParser $htmlFragmentParser = null;
+    private ?HtmlFragmentSerializer $htmlFragmentSerializer = null;
     private ?ResponseProcessor $responseProcessor = null;
     private ?QtiPackageValidator $qtiPackageValidator = null;
     private ?QtiSchemaValidator $qtiSchemaValidator = null;
@@ -109,7 +115,7 @@ final class QtiClient
             $this->getItemBodyParser(),
             new ResponseProcessingParser(new ProcessingElementParser($qtiExpressionParser)),
             new StylesheetParser(),
-            new ModalFeedbackParser(new StylesheetParser()),
+            new ModalFeedbackParser(new StylesheetParser(), $this->getContentNodeParser()),
             $this->getXmlReader(),
         );
     }
@@ -117,9 +123,10 @@ final class QtiClient
     private function getItemBodyParser(): ItemBodyParser
     {
         return $this->itemBodyParser ??= new ItemBodyParser(
-            new InteractionParser(),
-            new RubricBlockParser(),
-            new FeedbackBlockParser(),
+            new InteractionParser($this->getContentNodeParser()),
+            new RubricBlockParser($this->getContentNodeParser()),
+            new FeedbackBlockParser($this->getContentNodeParser()),
+            $this->getContentNodeParser(),
         );
     }
 
@@ -128,7 +135,7 @@ final class QtiClient
         return $this->assessmentTestParser ??= new AssessmentTestParser(
             new OutcomeDeclarationParser(),
             $this->getTestPartParser(),
-            new RubricBlockParser(),
+            new RubricBlockParser($this->getContentNodeParser()),
         );
     }
 
@@ -223,6 +230,21 @@ final class QtiClient
     public function getXmlBuilder(): IXmlBuilder
     {
         return $this->xmlBuilder ??= new XmlBuilder();
+    }
+
+    public function getContentNodeParser(): ContentNodeParser
+    {
+        return $this->contentNodeParser ??= new ContentNodeParser();
+    }
+
+    public function getHtmlFragmentParser(): HtmlFragmentParser
+    {
+        return $this->htmlFragmentParser ??= new HtmlFragmentParser($this->getContentNodeParser());
+    }
+
+    public function getHtmlFragmentSerializer(): HtmlFragmentSerializer
+    {
+        return $this->htmlFragmentSerializer ??= new HtmlFragmentSerializer($this->getXmlBuilder());
     }
 
     public function getResponseProcessor(): ResponseProcessor
