@@ -50,10 +50,7 @@ class TestPartParser extends AbstractParser
         );
     }
 
-    /**
-     * Required by the XSD, but packages arrive unvalidated, so a missing or unknown value
-     * warns and falls back rather than throwing a raw ValueError.
-     */
+    /** The XSD requires the attribute, but packages reach the library unvalidated. */
     private function parseNavigationMode(DOMElement $element, StringCollection $warnings): NavigationMode
     {
         $raw = $element->getAttribute('navigation-mode');

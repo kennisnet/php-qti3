@@ -89,7 +89,6 @@ class HtmlFragmentParserTest extends TestCase
         $this->assertSame(' ', $children[1]->content);
     }
 
-    /** A stray end tag is what a browser repairs silently, and so does the parser. */
     #[Test]
     public function parseRepairsMalformedMarkupWithoutThrowingOrWarning(): void
     {
@@ -101,7 +100,6 @@ class HtmlFragmentParserTest extends TestCase
         $this->assertCount(1, $contentBody->content->all());
     }
 
-    /** Markup the HTML5 tree construction cannot place is dropped — that is worth a warning. */
     #[Test]
     public function parseWarnsWhenMarkupCannotBePlaced(): void
     {
@@ -199,7 +197,6 @@ class HtmlFragmentParserTest extends TestCase
         libxml_use_internal_errors($previous);
     }
 
-    /** An item body takes block content only, narrower than a content body. */
     #[Test]
     public function parseAppliesACallerSuppliedDirectChildRule(): void
     {

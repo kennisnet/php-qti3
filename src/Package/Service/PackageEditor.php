@@ -35,8 +35,7 @@ use Qti3\Shared\Model\IXmlElement;
 use ValueError;
 
 /**
- * Edits the assessment items and test-level rubric blocks of a {@see QtiPackage} in place,
- * without filesystem I/O: the caller loads the package and saves it afterwards.
+ * Edits a {@see QtiPackage} in place, without filesystem I/O: the caller loads and saves it.
  *
  * Every operation is surgical — it touches only the test it must (selected by
  * `$testId`, so multi-test packages are supported) and the single item added or
@@ -213,10 +212,7 @@ final readonly class PackageEditor
         return new EditResult(null, $parsed->warnings);
     }
 
-    /**
-     * Replaces *every* test-level rubric block, so read {@see self::parseTest()} first to
-     * decide which to keep; an empty collection removes them all.
-     */
+    /** Replaces *every* test-level rubric block; read {@see self::parseTest()} first to keep any. */
     public function setTestRubricBlocks(QtiPackage $package, string $testId, RubricBlockCollection $rubricBlocks): EditResult
     {
         $testResource = $package->getResource($testId, ResourceType::ASSESSMENT_TEST);
@@ -241,7 +237,6 @@ final readonly class PackageEditor
         return new EditResult(null, $parsed->warnings);
     }
 
-    /** The same parse the mutating operations do, for callers that read before editing. */
     public function parseTest(QtiPackage $package, string $testId): TestParseResult
     {
         try {
@@ -265,10 +260,7 @@ final readonly class PackageEditor
         $this->getXmlFileFromResource($testResource)->replaceContent((string) $rebuilt->getMainFile());
     }
 
-    /**
-     * Fails the edit when `$element` references a resource that cannot be resolved against
-     * the package; in-package files, `data:` URIs, `http(s)` URLs and library assets all resolve.
-     */
+    /** In-package files, `data:` URIs, `http(s)` URLs and library assets all resolve; the rest fails the edit. */
     private function assertResourceReferencesResolve(QtiPackage $package, IXmlElement $element): void
     {
         $invalidReferences = $this->webcontentProcessor->findInvalidReferences($element, $package);

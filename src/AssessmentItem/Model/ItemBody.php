@@ -11,8 +11,7 @@ use InvalidArgumentException;
 class ItemBody extends QtiElement
 {
     /**
-     * Block content per the XSD's `ItemBodyDType` group, narrower than {@see ContentBody}'s flow content;
-     * `math` is the one MathML root among them.
+     * Block content per the XSD's `ItemBodyDType` group; `math` is its one MathML root.
      *
      * @var array<int,string>
      */

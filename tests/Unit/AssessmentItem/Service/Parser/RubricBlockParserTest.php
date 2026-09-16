@@ -186,7 +186,6 @@ class RubricBlockParserTest extends TestCase
         $this->assertSame([View::CANDIDATE], $result->views->all());
     }
 
-    /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
     #[Test]
     public function parseKeepsATagThatCannotStandOnItsOwn(): void
     {

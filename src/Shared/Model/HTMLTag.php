@@ -249,8 +249,6 @@ class HTMLTag implements IXmlElement, IQtiResourceProvider
     }
 
     /**
-     * The QTI HTML whitelist plus MathML.
-     *
      * @return array<int,string>
      */
     private static function allowedTagNames(): array

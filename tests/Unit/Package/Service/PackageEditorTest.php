@@ -862,7 +862,6 @@ final class PackageEditorTest extends TestCase
         return $this->client->getAssessmentItemParser()->parse($element)->item;
     }
 
-    /** Parses a one-off rubric block, e.g. to hand a new block to setTestRubricBlocks(). */
     private function rubricBlock(string $view, string $text): RubricBlock
     {
         $xml = sprintf(
@@ -883,7 +882,6 @@ final class PackageEditorTest extends TestCase
         return $this->client->getAssessmentTestParser()->parse($element)->test->rubricBlocks->all()[0];
     }
 
-    /** A rubric block whose content references an image, to exercise media handling. */
     private function rubricBlockWithImage(string $view, string $src): RubricBlock
     {
         $xml = sprintf(

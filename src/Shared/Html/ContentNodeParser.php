@@ -19,16 +19,15 @@ use Qti3\Shared\Model\IContentNode;
 use Qti3\Shared\Model\TextNode;
 
 /**
- * Parses a DOM node into an {@see IContentNode} tree; node types the model has no place for are dropped.
  * Reads both DOM APIs: the QTI parsers hand it classic `DOM*` nodes, the HTML5 parser `Dom\*` ones.
+ * Node types the model has no place for are dropped.
  *
  * @throws InvalidArgumentException from {@see HTMLTag} for a tag or attribute outside the QTI whitelist.
  */
 final readonly class ContentNodeParser
 {
     /**
-     * Tags whose surrounding whitespace is layout. Follows CSS display, not
-     * {@see HTMLTag::getBlockTags()}, which splits tags by the QTI content model.
+     * Tags whose surrounding whitespace is layout — CSS display, not {@see HTMLTag::getBlockTags()}'s content model.
      *
      * @var array<int,string>
      */
@@ -40,8 +39,6 @@ final readonly class ContentNodeParser
     ];
 
     /**
-     * The QTI elements that flow inline with the surrounding words.
-     *
      * @var array<int,string>
      */
     public const array INLINE_QTI_TAGS = [
@@ -113,7 +110,6 @@ final readonly class ContentNodeParser
         return $attributes;
     }
 
-    /** Both sides have to be inline for the whitespace to be a word boundary. */
     private function separatesInlineContent(DOMText|HtmlText $node): bool
     {
         $parent = $node->parentNode;

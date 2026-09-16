@@ -110,7 +110,6 @@ class HTMLTagTest extends TestCase
         $this->assertEquals(['controls' => 'false'], $tag->attributes());
     }
 
-    /** HTML5 writes a boolean attribute without a value; QTI wants true/false. */
     #[Test]
     public function valuelessBooleanAttributeIsNormalisedToTrue(): void
     {

@@ -14,8 +14,7 @@ class CommentTest extends TestCase
     #[Test]
     public function aCommentCanBeCreatedWithContent(): void
     {
-        // A comment holds the text between the delimiters, as the parser reads
-        // it off a DOMComment.
+        // A comment holds the text between the delimiters, not the delimiters.
         $comment = new Comment('This is a comment');
 
         $this->assertEquals('This is a comment', $comment->getContentForXml());

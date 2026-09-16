@@ -50,7 +50,6 @@ class ItemBodyTest extends TestCase
         $this->assertFalse(ItemBody::allowsAsDirectChild('strong'));
     }
 
-    /** `ItemBodyDType` lists `m3:math`, but not the elements inside it. */
     #[Test]
     public function acceptsAMathMlRootButNotItsInnerElements(): void
     {

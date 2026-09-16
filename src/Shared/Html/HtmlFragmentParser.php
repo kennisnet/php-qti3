@@ -14,8 +14,7 @@ use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
 
 /**
- * Turns an HTML fragment string, as produced by a rich-text editor, into the
- * library's content model without the caller having to build any DOM itself.
+ * Turns an HTML fragment string, as a rich-text editor produces it, into the content model.
  */
 final readonly class HtmlFragmentParser
 {
@@ -52,9 +51,8 @@ final readonly class HtmlFragmentParser
     }
 
     /**
-     * PHP's HTML5 parser repairs what an editor emits — unclosed tags, valueless attributes,
-     * `&nbsp;`, a stray `</body>` — and knows MathML and the HTML5 elements, so its complaints
-     * are real ones and go to `$warnings` unfiltered.
+     * PHP's HTML5 parser repairs what an editor emits and knows MathML, so unlike the HTML4
+     * one its complaints are all real and reach `$warnings` unfiltered.
      *
      * @return array<int,Node>
      */

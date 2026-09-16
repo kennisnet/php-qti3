@@ -8,8 +8,8 @@ use Qti3\Package\Model\Resource\Resource;
 use Qti3\Shared\Collection\StringCollection;
 
 /**
- * The outcome of a {@see PackageEditor} operation: the affected item resource (null for
- * reorder and rubric blocks) plus warnings, which surface constructs dropped on rewrite.
+ * The outcome of a {@see PackageEditor} operation; the resource is null for an edit that
+ * rewrites no item, such as a reorder or a rubric-block replacement.
  */
 final readonly class EditResult
 {
