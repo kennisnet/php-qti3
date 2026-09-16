@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Qti3\Package\Service\QtiPackageBuilder;
+namespace Qti3\Shared\Xml\Builder;
 
 use Qti3\Shared\Model\Comment;
 use Qti3\Shared\Model\IXmlElement;

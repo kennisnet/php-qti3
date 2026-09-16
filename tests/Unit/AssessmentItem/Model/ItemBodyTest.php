@@ -45,9 +45,24 @@ class ItemBodyTest extends TestCase
     }
 
     #[Test]
-    public function anItemBodyWithAnInvalidChildThrowsAnException(): void
+    public function rejectsAnInlineTagAsDirectChild(): void
+    {
+        $this->assertFalse(ItemBody::allowsAsDirectChild('strong'));
+    }
+
+    #[Test]
+    public function acceptsAMathMlRootButNotItsInnerElements(): void
+    {
+        $this->assertTrue(ItemBody::allowsAsDirectChild('math'));
+        $this->assertFalse(ItemBody::allowsAsDirectChild('mi'));
+    }
+
+    #[Test]
+    public function constructorRejectsATagThatIsNotBlockContent(): void
     {
         $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTML tag strong is not allowed as direct child of ItemBody');
+
         new ItemBody(new ContentNodeCollection([new HTMLTag('strong')]));
     }
 }

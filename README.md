@@ -124,9 +124,9 @@ All violations of one item are reported together, each prefixed with the item's 
 
 **UC-P6: Add, update or reorder items in a package**
 
-`getPackageEditor()` returns a `PackageEditor` that edits the assessment items of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1). Adding an item assigns it the next free `ITEMnnn` identifier by default (or one you pass). Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are. Editing never refuses an imperfect package: a construct the model cannot hold is dropped on regeneration and reported through the returned `EditResult`'s `warnings` (parsing an item likewise returns an `ItemParseResult` with `item` + `warnings`).
+`getPackageEditor()` returns a `PackageEditor` that edits the assessment items and the test-level rubric blocks of a `QtiPackage` **in place**. It does no filesystem I/O: you load the package, edit it, and save it yourself. Items are passed as typed `AssessmentItem` models — you build or parse them (see UC-I1). Adding an item assigns it the next free `ITEMnnn` identifier by default (or one you pass). Each operation is *surgical*: adding or reordering rewrites a single assessment test (named by its resource identifier `$testId`, so packages with more than one test are supported) and, for an add, appends one item resource; updating replaces a single item resource. Untouched items, media and metadata are left exactly as they are. Editing never refuses an imperfect package: a construct the model cannot hold is dropped on regeneration and reported through the returned `EditResult`'s `warnings` (parsing an item likewise returns an `ItemParseResult` with `item` + `warnings`).
 
-> **See [docs/package-editor.md](docs/package-editor.md)** for worked examples of adding an item from an XML string, updating, removing and reordering items, an errors table and notes.
+> **See [docs/package-editor.md](docs/package-editor.md)** for worked examples of adding an item from an XML string, updating, removing and reordering items, reading the test model with `parseTest()` and replacing test-level rubric blocks with `setTestRubricBlocks()`, an errors table and notes.
 
 ```php
 $package = $qtiClient->getQtiPackageReader()->fromFilesystem('/tmp/folder');
@@ -189,6 +189,35 @@ $packageBuilder = $qtiClient->getQtiPackageBuilder();
 $package = $packageBuilder->buildForTest($test, $items);
 // $package is now of type Qti3\Package\Model\QtiPackage
 ```
+
+**UC-T3: HTML fragment ↔ content model**
+
+A rich-text editor hands you HTML as a string; the model wants a `ContentBody`. `getHtmlFragmentParser()` and `getHtmlFragmentSerializer()` convert in both directions so an application never builds DOM of its own — for instance to store student instructions as a test-level `qti-rubric-block`:
+
+```php
+$contentBody = $qtiClient->getHtmlFragmentParser()->parse('<p>Lees eerst de <strong>hele</strong> vraag.</p>');
+$block = new RubricBlock(qtiUse::INSTRUCTIONS, new ViewCollection([View::CANDIDATE]), $contentBody);
+
+$editor = $qtiClient->getPackageEditor();
+$parsed = $editor->parseTest($package, $testId);
+$kept = array_filter($parsed->test->rubricBlocks->all(), fn (RubricBlock $existing) => !$existing->hasView(View::CANDIDATE));
+$editor->setTestRubricBlocks($package, $testId, new RubricBlockCollection([...$kept, $block]));
+
+$html = $qtiClient->getHtmlFragmentSerializer()->serialize($block->contentBody); // '<p>Lees eerst de <strong>hele</strong> vraag.</p>'
+```
+
+`parse()` is lenient about markup but strict about content. Markup goes through PHP's HTML5 parser (`Dom\HTMLDocument`), which repairs an editor's output the way a browser does: unclosed tags, valueless boolean attributes (`<details open>` becomes `open="true"`), `&nbsp;`, a stray `</body>`. Content is then checked against the model: a tag or attribute outside the QTI HTML whitelist throws `InvalidArgumentException`, including a tag that cannot stand on its own at the top of a content body (a stray `<li>`, or a MathML element other than the `<math>` root). Parsing a package is more forgiving: a content body keeps such a tag as authored and reports it as a warning, so an imperfect package stays readable. An item body rejects it in its constructor either way, because the generators that build one write packages and a wrong tag there would travel. A content body holds flow content; pass a rule as the third argument to author for a target with a narrower content model — an item body takes block content only:
+
+```php
+$contentBody = $qtiClient->getHtmlFragmentParser()->parse($html, $warnings, ItemBody::allowsAsDirectChild(...));
+$itemBody = new ItemBody($contentBody->content); // <strong>vet</strong> at the top would have thrown
+```
+
+Note that `style` is not a QTI attribute, so strip presentational markup in the editor before calling `parse()`. Pass a `StringCollection` as the second argument to collect the parser's warnings. Those report markup the HTML5 tree construction could not place and therefore dropped — a `<td>` outside a table, for instance; markup a browser repairs silently is repaired silently here too, and MathML and HTML5 elements parse without complaint.
+
+Whitespace is treated the way a browser renders it: the space between two inline elements (`<strong>vet</strong> <em>cursief</em>`) is content and is kept, while whitespace around block elements — indentation between `</p>` and `<p>`, or just inside a `<p>` — is layout and is dropped. Comments are preserved; a `--` inside one is written back as `- -`, because XML cannot represent it and the package would otherwise no longer parse.
+
+`serialize()` emits XHTML-style markup (`<br/>`, raw U+00A0 rather than `&nbsp;`) and never re-indents. A round trip is faithful rather than byte-identical: an `<img>` without `alt` comes back with `alt=""`, because QTI requires it.
 
 ### Assessment Item Level
 

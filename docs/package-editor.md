@@ -211,6 +211,46 @@ exactly the items currently in the test's section.
 $editor->reorderItemsInTest($package, $testId, ['ITEM003', 'ITEM001', 'ITEM002']);
 ```
 
+## Reading the test model with `parseTest()`
+
+`parseTest()` parses a test to its typed `AssessmentTest` model plus the
+warnings for any construct the model cannot hold — the same parse
+`addItemToTest()` and friends do internally, exposed for callers that need to
+read the model before editing (e.g. to decide which rubric block to keep).
+
+```php
+$parsed = $editor->parseTest($package, $testId);
+echo $parsed->test->rubricBlocks->count();
+```
+
+It throws `InvalidAssessmentTestException` exactly as the mutating operations
+do when the test cannot be parsed.
+
+## Setting the test's rubric blocks
+
+`setTestRubricBlocks()` replaces every test-level rubric block of a test with
+the collection you pass, and regenerates the test XML. Passing an empty
+collection removes every test-level rubric block. The XSD order (rubric blocks
+after outcome declarations, before the first test part) is produced
+automatically — you only supply the blocks to keep.
+
+Media referenced by the blocks is handled exactly as it is for an item: a
+reference that cannot be resolved against the package fails the edit before
+anything is written, a file already in the package is reused, and the manifest
+dependencies are reconciled — media that no remaining block references is
+unlinked, while the file itself stays in the package.
+
+Since the operation replaces *all* rubric blocks, read the existing ones with
+`parseTest()` first and filter out only the one you mean to change — here,
+replacing the candidate-view student instructions while leaving every other
+block untouched:
+
+```php
+$parsed = $editor->parseTest($package, 'TEST');
+$kept = array_filter($parsed->test->rubricBlocks->all(), fn (RubricBlock $block) => !$block->hasView(View::CANDIDATE));
+$editor->setTestRubricBlocks($package, 'TEST', new RubricBlockCollection([...$kept, $newBlock]));
+```
+
 ## A complete example
 
 ```php
@@ -250,7 +290,8 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 | Unknown `$testId`, or updating/removing a non-existent item | `Qti3\Shared\Exception\ResourceNotFoundException` |
 | Adding an item whose identifier already exists in the package | `Qti3\AssessmentTest\Exception\InvalidAssessmentTestException` |
 | Reorder list that does not match the items in the test | `Qti3\AssessmentTest\Exception\InvalidItemOrderException` |
-| Adding/updating an item whose content references a resource not in the package (or a path outside it) | `Qti3\Package\Exception\InvalidResourceReferenceException` |
+| Adding/updating an item, or setting rubric blocks, whose content references a resource not in the package (or a path outside it) | `Qti3\Package\Exception\InvalidResourceReferenceException` |
+| An HTML fragment passed to `HtmlFragmentParser::parse()` that uses a tag or attribute outside the QTI whitelist | `InvalidArgumentException` |
 
 A construct the model cannot hold (outcome processing, test feedback, nested
 sections, a template declaration, an unconsumed attribute, ...) is **not** an

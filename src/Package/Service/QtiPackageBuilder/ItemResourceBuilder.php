@@ -11,7 +11,7 @@ use Qti3\Package\Model\PackageFile\PackageFileCollection;
 use Qti3\Package\Model\PackageFile\XmlFile;
 use Qti3\Package\Model\Resource\Resource;
 use Qti3\Package\Model\Resource\ResourceType;
-use Qti3\Package\Service\QtiPackageBuilder\IXmlBuilder;
+use Qti3\Shared\Xml\Builder\IXmlBuilder;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 
 readonly class ItemResourceBuilder

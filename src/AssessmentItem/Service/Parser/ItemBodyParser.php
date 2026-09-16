@@ -8,9 +8,9 @@ use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
 use Qti3\AssessmentItem\Model\ItemBody;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\Shared\Collection\StringCollection;
+use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\ContentNodeCollection;
 use Qti3\Shared\Model\HTMLTag;
-use Qti3\Shared\Model\TextNode;
 use DOMElement;
 use DOMNode;
 use DOMText;
@@ -42,11 +42,7 @@ class ItemBodyParser extends AbstractParser
     private function parseNode(DOMNode $node, ?StringCollection $warnings): mixed
     {
         if ($node instanceof DOMText) {
-            $text = $node->textContent;
-            if (trim($text) === '') {
-                return null;
-            }
-            return new TextNode($text);
+            return ContentNodeParser::parseText($node);
         }
 
         if ($node instanceof DOMElement) {
@@ -61,7 +57,7 @@ class ItemBodyParser extends AbstractParser
             }
 
             if ($tagName === FeedbackBlock::qtiTagName()) {
-                return $this->feedbackBlockParser->parse($node);
+                return $this->feedbackBlockParser->parse($node, $warnings);
             }
 
             // Default: treat as HTML content

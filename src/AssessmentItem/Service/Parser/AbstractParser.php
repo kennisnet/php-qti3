@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\AssessmentItem\Service\Parser;
 
 use Qti3\Shared\Model\BaseSequenceAttributes;
+use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Collection\StringCollection;
 use DOMAttr;
 use DOMElement;
@@ -186,6 +187,25 @@ abstract class AbstractParser
                 $warnings->add(sprintf('%s: drops unsupported element <%s>', $this->locate($child), $child->localName));
             }
         }
+    }
+
+    /**
+     * Records a warning for a direct child the body's content model does not list. The tag is
+     * kept as authored, so the warning is the only signal that the body holds one.
+     *
+     * @param callable(string): bool $allowsAsDirectChild
+     */
+    protected function warnUnlistedDirectChild(
+        DOMNode $child,
+        mixed $node,
+        callable $allowsAsDirectChild,
+        ?StringCollection $warnings,
+    ): void {
+        if (!$node instanceof HTMLTag || $allowsAsDirectChild($node->tagName())) {
+            return;
+        }
+
+        $warnings?->add(sprintf('%s: keeps <%s>, which the content model does not allow here', $this->locate($child), $node->tagName()));
     }
 
     /**

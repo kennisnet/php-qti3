@@ -111,6 +111,20 @@ class HTMLTagTest extends TestCase
     }
 
     #[Test]
+    public function valuelessBooleanAttributeIsNormalisedToTrue(): void
+    {
+        $tag = new HTMLTag('details', ['open' => '']);
+        $this->assertEquals(['open' => 'true'], $tag->attributes());
+    }
+
+    #[Test]
+    public function booleanAttributeEchoingItsOwnNameIsNormalisedToTrue(): void
+    {
+        $tag = new HTMLTag('audio', ['src' => 'a.mp3', 'controls' => 'controls']);
+        $this->assertEquals(['src' => 'a.mp3', 'controls' => 'true'], $tag->attributes());
+    }
+
+    #[Test]
     public function booleanAttributeWithInvalidValueThrows(): void
     {
         $this->expectException(InvalidArgumentException::class);

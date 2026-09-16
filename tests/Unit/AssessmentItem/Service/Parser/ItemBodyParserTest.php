@@ -6,6 +6,7 @@ namespace Qti3\Tests\Unit\AssessmentItem\Service\Parser;
 
 use DOMDocument;
 use DOMElement;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
@@ -17,6 +18,7 @@ use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ItemBodyParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
@@ -38,6 +40,33 @@ class ItemBodyParserTest extends TestCase
         $doc = new DOMDocument();
         $doc->loadXML($xml);
         return $doc->documentElement;
+    }
+
+    #[Test]
+    public function parseRejectsATagOutsideBlockContent(): void
+    {
+        $element = $this->loadElement('<qti-item-body><strong>los</strong></qti-item-body>');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTML tag strong is not allowed as direct child of ItemBody');
+
+        $this->parser->parse($element);
+    }
+
+    #[Test]
+    public function parseDoesNotWarnAboutContentThatIsAllowed(): void
+    {
+        $element = $this->loadElement('
+            <qti-item-body>
+                <p>tekst</p>
+                <qti-rubric-block use="instructions" view="candidate"><p>x</p></qti-rubric-block>
+            </qti-item-body>
+        ');
+        $warnings = new StringCollection();
+
+        $this->parser->parse($element, $warnings);
+
+        $this->assertSame([], $warnings->all());
     }
 
     #[Test]
