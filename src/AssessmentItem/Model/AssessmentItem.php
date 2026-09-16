@@ -17,6 +17,8 @@ class AssessmentItem extends QtiElement
 
     /**
      * @param array<int,ModalFeedback> $modalFeedbacks
+     * @param array<string,string> $dataAttributes data-* extension attributes on the item element, verbatim
+     *                                              (the XSD's dataExtension.AssessmentItem.Attr / xs:anyAttribute)
      */
     public function __construct(
         public readonly AssessmentItemId $identifier,
@@ -30,6 +32,7 @@ class AssessmentItem extends QtiElement
         public readonly bool $timeDependent = false,
         public readonly bool $adaptive = false,
         public readonly string $language = 'nl-NL',
+        public readonly array $dataAttributes = [],
     ) {
         // The default stylesheet is a library asset, so it may be read from the
         // local filesystem; a stylesheet parsed from item content is not.
@@ -50,6 +53,7 @@ class AssessmentItem extends QtiElement
             'xmlns' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0',
             'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:schemaLocation' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd http://www.w3.org/1998/Math/MathML https://purl.imsglobal.org/spec/mathml/v3p0/schema/xsd/mathml3.xsd',
+            ...$this->dataAttributes,
         ];
     }
 
@@ -79,6 +83,7 @@ class AssessmentItem extends QtiElement
             $this->timeDependent,
             $this->adaptive,
             $this->language,
+            $this->dataAttributes,
         );
     }
 
