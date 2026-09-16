@@ -12,7 +12,6 @@ use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
 use Qti3\AssessmentItem\Model\Feedback\Visibility;
 use Qti3\AssessmentItem\Service\Parser\FeedbackBlockParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
-use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
@@ -22,7 +21,7 @@ class FeedbackBlockParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->parser = new FeedbackBlockParser(new ContentNodeParser());
+        $this->parser = new FeedbackBlockParser();
     }
 
     private function loadElement(string $xml): DOMElement

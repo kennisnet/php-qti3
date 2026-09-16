@@ -24,7 +24,7 @@ use Qti3\Shared\Model\TextNode;
  *
  * @throws InvalidArgumentException from {@see HTMLTag} for a tag or attribute outside the QTI whitelist.
  */
-final readonly class ContentNodeParser
+final class ContentNodeParser
 {
     /**
      * Tags whose surrounding whitespace is layout — CSS display, not {@see HTMLTag::getBlockTags()}'s content model.
@@ -46,10 +46,12 @@ final readonly class ContentNodeParser
         'qti-text-entry-interaction',
     ];
 
-    public function parse(DOMNode|HtmlNode $node): ?IContentNode
+    private function __construct() {}
+
+    public static function parse(DOMNode|HtmlNode $node): ?IContentNode
     {
         if ($node instanceof DOMText || $node instanceof HtmlText) {
-            return $this->parseText($node);
+            return self::parseText($node);
         }
 
         if ($node instanceof DOMComment || $node instanceof HtmlComment) {
@@ -58,7 +60,7 @@ final readonly class ContentNodeParser
 
         if ($node instanceof DOMElement || $node instanceof HtmlElement) {
             // `localName`, not `nodeName`: the HTML5 parser reports element names uppercased.
-            return new HTMLTag($node->localName, $this->attributesOf($node), $this->parseChildren($node));
+            return new HTMLTag($node->localName, self::attributesOf($node), self::parseChildren($node));
         }
 
         return null;
@@ -68,13 +70,13 @@ final readonly class ContentNodeParser
      * Whitespace-only text is content where it separates inline content
      * (`<strong>a</strong> <em>b</em>` is two words) and layout next to a block.
      */
-    public function parseText(DOMText|HtmlText $node): ?TextNode
+    public static function parseText(DOMText|HtmlText $node): ?TextNode
     {
         if (trim($node->textContent) !== '') {
             return new TextNode($node->textContent);
         }
 
-        if ($this->separatesInlineContent($node)) {
+        if (self::separatesInlineContent($node)) {
             return new TextNode($node->textContent);
         }
 
@@ -84,11 +86,11 @@ final readonly class ContentNodeParser
     /**
      * @return array<int,IContentNode>
      */
-    private function parseChildren(DOMElement|HtmlElement $element): array
+    private static function parseChildren(DOMElement|HtmlElement $element): array
     {
         $children = [];
         foreach ($element->childNodes as $child) {
-            $parsedChild = $this->parse($child);
+            $parsedChild = self::parse($child);
             if ($parsedChild !== null) {
                 $children[] = $parsedChild;
             }
@@ -100,7 +102,7 @@ final readonly class ContentNodeParser
     /**
      * @return array<string,string|null>
      */
-    private function attributesOf(DOMElement|HtmlElement $element): array
+    private static function attributesOf(DOMElement|HtmlElement $element): array
     {
         $attributes = [];
         foreach ($element->attributes as $attribute) {
@@ -110,18 +112,18 @@ final readonly class ContentNodeParser
         return $attributes;
     }
 
-    private function separatesInlineContent(DOMText|HtmlText $node): bool
+    private static function separatesInlineContent(DOMText|HtmlText $node): bool
     {
         $parent = $node->parentNode;
         $atInlineEdge = ($parent instanceof DOMElement || $parent instanceof HtmlElement)
-            && $this->isInlineTag($parent->localName);
+            && self::isInlineTag($parent->localName);
 
-        return $this->isInlineNeighbour($node->previousSibling, $atInlineEdge)
-            && $this->isInlineNeighbour($node->nextSibling, $atInlineEdge);
+        return self::isInlineNeighbour($node->previousSibling, $atInlineEdge)
+            && self::isInlineNeighbour($node->nextSibling, $atInlineEdge);
     }
 
     /** A missing sibling is an edge of the parent, which is content only inside an inline parent. */
-    private function isInlineNeighbour(DOMNode|HtmlNode|null $sibling, bool $atInlineEdge): bool
+    private static function isInlineNeighbour(DOMNode|HtmlNode|null $sibling, bool $atInlineEdge): bool
     {
         if ($sibling === null) {
             return $atInlineEdge;
@@ -132,20 +134,20 @@ final readonly class ContentNodeParser
         }
 
         return ($sibling instanceof DOMElement || $sibling instanceof HtmlElement)
-            && $this->isInlineTag($sibling->localName);
+            && self::isInlineTag($sibling->localName);
     }
 
     /** Anything unrecognised — MathML, a QTI container, an unknown tag — counts as block. */
-    private function isInlineTag(string $tagName): bool
+    private static function isInlineTag(string $tagName): bool
     {
         if (in_array($tagName, self::INLINE_QTI_TAGS, true)) {
             return true;
         }
 
-        return $this->isHtmlTag($tagName) && !in_array($tagName, self::WHITESPACE_INSIGNIFICANT_TAGS, true);
+        return self::isHtmlTag($tagName) && !in_array($tagName, self::WHITESPACE_INSIGNIFICANT_TAGS, true);
     }
 
-    private function isHtmlTag(string $tagName): bool
+    private static function isHtmlTag(string $tagName): bool
     {
         static $htmlTags = null;
         if ($htmlTags === null) {

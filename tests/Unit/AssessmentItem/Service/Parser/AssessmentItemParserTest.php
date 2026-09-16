@@ -24,7 +24,6 @@ use Qti3\AssessmentItem\Service\Parser\ResponseProcessingParser;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentItem\Service\Parser\ModalFeedbackParser;
 use Qti3\AssessmentItem\Service\Parser\StylesheetParser;
-use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Cardinality;
 use Qti3\Shared\Xml\Reader\XmlReader;
@@ -39,10 +38,9 @@ class AssessmentItemParserTest extends TestCase
             new ResponseDeclarationParser(),
             new OutcomeDeclarationParser(),
             new ItemBodyParser(
-                new InteractionParser(new ContentNodeParser()),
-                new RubricBlockParser(new ContentNodeParser()),
-                new FeedbackBlockParser(new ContentNodeParser()),
-                new ContentNodeParser(),
+                new InteractionParser(),
+                new RubricBlockParser(),
+                new FeedbackBlockParser(),
             ),
             new ResponseProcessingParser(
                 new ProcessingElementParser(
@@ -50,7 +48,7 @@ class AssessmentItemParserTest extends TestCase
                 ),
             ),
             new StylesheetParser(),
-            new ModalFeedbackParser(new StylesheetParser(), new ContentNodeParser()),
+            new ModalFeedbackParser(new StylesheetParser()),
             new XmlReader(),
         );
     }

@@ -38,8 +38,6 @@ use Qti3\Shared\Model\IXmlElement;
 
 class InteractionParser extends AbstractParser
 {
-    public function __construct(private readonly ContentNodeParser $contentNodeParser) {}
-
     public function parse(DOMElement $element): IXmlElement
     {
         return match ($element->nodeName) {
@@ -428,7 +426,7 @@ class InteractionParser extends AbstractParser
     private function parseContentNode(DOMNode $node): mixed
     {
         if ($node instanceof DOMText) {
-            return $this->contentNodeParser->parseText($node);
+            return ContentNodeParser::parseText($node);
         }
 
         if ($node instanceof DOMElement) {

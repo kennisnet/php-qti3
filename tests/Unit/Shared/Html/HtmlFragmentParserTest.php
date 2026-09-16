@@ -9,7 +9,6 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\Shared\Collection\StringCollection;
-use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Html\HtmlFragmentParser;
 use Qti3\Shared\Model\Comment;
 use Qti3\Shared\Model\HTMLTag;
@@ -21,7 +20,7 @@ class HtmlFragmentParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->parser = new HtmlFragmentParser(new ContentNodeParser());
+        $this->parser = new HtmlFragmentParser();
     }
 
     #[Test]

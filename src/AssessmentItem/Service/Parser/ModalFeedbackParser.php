@@ -16,10 +16,7 @@ use Qti3\Shared\Model\IXmlElement;
 
 class ModalFeedbackParser extends AbstractParser
 {
-    public function __construct(
-        private readonly StylesheetParser $stylesheetParser,
-        private readonly ContentNodeParser $contentNodeParser,
-    ) {}
+    public function __construct(private readonly StylesheetParser $stylesheetParser) {}
 
     public function parse(DOMElement $element, ?StringCollection $warnings = null): IXmlElement
     {
@@ -53,7 +50,7 @@ class ModalFeedbackParser extends AbstractParser
     {
         $content = new ContentNodeCollection();
         foreach ($element->childNodes as $child) {
-            $node = $this->contentNodeParser->parse($child);
+            $node = ContentNodeParser::parse($child);
             if ($node === null) {
                 continue;
             }

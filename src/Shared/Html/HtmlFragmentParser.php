@@ -18,8 +18,6 @@ use Qti3\Shared\Model\HTMLTag;
  */
 final readonly class HtmlFragmentParser
 {
-    public function __construct(private ContentNodeParser $contentNodeParser) {}
-
     /**
      * Lenient about markup, strict about content. Defaults to a content body's flow content;
      * pass `$allowsAsDirectChild` for a narrower target, such as `ItemBody::allowsAsDirectChild(...)`.
@@ -35,7 +33,7 @@ final readonly class HtmlFragmentParser
 
         $content = new ContentNodeCollection();
         foreach ($this->loadFragment($html, $warnings) as $child) {
-            $node = $this->contentNodeParser->parse($child);
+            $node = ContentNodeParser::parse($child);
             if ($node === null) {
                 continue;
             }

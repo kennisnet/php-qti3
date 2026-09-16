@@ -7,7 +7,6 @@ namespace Qti3\Tests\Unit\Shared\Html;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\Shared\Xml\Builder\XmlBuilder;
-use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Html\HtmlFragmentParser;
 use Qti3\Shared\Html\HtmlFragmentSerializer;
 use Qti3\Shared\Model\ContentBody;
@@ -20,7 +19,7 @@ class HtmlFragmentSerializerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->parser = new HtmlFragmentParser(new ContentNodeParser());
+        $this->parser = new HtmlFragmentParser();
         $this->serializer = new HtmlFragmentSerializer(new XmlBuilder());
     }
 

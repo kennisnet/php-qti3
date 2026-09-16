@@ -16,13 +16,6 @@ use Qti3\Shared\Model\TextNode;
 
 class ContentNodeParserTest extends TestCase
 {
-    private ContentNodeParser $parser;
-
-    protected function setUp(): void
-    {
-        $this->parser = new ContentNodeParser();
-    }
-
     private function firstChild(string $xml): DOMNode
     {
         return $this->nthChild($xml, 0);
@@ -41,7 +34,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild('<root>Hello world</root>');
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertInstanceOf(TextNode::class, $result);
         $this->assertSame('Hello world', $result->content);
@@ -52,7 +45,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild("<root>   \n\t  </root>");
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertNull($result);
     }
@@ -62,7 +55,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->nthChild('<root><p><strong>een</strong> <em>twee</em></p></root>', 0);
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertInstanceOf(HTMLTag::class, $result);
         $children = $result->children();
@@ -76,7 +69,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild('<root><qti-text-entry-interaction/> <qti-text-entry-interaction/></root>')->nextSibling;
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertInstanceOf(TextNode::class, $result);
     }
@@ -86,7 +79,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild("<root><p>een</p>\n  <p>twee</p></root>")->nextSibling;
 
-        $this->assertNull($this->parser->parse($node));
+        $this->assertNull(ContentNodeParser::parse($node));
     }
 
     #[Test]
@@ -94,7 +87,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->nthChild("<root><p>\n  <strong>een</strong>\n</p></root>", 0);
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertInstanceOf(HTMLTag::class, $result);
         $this->assertCount(1, $result->children());
@@ -105,7 +98,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild("<root><div>een</div>\n<qti-text-entry-interaction/></root>")->nextSibling;
 
-        $this->assertNull($this->parser->parse($node));
+        $this->assertNull(ContentNodeParser::parse($node));
     }
 
     #[Test]
@@ -113,7 +106,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild('<root><p class="intro" id="p1">Nested <em>emphasis</em> text</p></root>');
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertInstanceOf(HTMLTag::class, $result);
         $this->assertSame('p', $result->tagName());
@@ -136,7 +129,7 @@ class ContentNodeParserTest extends TestCase
     {
         $node = $this->firstChild('<root><!-- a comment --></root>');
 
-        $result = $this->parser->parse($node);
+        $result = ContentNodeParser::parse($node);
 
         $this->assertInstanceOf(Comment::class, $result);
         $this->assertSame(' a comment ', $result->content);
@@ -149,6 +142,6 @@ class ContentNodeParserTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->parser->parse($node);
+        ContentNodeParser::parse($node);
     }
 }

@@ -15,8 +15,6 @@ use Qti3\Shared\Model\IXmlElement;
 
 class FeedbackBlockParser extends AbstractParser
 {
-    public function __construct(private readonly ContentNodeParser $contentNodeParser) {}
-
     public function parse(DOMElement $element, ?StringCollection $warnings = null): IXmlElement
     {
         $this->validateTag($element, FeedbackBlock::qtiTagName());
@@ -30,7 +28,7 @@ class FeedbackBlockParser extends AbstractParser
 
         $content = new ContentNodeCollection();
         foreach ($contentRoot->childNodes as $child) {
-            $node = $this->contentNodeParser->parse($child);
+            $node = ContentNodeParser::parse($child);
             if ($node === null) {
                 continue;
             }

@@ -28,7 +28,6 @@ use Qti3\AssessmentItem\Model\Interaction\TextEntryInteraction\TextEntryInteract
 use Qti3\AssessmentItem\Model\Shape\ShapeName;
 use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
-use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
 
@@ -38,7 +37,7 @@ class InteractionParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->parser = new InteractionParser(new ContentNodeParser());
+        $this->parser = new InteractionParser();
     }
 
     private function loadElement(string $xml): DOMElement

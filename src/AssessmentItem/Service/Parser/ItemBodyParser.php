@@ -21,7 +21,6 @@ class ItemBodyParser extends AbstractParser
         private readonly InteractionParser $interactionParser,
         private readonly RubricBlockParser $rubricBlockParser,
         private readonly FeedbackBlockParser $feedbackBlockParser,
-        private readonly ContentNodeParser $contentNodeParser,
     ) {}
 
     /** `$warnings` is handed to the child parsers that report what they drop. */
@@ -46,7 +45,7 @@ class ItemBodyParser extends AbstractParser
     private function parseNode(DOMNode $node, ?StringCollection $warnings): mixed
     {
         if ($node instanceof DOMText) {
-            return $this->contentNodeParser->parseText($node);
+            return ContentNodeParser::parseText($node);
         }
 
         if ($node instanceof DOMElement) {
