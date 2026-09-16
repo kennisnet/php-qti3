@@ -57,12 +57,12 @@ class ItemBodyTest extends TestCase
         $this->assertFalse(ItemBody::allowsAsDirectChild('mi'));
     }
 
-    /** A package arrives unvalidated; reading one must not fail over a tag out of place. */
     #[Test]
-    public function constructorAcceptsATagThatIsNotBlockContent(): void
+    public function constructorRejectsATagThatIsNotBlockContent(): void
     {
-        $itemBody = new ItemBody(new ContentNodeCollection([new HTMLTag('strong')]));
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTML tag strong is not allowed as direct child of ItemBody');
 
-        $this->assertSame('strong', $itemBody->children()[0]->tagName());
+        new ItemBody(new ContentNodeCollection([new HTMLTag('strong')]));
     }
 }

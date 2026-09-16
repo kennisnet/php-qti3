@@ -31,12 +31,9 @@ class ItemBodyParser extends AbstractParser
         $content = new ContentNodeCollection();
         foreach ($element->childNodes as $child) {
             $node = $this->parseNode($child, $warnings);
-            if ($node === null) {
-                continue;
+            if ($node !== null) {
+                $content->add($node);
             }
-
-            $this->warnUnlistedDirectChild($child, $node, ItemBody::allowsAsDirectChild(...), $warnings);
-            $content->add($node);
         }
 
         return new ItemBody($content);

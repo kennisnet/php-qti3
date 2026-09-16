@@ -6,6 +6,7 @@ namespace Qti3\Tests\Unit\AssessmentItem\Service\Parser;
 
 use DOMDocument;
 use DOMElement;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\Feedback\FeedbackBlock;
@@ -42,20 +43,18 @@ class ItemBodyParserTest extends TestCase
     }
 
     #[Test]
-    public function parseKeepsATagOutsideBlockContentAndWarnsAboutIt(): void
+    public function parseRejectsATagOutsideBlockContent(): void
     {
         $element = $this->loadElement('<qti-item-body><strong>los</strong></qti-item-body>');
-        $warnings = new StringCollection();
 
-        $result = $this->parser->parse($element, $warnings);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTML tag strong is not allowed as direct child of ItemBody');
 
-        $this->assertSame('strong', $result->content->all()[0]->tagName());
-        $this->assertCount(1, $warnings->all());
-        $this->assertStringContainsString('keeps <strong>, which the content model does not allow here', $warnings->all()[0]);
+        $this->parser->parse($element);
     }
 
     #[Test]
-    public function parseDoesNotWarnAboutContentTheItemBodyListsOrAboutQtiChildren(): void
+    public function parseDoesNotWarnAboutContentThatIsAllowed(): void
     {
         $element = $this->loadElement('
             <qti-item-body>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\AssessmentItem\Model;
 
 use Qti3\Shared\Model\ContentNodeCollection;
+use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\QtiElement;
 use InvalidArgumentException;
 
@@ -27,9 +28,14 @@ class ItemBody extends QtiElement
         if (count($content) === 0) {
             throw new InvalidArgumentException('ItemBody must have at least one child element');
         }
+        foreach ($content as $child) {
+            if ($child instanceof HTMLTag && !self::allowsAsDirectChild($child->tagName())) {
+                throw new InvalidArgumentException(sprintf('HTML tag %s is not allowed as direct child of ItemBody', $child->tagName()));
+            }
+        }
     }
 
-    /** Enforced where content is authored, as with {@see ContentBody::allowsAsDirectChild()}. */
+    /** The rule the constructor enforces, for a caller that wants to check before it builds. */
     public static function allowsAsDirectChild(string $tagName): bool
     {
         return in_array($tagName, self::ALLOWED_HTML_TAGS);
