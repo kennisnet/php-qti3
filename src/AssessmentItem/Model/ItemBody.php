@@ -29,7 +29,7 @@ class ItemBody extends QtiElement
         }
     }
 
-    /** Authoring-side check, as {@see ContentBody::allowsAsDirectChild()}. */
+    /** Enforced where content is authored, as with {@see ContentBody::allowsAsDirectChild()}. */
     public static function allowsAsDirectChild(string $tagName): bool
     {
         return in_array($tagName, self::ALLOWED_HTML_TAGS);

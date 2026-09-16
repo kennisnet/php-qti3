@@ -31,9 +31,12 @@ class RubricBlockParser extends AbstractParser
         $content = new ContentNodeCollection();
         foreach ($contentRoot->childNodes as $child) {
             $node = $this->contentNodeParser->parse($child);
-            if ($node !== null) {
-                $content->add($node);
+            if ($node === null) {
+                continue;
             }
+
+            $this->warnUnlistedDirectChild($child, $node, ContentBody::allowsAsDirectChild(...), $warnings);
+            $content->add($node);
         }
 
         return new RubricBlock($use, $views, new ContentBody($content), $class);

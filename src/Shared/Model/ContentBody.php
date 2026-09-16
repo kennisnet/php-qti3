@@ -23,7 +23,7 @@ final class ContentBody extends QtiElement
         public ContentNodeCollection $content,
     ) {}
 
-    /** Checked where content is authored, not where a package is parsed. */
+    /** Enforced where content is authored; parsing keeps the tag and warns instead. */
     public static function allowsAsDirectChild(string $tagName): bool
     {
         return in_array($tagName, self::ALLOWED_HTML_TAGS);

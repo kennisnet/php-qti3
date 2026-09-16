@@ -187,13 +187,16 @@ class RubricBlockParserTest extends TestCase
     }
 
     #[Test]
-    public function parseKeepsATagThatCannotStandOnItsOwn(): void
+    public function parseKeepsATagThatCannotStandOnItsOwnAndWarnsAboutIt(): void
     {
         $element = $this->loadElement('<qti-rubric-block use="instructions" view="candidate"><qti-content-body><li>los</li></qti-content-body></qti-rubric-block>');
+        $warnings = new StringCollection();
 
-        $result = $this->parser->parse($element);
+        $result = $this->parser->parse($element, $warnings);
 
         $this->assertSame('li', $result->contentBody->children()[0]->tagName());
+        $this->assertCount(1, $warnings->all());
+        $this->assertStringContainsString('keeps <li>, which the content model does not allow here', $warnings->all()[0]);
     }
 
     #[Test]

@@ -17,6 +17,7 @@ use Qti3\AssessmentItem\Service\Parser\InteractionParser;
 use Qti3\AssessmentItem\Service\Parser\ItemBodyParser;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\TextNode;
@@ -40,6 +41,35 @@ class ItemBodyParserTest extends TestCase
         $doc = new DOMDocument();
         $doc->loadXML($xml);
         return $doc->documentElement;
+    }
+
+    #[Test]
+    public function parseKeepsATagOutsideBlockContentAndWarnsAboutIt(): void
+    {
+        $element = $this->loadElement('<qti-item-body><strong>los</strong></qti-item-body>');
+        $warnings = new StringCollection();
+
+        $result = $this->parser->parse($element, $warnings);
+
+        $this->assertSame('strong', $result->content->all()[0]->tagName());
+        $this->assertCount(1, $warnings->all());
+        $this->assertStringContainsString('keeps <strong>, which the content model does not allow here', $warnings->all()[0]);
+    }
+
+    #[Test]
+    public function parseDoesNotWarnAboutContentTheItemBodyListsOrAboutQtiChildren(): void
+    {
+        $element = $this->loadElement('
+            <qti-item-body>
+                <p>tekst</p>
+                <qti-rubric-block use="instructions" view="candidate"><p>x</p></qti-rubric-block>
+            </qti-item-body>
+        ');
+        $warnings = new StringCollection();
+
+        $this->parser->parse($element, $warnings);
+
+        $this->assertSame([], $warnings->all());
     }
 
     #[Test]

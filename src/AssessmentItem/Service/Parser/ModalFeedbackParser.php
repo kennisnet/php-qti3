@@ -8,6 +8,7 @@ use DOMElement;
 use Qti3\AssessmentItem\Model\Feedback\ModalFeedback;
 use Qti3\AssessmentItem\Model\Feedback\Visibility;
 use Qti3\AssessmentItem\Model\Stylesheet\Stylesheet;
+use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\ContentBody;
 use Qti3\Shared\Model\ContentNodeCollection;
@@ -20,7 +21,7 @@ class ModalFeedbackParser extends AbstractParser
         private readonly ContentNodeParser $contentNodeParser,
     ) {}
 
-    public function parse(DOMElement $element): IXmlElement
+    public function parse(DOMElement $element, ?StringCollection $warnings = null): IXmlElement
     {
         $this->validateTag($element, ModalFeedback::qtiTagName());
 
@@ -39,7 +40,7 @@ class ModalFeedbackParser extends AbstractParser
                 continue;
             }
             if ($child->nodeName === 'qti-content-body') {
-                $contentBody = $this->parseContentBody($child);
+                $contentBody = $this->parseContentBody($child, $warnings);
                 continue;
             }
             // qti-catalog-info: not currently modeled; ignoring
@@ -48,15 +49,19 @@ class ModalFeedbackParser extends AbstractParser
         return new ModalFeedback($identifier, $outcomeIdentifier, $visibility, $title, $contentBody, $stylesheets);
     }
 
-    private function parseContentBody(DOMElement $element): ContentBody
+    private function parseContentBody(DOMElement $element, ?StringCollection $warnings): ContentBody
     {
         $content = new ContentNodeCollection();
         foreach ($element->childNodes as $child) {
             $node = $this->contentNodeParser->parse($child);
-            if ($node !== null) {
-                $content->add($node);
+            if ($node === null) {
+                continue;
             }
+
+            $this->warnUnlistedDirectChild($child, $node, ContentBody::allowsAsDirectChild(...), $warnings);
+            $content->add($node);
         }
+
         return new ContentBody($content);
     }
 }

@@ -111,7 +111,7 @@ class AssessmentItemParser extends AbstractParser
                 $stylesheet = $this->stylesheetParser->parse($child);
                 $stylesheetCount++;
             } elseif ($child->nodeName === ModalFeedback::qtiTagName()) {
-                $modalFeedbacks[] = $this->modalFeedbackParser->parse($child);
+                $modalFeedbacks[] = $this->modalFeedbackParser->parse($child, $warnings);
             }
         }
 

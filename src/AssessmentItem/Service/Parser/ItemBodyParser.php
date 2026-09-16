@@ -32,9 +32,12 @@ class ItemBodyParser extends AbstractParser
         $content = new ContentNodeCollection();
         foreach ($element->childNodes as $child) {
             $node = $this->parseNode($child, $warnings);
-            if ($node !== null) {
-                $content->add($node);
+            if ($node === null) {
+                continue;
             }
+
+            $this->warnUnlistedDirectChild($child, $node, ItemBody::allowsAsDirectChild(...), $warnings);
+            $content->add($node);
         }
 
         return new ItemBody($content);
@@ -58,7 +61,7 @@ class ItemBodyParser extends AbstractParser
             }
 
             if ($tagName === FeedbackBlock::qtiTagName()) {
-                return $this->feedbackBlockParser->parse($node);
+                return $this->feedbackBlockParser->parse($node, $warnings);
             }
 
             // Default: treat as HTML content
