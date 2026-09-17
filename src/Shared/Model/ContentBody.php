@@ -19,6 +19,11 @@ final class ContentBody extends QtiElement
         'math',
     ];
 
+    /** Tags that carry content on their own, regardless of children (e.g. an empty <table/>). */
+    private const array CONTENT_CARRYING_TAGS = [
+        'img', 'hr', 'table', 'video', 'audio', 'object', 'picture',
+    ];
+
     public function __construct(
         public ContentNodeCollection $content,
     ) {}
@@ -35,5 +40,53 @@ final class ContentBody extends QtiElement
     public function children(): array
     {
         return $this->content->all();
+    }
+
+    /** Whether the body carries anything visually meaningful, as opposed to e.g. `<p><br></p>`. */
+    public function hasContent(): bool
+    {
+        foreach ($this->content as $node) {
+            if (self::nodeHasContent($node)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function nodeHasContent(IContentNode $node): bool
+    {
+        // A Comment is a TextNode subtype but carries no visible content.
+        if ($node instanceof Comment) {
+            return false;
+        }
+
+        if ($node instanceof TextNode) {
+            return self::textHasContent($node->content);
+        }
+
+        if ($node instanceof HTMLTag) {
+            if (in_array($node->tagName(), self::CONTENT_CARRYING_TAGS, true)) {
+                return true;
+            }
+
+            foreach ($node->children() as $child) {
+                if (self::nodeHasContent($child)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Interactions, feedback blocks, etc. — none of these can be visually empty.
+        return true;
+    }
+
+    private static function textHasContent(string $text): bool
+    {
+        $stripped = str_replace(["\u{00A0}", "\u{200B}", "\u{FEFF}"], '', $text);
+
+        return trim($stripped) !== '';
     }
 }

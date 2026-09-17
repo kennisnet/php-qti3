@@ -84,6 +84,16 @@ final class PackageEditorTest extends TestCase
     }
 
     #[Test]
+    public function addItemToTestKeepsTheTestLanguage(): void
+    {
+        $package = $this->draftWithLanguage();
+
+        $this->editor->addItemToTest($package, self::TEST_ID, $this->item('PLACEHOLDER'));
+
+        $this->assertStringContainsString('xml:lang="nl"', (string) $package->getFile('AssessmentTest.xml'));
+    }
+
+    #[Test]
     public function addItemUsesAnExplicitIdentifierWhenGiven(): void
     {
         $package = $this->emptyDraft();
@@ -358,6 +368,17 @@ final class PackageEditorTest extends TestCase
             }
         }
         $this->assertSame(['qti-outcome-declaration', 'qti-rubric-block', 'qti-test-part'], $childNames);
+    }
+
+    #[Test]
+    public function setTestRubricBlocksKeepsTheTestLanguage(): void
+    {
+        $package = $this->draftWithLanguage();
+        $block = $this->rubricBlock('candidate', 'Welkom');
+
+        $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection([$block]));
+
+        $this->assertStringContainsString('xml:lang="nl"', (string) $package->getFile('AssessmentTest.xml'));
     }
 
     #[Test]
@@ -930,6 +951,33 @@ final class PackageEditorTest extends TestCase
 
         $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
         $this->filesystem->write(self::FOLDER . '/' . $testHref, $test);
+
+        return $this->readPackage();
+    }
+
+    private function draftWithLanguage(string $language = 'nl'): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="" xml:lang="%s">'
+            . '<qti-test-part identifier="testPart-1" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="section-1" title="" visible="true"/>'
+            . '</qti-test-part></qti-assessment-test>',
+            self::ASI_NAMESPACE,
+            $language,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
 
         return $this->readPackage();
     }

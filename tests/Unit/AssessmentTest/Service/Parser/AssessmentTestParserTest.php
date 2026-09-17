@@ -106,6 +106,43 @@ XML;
     }
 
     #[Test]
+    public function xmlLangIsParsedIntoTheModelWithoutAWarning(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets" xml:lang="nl">
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $result = $this->parser->parse($dom->documentElement);
+
+        $this->assertSame('nl', $result->test->language);
+        $this->assertSame([], $result->warnings->all());
+    }
+
+    #[Test]
+    public function aTestWithoutXmlLangYieldsANullLanguage(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $this->assertNull($this->parser->parse($dom->documentElement)->test->language);
+    }
+
+    #[Test]
     public function testLevelRubricBlocksAreParsedInOrder(): void
     {
         $xml = <<<XML

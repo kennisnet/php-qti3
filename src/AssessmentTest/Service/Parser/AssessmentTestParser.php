@@ -41,6 +41,7 @@ class AssessmentTestParser extends AbstractParser
         $identifier = AssessmentTestId::fromString($identifierValue ?: 'test-' . uniqid());
 
         $title = $element->getAttribute('title') ?: null;
+        $language = $element->getAttribute('xml:lang') ?: null;
 
         $outcomeDeclarations = new OutcomeDeclarationCollection();
         $rubricBlocks = new RubricBlockCollection();
@@ -58,7 +59,7 @@ class AssessmentTestParser extends AbstractParser
 
         $this->warnUnconsumed(
             $element,
-            ['identifier', 'title'],
+            ['identifier', 'title', 'xml:lang'],
             [OutcomeDeclaration::qtiTagName(), RubricBlock::qtiTagName(), TestPart::qtiTagName()],
             $warnings,
         );
@@ -69,6 +70,7 @@ class AssessmentTestParser extends AbstractParser
             testParts: $testParts,
             title: $title,
             rubricBlocks: $rubricBlocks,
+            language: $language,
         );
 
         return new TestParseResult($test, $warnings);

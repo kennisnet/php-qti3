@@ -44,6 +44,27 @@ class AssessmentTestTest extends TestCase
     }
 
     #[Test]
+    public function languageIsNullByDefault(): void
+    {
+        $assessmentTest = AssessmentTestStub::assessmentTest();
+        $this->assertNull($assessmentTest->language);
+        $this->assertNull($assessmentTest->attributes()['xml:lang']);
+    }
+
+    #[Test]
+    public function languageIsIncludedInAttributesWhenSet(): void
+    {
+        $assessmentTest = new AssessmentTest(
+            AssessmentTestId::fromString('e076edda-bf70-5105-a9a9-118d7eecd0c4'),
+            new OutcomeDeclarationCollection(),
+            new TestPartCollection(),
+            language: 'nl',
+        );
+
+        $this->assertSame('nl', $assessmentTest->attributes()['xml:lang']);
+    }
+
+    #[Test]
     public function outcomeDeclarationsCanBeRetrieved(): void
     {
         $assessmentTest = AssessmentTestStub::assessmentTest();
