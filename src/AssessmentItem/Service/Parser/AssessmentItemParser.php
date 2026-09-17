@@ -17,6 +17,7 @@ use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclarationCollection;
 use Qti3\Shared\Xml\Reader\IXmlReader;
 use Qti3\Shared\Xml\Reader\XmlParsingException;
+use DOMAttr;
 use DOMElement;
 
 class AssessmentItemParser extends AbstractParser
@@ -123,9 +124,13 @@ class AssessmentItemParser extends AbstractParser
             $warnings->add(sprintf('%s: keeps only one <qti-stylesheet>, the others are dropped', $this->locate($element)));
         }
 
+        // The XSD opens the item element to any extra attribute (dataExtension.AssessmentItem.Attr);
+        // data-* is the family editors use to annotate an item, so it is kept verbatim rather than dropped.
+        $dataAttributes = $this->readDataAttributes($element);
+
         $this->warnUnconsumed(
             $element,
-            ['identifier', 'title', 'adaptive', 'time-dependent', 'xml:lang'],
+            ['identifier', 'title', 'adaptive', 'time-dependent', 'xml:lang', ...array_keys($dataAttributes)],
             [
                 ResponseDeclaration::qtiTagName(),
                 OutcomeDeclaration::qtiTagName(),
@@ -149,8 +154,24 @@ class AssessmentItemParser extends AbstractParser
             timeDependent: $element->getAttribute('time-dependent') === 'true',
             adaptive: $element->getAttribute('adaptive') === 'true',
             language: $element->getAttribute('xml:lang') ?: 'nl-NL',
+            dataAttributes: $dataAttributes,
         );
 
         return new ItemParseResult($item, $warnings);
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private function readDataAttributes(DOMElement $element): array
+    {
+        $dataAttributes = [];
+        foreach ($element->attributes as $attribute) {
+            if ($attribute instanceof DOMAttr && str_starts_with($attribute->nodeName, 'data-')) {
+                $dataAttributes[$attribute->nodeName] = $attribute->nodeValue ?? '';
+            }
+        }
+
+        return $dataAttributes;
     }
 }

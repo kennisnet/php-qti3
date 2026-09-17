@@ -192,4 +192,50 @@ class AssessmentItemParserTest extends TestCase
 
         $this->parser->parseFromString('<qti-assessment-item><unclosed>');
     }
+
+    #[Test]
+    public function parseKeepsDataAttributesOnTheItemElementWithoutWarning(): void
+    {
+        $result = $this->parser->parseFromString(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item identifier="item-data" title="Met data" time-dependent="false" data-title-mode="auto" data-note="">'
+            . '<qti-item-body><div>Content</div></qti-item-body>'
+            . '</qti-assessment-item>',
+        );
+
+        $this->assertSame(['data-title-mode' => 'auto', 'data-note' => ''], $result->item->dataAttributes);
+        $this->assertSame('auto', $result->item->attributes()['data-title-mode']);
+        $this->assertTrue($result->warnings->isEmpty());
+    }
+
+    #[Test]
+    public function parseStillWarnsAboutAnUnsupportedAttributeThatIsNotADataAttribute(): void
+    {
+        $result = $this->parser->parseFromString(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item identifier="item-note" title="Met note" time-dependent="false" note="dropped">'
+            . '<qti-item-body><div>Content</div></qti-item-body>'
+            . '</qti-assessment-item>',
+        );
+
+        $this->assertSame([], $result->item->dataAttributes);
+        $this->assertArrayNotHasKey('note', $result->item->attributes());
+        $this->assertCount(1, $result->warnings->all());
+        $this->assertStringContainsString('drops unsupported attribute "note"', $result->warnings->all()[0]);
+    }
+
+    #[Test]
+    public function withIdentifierKeepsTheDataAttributes(): void
+    {
+        $result = $this->parser->parseFromString(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-item identifier="item-data" title="Met data" time-dependent="false" data-title-mode="manual">'
+            . '<qti-item-body><div>Content</div></qti-item-body>'
+            . '</qti-assessment-item>',
+        );
+
+        $renamed = $result->item->withIdentifier(\Qti3\AssessmentItem\Model\AssessmentItemId::fromString('item-renamed'));
+
+        $this->assertSame(['data-title-mode' => 'manual'], $renamed->dataAttributes);
+    }
 }
