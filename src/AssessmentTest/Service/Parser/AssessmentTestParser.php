@@ -8,9 +8,13 @@ use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentItem\Service\Parser\AbstractParser;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
+use Qti3\AssessmentTest\Model\Feedback\TestFeedback;
+use Qti3\AssessmentTest\Model\Feedback\TestFeedbackCollection;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeProcessing;
 use Qti3\AssessmentTest\Model\TestPart\TestPart;
 use Qti3\AssessmentTest\Model\TestPart\TestPartCollection;
 use Qti3\AssessmentTest\Service\TestParseResult;
@@ -25,6 +29,8 @@ class AssessmentTestParser extends AbstractParser
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
         private readonly TestPartParser $testPartParser,
         private readonly RubricBlockParser $rubricBlockParser,
+        private readonly OutcomeProcessingParser $outcomeProcessingParser = new OutcomeProcessingParser(new QtiExpressionParser()),
+        private readonly TestFeedbackParser $testFeedbackParser = new TestFeedbackParser(),
     ) {}
 
     /**
@@ -46,6 +52,8 @@ class AssessmentTestParser extends AbstractParser
         $outcomeDeclarations = new OutcomeDeclarationCollection();
         $rubricBlocks = new RubricBlockCollection();
         $testParts = new TestPartCollection();
+        $outcomeProcessing = null;
+        $testFeedback = new TestFeedbackCollection();
 
         foreach ($this->getChildren($element) as $child) {
             if ($child->nodeName === OutcomeDeclaration::qtiTagName()) {
@@ -54,13 +62,22 @@ class AssessmentTestParser extends AbstractParser
                 $rubricBlocks->add($this->rubricBlockParser->parse($child, $warnings));
             } elseif ($child->nodeName === TestPart::qtiTagName()) {
                 $testParts->add($this->testPartParser->parse($child, $warnings));
+            } elseif ($child->nodeName === OutcomeProcessing::qtiTagName()) {
+                // The schema allows one; a second cannot be represented and is dropped like any other unsupported construct.
+                if ($outcomeProcessing !== null) {
+                    $warnings->add(sprintf('%s: drops a second <%s>', $this->locate($child), $child->nodeName));
+                    continue;
+                }
+                $outcomeProcessing = $this->outcomeProcessingParser->parse($child, $warnings);
+            } elseif ($child->nodeName === TestFeedback::qtiTagName()) {
+                $testFeedback->add($this->testFeedbackParser->parse($child, $warnings));
             }
         }
 
         $this->warnUnconsumed(
             $element,
             ['identifier', 'title', 'xml:lang'],
-            [OutcomeDeclaration::qtiTagName(), RubricBlock::qtiTagName(), TestPart::qtiTagName()],
+            [OutcomeDeclaration::qtiTagName(), RubricBlock::qtiTagName(), TestPart::qtiTagName(), OutcomeProcessing::qtiTagName(), TestFeedback::qtiTagName()],
             $warnings,
         );
 
@@ -69,6 +86,8 @@ class AssessmentTestParser extends AbstractParser
             outcomeDeclarations: $outcomeDeclarations,
             testParts: $testParts,
             title: $title,
+            outcomeProcessing: $outcomeProcessing,
+            testFeedback: $testFeedback,
             rubricBlocks: $rubricBlocks,
             language: $language,
         );

@@ -247,8 +247,8 @@ final class PackageEditorTest extends TestCase
     #[Test]
     public function editingATestWithUnsupportedConstructsSurfacesTraceableWarnings(): void
     {
-        // The test carries outcome processing the model cannot hold: editing
-        // succeeds, but the loss is reported with file + line + selector.
+        // The test carries an outcome rule whose expression the model cannot hold:
+        // editing succeeds, but the loss is reported with file + line + selector.
         $package = $this->draftWithUnsupportedTestConstruct();
 
         $result = $this->addItemResult($package);
@@ -256,7 +256,8 @@ final class PackageEditorTest extends TestCase
         $this->assertNotSame([], $result->warnings->all());
         $warning = $result->warnings->all()[0];
         $this->assertStringStartsWith('AssessmentTest.xml: line ', $warning);
-        $this->assertStringContainsString('qti-outcome-processing', $warning);
+        $this->assertStringContainsString('/qti-outcome-processing/qti-set-outcome-value', $warning);
+        $this->assertStringContainsString('qti-number-correct', $warning);
     }
 
     #[Test]
@@ -1009,7 +1010,7 @@ final class PackageEditorTest extends TestCase
             . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
             . '<qti-assessment-section identifier="s" title="" visible="true"/>'
             . '</qti-test-part>'
-            . '<qti-outcome-processing/>'
+            . '<qti-outcome-processing><qti-set-outcome-value identifier="N"><qti-number-correct/></qti-set-outcome-value></qti-outcome-processing>'
             . '</qti-assessment-test>',
             self::ASI_NAMESPACE,
         );

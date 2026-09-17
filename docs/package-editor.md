@@ -293,14 +293,17 @@ $qtiClient->getFilesystemPackageFactory()->getWriter('/tmp/my-package')->write($
 | Adding/updating an item, or setting rubric blocks, whose content references a resource not in the package (or a path outside it) | `Qti3\Package\Exception\InvalidResourceReferenceException` |
 | An HTML fragment passed to `HtmlFragmentParser::parse()` that uses a tag or attribute outside the QTI whitelist | `InvalidArgumentException` |
 
-A construct the model cannot hold (outcome processing, test feedback, nested
-sections, a template declaration, an unconsumed attribute, ...) is **not** an
-error: it is dropped on regeneration and reported through the `warnings` on
-`ItemParseResult` / `EditResult`. Test-level rubric blocks are kept in
-`AssessmentTest::$rubricBlocks` and survive regeneration; the one thing a rubric
-block can lose is an extension `use` value (`use="ext:…"`, permitted by the
-schema but not by the model), which is dropped with a warning, as is a `view`
-token outside the enumeration.
+A construct the model cannot hold (nested sections, a template declaration, an
+unconsumed attribute, ...) is **not** an error: it is dropped on regeneration
+and reported through the `warnings` on `ItemParseResult` / `EditResult`.
+Test-level rubric blocks, outcome processing and test feedback are kept in
+`AssessmentTest::$rubricBlocks`, `$outcomeProcessing` and `$testFeedback` and
+survive regeneration. The one thing a rubric block can lose is an extension
+`use` value (`use="ext:…"`, permitted by the schema but not by the model), which
+is dropped with a warning, as is a `view` token outside the enumeration. Within
+outcome processing, a single rule whose expression the model does not know
+(`qti-number-correct`, ...) is dropped with a warning that names it; the other
+rules are kept.
 
 ## Notes
 

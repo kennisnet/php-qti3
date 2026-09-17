@@ -40,6 +40,7 @@ use Qti3\Shared\Model\Processing\Sum;
 use Qti3\Shared\Model\Processing\Variable;
 use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponse;
 use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponsePoint;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\TestVariables;
 use DOMElement;
 
 class QtiExpressionParser extends AbstractParser
@@ -121,6 +122,17 @@ class QtiExpressionParser extends AbstractParser
 
         if ($tagName === Variable::qtiTagName()) {
             return new Variable($element->getAttribute('identifier'));
+        }
+
+        if ($tagName === TestVariables::qtiTagName()) {
+            return new TestVariables(
+                $element->getAttribute('variable-identifier'),
+                $element->getAttribute('include-category') ?: null,
+                $element->getAttribute('section-identifier') ?: null,
+                $element->getAttribute('exclude-category') ?: null,
+                $element->getAttribute('weight-identifier') ?: null,
+                $element->getAttribute('base-type') ?: null,
+            );
         }
 
         if ($tagName === IsNull::qtiTagName()) {

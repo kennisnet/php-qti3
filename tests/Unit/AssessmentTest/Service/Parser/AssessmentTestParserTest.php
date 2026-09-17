@@ -12,6 +12,9 @@ use Qti3\AssessmentItem\Model\RubricBlock\qtiUse;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Model\AssessmentTest;
+use Qti3\AssessmentTest\Model\Feedback\TestFeedback;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\ExitTest;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeCondition;
 use Qti3\AssessmentTest\Model\Section\AssessmentSection;
 use Qti3\AssessmentTest\Model\TestPart\NavigationMode;
 use Qti3\AssessmentTest\Model\TestPart\SubmissionMode;
@@ -22,6 +25,7 @@ use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
 use Qti3\AssessmentTest\Service\Parser\TestPartParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
+use Qti3\Shared\Model\Processing\SetOutcomeValue;
 use Qti3\Shared\Model\TextNode;
 use DOMDocument;
 
@@ -249,5 +253,82 @@ XML;
         }
 
         return '';
+    }
+
+    #[Test]
+    public function outcomeProcessingAndTestFeedbackAreParsedIntoTheModelWithoutAWarning(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-outcome-declaration identifier="PASS" cardinality="single" base-type="boolean"/>
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+    <qti-outcome-processing>
+        <qti-set-outcome-value identifier="SCORE"><qti-sum><qti-test-variables variable-identifier="SCORE"/></qti-sum></qti-set-outcome-value>
+        <qti-outcome-condition>
+            <qti-outcome-if><qti-is-null><qti-variable identifier="SCORE"/></qti-is-null><qti-exit-test/></qti-outcome-if>
+        </qti-outcome-condition>
+    </qti-outcome-processing>
+    <qti-test-feedback identifier="F1" outcome-identifier="PASS" show-hide="show" access="atEnd"><qti-content-body><p>Geslaagd</p></qti-content-body></qti-test-feedback>
+    <qti-test-feedback identifier="F2" outcome-identifier="PASS" show-hide="hide" access="atEnd"><qti-content-body><p>Helaas</p></qti-content-body></qti-test-feedback>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $result = $this->parser->parse($dom->documentElement);
+
+        $this->assertSame([], $result->warnings->all());
+        $this->assertNotNull($result->test->outcomeProcessing);
+        $this->assertCount(2, $result->test->outcomeProcessing->elements);
+        $this->assertInstanceOf(SetOutcomeValue::class, $result->test->outcomeProcessing->elements[0]);
+        $this->assertInstanceOf(OutcomeCondition::class, $result->test->outcomeProcessing->elements[1]);
+        $this->assertSame(['F1', 'F2'], array_map(static fn(TestFeedback $feedback): string => $feedback->identifier, $result->test->testFeedback->all()));
+    }
+
+    #[Test]
+    public function aTestWithoutOutcomeProcessingHasNone(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $test = $this->parser->parse($dom->documentElement)->test;
+
+        $this->assertNull($test->outcomeProcessing);
+        $this->assertCount(0, $test->testFeedback);
+    }
+
+    #[Test]
+    public function aSecondOutcomeProcessingIsDroppedWithAWarning(): void
+    {
+        $xml = <<<XML
+<qti-assessment-test xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" identifier="test-1" title="Toets">
+    <qti-test-part identifier="part1" navigation-mode="linear" submission-mode="individual">
+        <qti-assessment-section identifier="section1" title="Section 1" visible="true"/>
+    </qti-test-part>
+    <qti-outcome-processing><qti-exit-test/></qti-outcome-processing>
+    <qti-outcome-processing><qti-set-outcome-value identifier="TWICE"><qti-base-value base-type="integer">1</qti-base-value></qti-set-outcome-value></qti-outcome-processing>
+</qti-assessment-test>
+XML;
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $result = $this->parser->parse($dom->documentElement);
+
+        $this->assertNotNull($result->test->outcomeProcessing);
+        $this->assertInstanceOf(ExitTest::class, $result->test->outcomeProcessing->elements[0]);
+        $this->assertCount(1, $result->warnings);
+        $this->assertStringContainsString('drops a second <qti-outcome-processing>', $result->warnings->all()[0]);
     }
 }
