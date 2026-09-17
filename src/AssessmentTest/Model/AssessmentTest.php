@@ -29,6 +29,7 @@ class AssessmentTest extends QtiElement
         public readonly ?OutcomeProcessing $outcomeProcessing = null,
         public readonly TestFeedbackCollection $testFeedback = new TestFeedbackCollection(),
         public readonly RubricBlockCollection $rubricBlocks = new RubricBlockCollection(),
+        public readonly ?string $language = null,
     ) {}
 
     /**
@@ -39,6 +40,7 @@ class AssessmentTest extends QtiElement
         return [
             'identifier' => (string) $this->identifier,
             'title' => $this->title,
+            'xml:lang' => $this->language,
             'xmlns' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0',
             'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:schemaLocation' => 'http://www.imsglobal.org/xsd/imsqtiasi_v3p0 https://purl.imsglobal.org/spec/qti/v3p0/schema/xsd/imsqti_asiv3p0_v1p0.xsd',
