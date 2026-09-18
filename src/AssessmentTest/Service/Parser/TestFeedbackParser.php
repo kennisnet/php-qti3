@@ -41,9 +41,11 @@ class TestFeedbackParser extends AbstractParser
             try {
                 $node = ContentNodeParser::parse($child);
             } catch (InvalidArgumentException $exception) {
-                // Not HTML the model can hold (a qti-stylesheet without a wrapper, a tag or attribute
-                // outside the whitelist): reported and dropped, like every other unsupported construct.
-                $warnings->add(sprintf('%s: drops unsupported element <%s>, %s', $this->locate($child), $child->localName, $exception->getMessage()));
+                // Not content the model can hold: a qti-stylesheet where no wrapper separates it from the
+                // content, a tag outside the whitelist, or a supported tag carrying an attribute that is
+                // not. The whole child goes, since its tree is what failed to build, and the reason says
+                // which of the three it was.
+                $warnings->add(sprintf('%s: drops <%s>, %s', $this->locate($child), $child->nodeName, $exception->getMessage()));
                 continue;
             }
             if ($node === null) {

@@ -19,8 +19,6 @@ use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeProcessing;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\Processing\AbstractQtiExpression;
 use Qti3\Shared\Model\Processing\SetOutcomeValue;
-use TypeError;
-use ValueError;
 
 /**
  * Parses the test-level `<qti-outcome-processing>` into its model.
@@ -50,9 +48,7 @@ class OutcomeProcessingParser extends AbstractParser
 
             try {
                 $rules[] = $this->parseRule($child);
-            } catch (ParseError | TypeError | ValueError $error) {
-                // TypeError: an operator short of an operand; ValueError: an unknown base-type. Both come
-                // out of QtiExpressionParser as-is, and both mean the rule cannot be held.
+            } catch (ParseError $error) {
                 $warnings->add(sprintf('%s: drops <%s>, %s', $this->locate($child), $child->nodeName, $error->getMessage()));
             }
         }

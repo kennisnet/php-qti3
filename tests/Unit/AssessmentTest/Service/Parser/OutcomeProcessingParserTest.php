@@ -226,11 +226,14 @@ final class OutcomeProcessingParserTest extends TestCase
     #[Test]
     public function anExpressionTheParserCannotBuildIsDroppedLikeAnUnknownOne(): void
     {
-        // An unknown base-type ends in a ValueError deep in QtiExpressionParser; it may not take the whole test down.
+        // A comparison short of an operand and an unknown base-type are both malformed expressions,
+        // not reasons to take the whole test down. Neither may raise a PHP warning on the way out:
+        // an application that promotes those to exceptions would lose the test after all.
         $warnings = new StringCollection();
 
         $processing = $this->parser->parse($this->element(
             '<qti-outcome-processing>'
+            . '<qti-set-outcome-value identifier="A"><qti-lte><qti-variable identifier="X"/></qti-lte></qti-set-outcome-value>'
             . '<qti-set-outcome-value identifier="B"><qti-base-value base-type="bogus">1</qti-base-value></qti-set-outcome-value>'
             . '<qti-exit-test/>'
             . '</qti-outcome-processing>',
@@ -238,8 +241,9 @@ final class OutcomeProcessingParserTest extends TestCase
 
         $this->assertCount(1, $processing->elements);
         $this->assertInstanceOf(ExitTest::class, $processing->elements[0]);
-        $this->assertSame(1, count($warnings));
-        $this->assertStringContainsString("[@identifier='B']: drops <qti-set-outcome-value>, \"bogus\" is not a valid backing value", $warnings->all()[0]);
+        $this->assertSame(2, count($warnings));
+        $this->assertStringContainsString("[@identifier='A']: drops <qti-set-outcome-value>, <qti-lte> needs at least 2 operands, got 1", $warnings->all()[0]);
+        $this->assertStringContainsString("[@identifier='B']: drops <qti-set-outcome-value>, <qti-base-value> has unknown base-type \"bogus\"", $warnings->all()[1]);
     }
 
     #[Test]

@@ -95,7 +95,24 @@ final class TestFeedbackParserTest extends TestCase
 
         $this->assertCount(1, $feedback->contentBody->content);
         $this->assertSame(1, count($warnings));
-        $this->assertStringContainsString('drops unsupported element <qti-stylesheet>, Invalid HTML tag name: qti-stylesheet', $warnings->all()[0]);
+        $this->assertStringContainsString('drops <qti-stylesheet>, Invalid HTML tag name: qti-stylesheet', $warnings->all()[0]);
+    }
+
+    #[Test]
+    public function aSupportedTagWithAnUnsupportedAttributeIsDroppedAsThatTag(): void
+    {
+        // The whole <p> goes, because its tree is what failed to build; the warning must not
+        // claim <p> itself is unsupported.
+        $warnings = new StringCollection();
+
+        $feedback = $this->parser->parse($this->element(
+            '<qti-test-feedback identifier="F1" outcome-identifier="PASS"><p style="color:red">Eerste</p><p>Tweede</p></qti-test-feedback>',
+        ), $warnings);
+
+        $this->assertCount(1, $feedback->contentBody->content);
+        $this->assertSame(1, count($warnings));
+        $this->assertStringContainsString('drops <p>, Invalid attribute style', $warnings->all()[0]);
+        $this->assertStringNotContainsString('unsupported element', $warnings->all()[0]);
     }
 
     #[Test]
