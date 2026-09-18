@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\AssessmentTest\Service\Parser;
 
 use DOMElement;
+use InvalidArgumentException;
 use Qti3\AssessmentItem\Model\Feedback\Visibility;
 use Qti3\AssessmentItem\Service\Parser\AbstractParser;
 use Qti3\AssessmentTest\Model\Feedback\TestFeedback;
@@ -17,22 +18,34 @@ use Qti3\Shared\Model\ContentNodeCollection;
 /** Parses a test-level `<qti-test-feedback>`, content included, so it survives regeneration. */
 class TestFeedbackParser extends AbstractParser
 {
+    private const string CONTENT_BODY = 'qti-content-body';
+
     public function parse(DOMElement $element, ?StringCollection $warnings = null): TestFeedback
     {
         $this->validateTag($element, TestFeedback::qtiTagName());
+        $warnings ??= new StringCollection();
 
-        $this->warnUnconsumed(
-            $element,
-            ['identifier', 'outcome-identifier', 'show-hide', 'access', 'title'],
-            ['qti-content-body', ...ContentBody::ALLOWED_HTML_TAGS],
-            $warnings ?? new StringCollection(),
-        );
+        $this->warnUnconsumedAttributes($element, ['identifier', 'outcome-identifier', 'show-hide', 'access', 'title'], $warnings);
 
+        // The schema wraps the content in <qti-content-body>; authored XML often leaves the wrapper out.
+        // With a wrapper, anything beside it (qti-stylesheet, qti-catalog-info) is dropped; the wrapper's
+        // own attributes have no place in the model either. Without one, every child is content.
         $contentRoot = $this->unwrapContentBody($element);
+        if ($contentRoot !== $element) {
+            $this->warnUnconsumedChildren($element, [self::CONTENT_BODY], $warnings);
+            $this->warnUnconsumedAttributes($contentRoot, [], $warnings);
+        }
 
         $content = new ContentNodeCollection();
         foreach ($contentRoot->childNodes as $child) {
-            $node = ContentNodeParser::parse($child);
+            try {
+                $node = ContentNodeParser::parse($child);
+            } catch (InvalidArgumentException $exception) {
+                // Not HTML the model can hold (a qti-stylesheet without a wrapper, a tag or attribute
+                // outside the whitelist): reported and dropped, like every other unsupported construct.
+                $warnings->add(sprintf('%s: drops unsupported element <%s>, %s', $this->locate($child), $child->localName, $exception->getMessage()));
+                continue;
+            }
             if ($node === null) {
                 continue;
             }
@@ -51,23 +64,23 @@ class TestFeedbackParser extends AbstractParser
         );
     }
 
-    private function parseAccess(DOMElement $element, ?StringCollection $warnings): TestFeedbackAccess
+    private function parseAccess(DOMElement $element, StringCollection $warnings): TestFeedbackAccess
     {
         $raw = $element->getAttribute('access');
         $access = TestFeedbackAccess::tryFrom($raw);
         if ($access === null && $raw !== '') {
-            $warnings?->add(sprintf('%s: defaults unknown access "%s" to "%s"', $this->locate($element), $raw, TestFeedbackAccess::AT_END->value));
+            $warnings->add(sprintf('%s: defaults unknown access "%s" to "%s"', $this->locate($element), $raw, TestFeedbackAccess::AT_END->value));
         }
 
         return $access ?? TestFeedbackAccess::AT_END;
     }
 
-    private function parseShowHide(DOMElement $element, ?StringCollection $warnings): Visibility
+    private function parseShowHide(DOMElement $element, StringCollection $warnings): Visibility
     {
         $raw = $element->getAttribute('show-hide');
         $visibility = Visibility::tryFrom($raw);
         if ($visibility === null && $raw !== '') {
-            $warnings?->add(sprintf('%s: defaults unknown show-hide "%s" to "%s"', $this->locate($element), $raw, Visibility::SHOW->value));
+            $warnings->add(sprintf('%s: defaults unknown show-hide "%s" to "%s"', $this->locate($element), $raw, Visibility::SHOW->value));
         }
 
         return $visibility ?? Visibility::SHOW;

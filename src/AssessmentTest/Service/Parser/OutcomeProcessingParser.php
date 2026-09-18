@@ -19,14 +19,15 @@ use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeProcessing;
 use Qti3\Shared\Collection\StringCollection;
 use Qti3\Shared\Model\Processing\AbstractQtiExpression;
 use Qti3\Shared\Model\Processing\SetOutcomeValue;
+use TypeError;
+use ValueError;
 
 /**
  * Parses the test-level `<qti-outcome-processing>` into its model.
  *
- * A rule the model cannot hold, or whose expression the expression parser does
- * not know, is dropped with a warning instead of failing the whole test: the
- * rest of the test stays editable and the loss is reported, like every other
- * unsupported construct.
+ * A top-level rule the model cannot hold is dropped on its own, with a warning.
+ * Inside a condition the whole <qti-outcome-condition> goes: keeping the other
+ * branches would silently change what the test scores.
  */
 class OutcomeProcessingParser extends AbstractParser
 {
@@ -49,7 +50,9 @@ class OutcomeProcessingParser extends AbstractParser
 
             try {
                 $rules[] = $this->parseRule($child);
-            } catch (ParseError $error) {
+            } catch (ParseError | TypeError | ValueError $error) {
+                // TypeError: an operator short of an operand; ValueError: an unknown base-type. Both come
+                // out of QtiExpressionParser as-is, and both mean the rule cannot be held.
                 $warnings->add(sprintf('%s: drops <%s>, %s', $this->locate($child), $child->nodeName, $error->getMessage()));
             }
         }

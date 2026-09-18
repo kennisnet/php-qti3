@@ -189,6 +189,60 @@ final class OutcomeProcessingParserTest extends TestCase
     }
 
     #[Test]
+    public function anUnknownRuleInsideABranchDropsTheWholeCondition(): void
+    {
+        $warnings = new StringCollection();
+
+        $processing = $this->parser->parse($this->element(
+            '<qti-outcome-processing><qti-outcome-condition>'
+            . '<qti-outcome-if><qti-is-null><qti-variable identifier="X"/></qti-is-null><qti-exit-test/></qti-outcome-if>'
+            . '<qti-outcome-else><qti-outcome-rule-ext/></qti-outcome-else>'
+            . '</qti-outcome-condition></qti-outcome-processing>',
+        ), $warnings);
+
+        $this->assertSame([], $processing->elements);
+        $this->assertSame(1, count($warnings));
+        $this->assertStringContainsString('drops <qti-outcome-condition>, Unknown outcome processing rule qti-outcome-rule-ext', $warnings->all()[0]);
+    }
+
+    #[Test]
+    public function anEmptyConditionAndAForeignBranchAreReported(): void
+    {
+        $warnings = new StringCollection();
+
+        $processing = $this->parser->parse($this->element(
+            '<qti-outcome-processing>'
+            . '<qti-outcome-condition/>'
+            . '<qti-outcome-condition><qti-outcome-if><qti-is-null><qti-variable identifier="X"/></qti-is-null></qti-outcome-if><qti-outcome-foo/></qti-outcome-condition>'
+            . '</qti-outcome-processing>',
+        ), $warnings);
+
+        $this->assertSame([], $processing->elements);
+        $this->assertSame(2, count($warnings));
+        $this->assertStringContainsString('Expected tag "qti-outcome-if", no element found', $warnings->all()[0]);
+        $this->assertStringContainsString('Expected tag "qti-outcome-else-if", got "qti-outcome-foo"', $warnings->all()[1]);
+    }
+
+    #[Test]
+    public function anExpressionTheParserCannotBuildIsDroppedLikeAnUnknownOne(): void
+    {
+        // An unknown base-type ends in a ValueError deep in QtiExpressionParser; it may not take the whole test down.
+        $warnings = new StringCollection();
+
+        $processing = $this->parser->parse($this->element(
+            '<qti-outcome-processing>'
+            . '<qti-set-outcome-value identifier="B"><qti-base-value base-type="bogus">1</qti-base-value></qti-set-outcome-value>'
+            . '<qti-exit-test/>'
+            . '</qti-outcome-processing>',
+        ), $warnings);
+
+        $this->assertCount(1, $processing->elements);
+        $this->assertInstanceOf(ExitTest::class, $processing->elements[0]);
+        $this->assertSame(1, count($warnings));
+        $this->assertStringContainsString("[@identifier='B']: drops <qti-set-outcome-value>, \"bogus\" is not a valid backing value", $warnings->all()[0]);
+    }
+
+    #[Test]
     public function rejectsAnotherElement(): void
     {
         $this->expectException(ParseError::class);

@@ -8,7 +8,6 @@ use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentItem\Model\RubricBlock\RubricBlockCollection;
 use Qti3\AssessmentItem\Service\Parser\AbstractParser;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
-use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\AssessmentTestId;
@@ -29,8 +28,8 @@ class AssessmentTestParser extends AbstractParser
         private readonly OutcomeDeclarationParser $outcomeDeclarationParser,
         private readonly TestPartParser $testPartParser,
         private readonly RubricBlockParser $rubricBlockParser,
-        private readonly OutcomeProcessingParser $outcomeProcessingParser = new OutcomeProcessingParser(new QtiExpressionParser()),
-        private readonly TestFeedbackParser $testFeedbackParser = new TestFeedbackParser(),
+        private readonly OutcomeProcessingParser $outcomeProcessingParser,
+        private readonly TestFeedbackParser $testFeedbackParser,
     ) {}
 
     /**

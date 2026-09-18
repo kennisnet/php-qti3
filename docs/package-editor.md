@@ -301,9 +301,11 @@ Test-level rubric blocks, outcome processing and test feedback are kept in
 survive regeneration. The one thing a rubric block can lose is an extension
 `use` value (`use="ext:…"`, permitted by the schema but not by the model), which
 is dropped with a warning, as is a `view` token outside the enumeration. Within
-outcome processing, a single rule whose expression the model does not know
-(`qti-number-correct`, ...) is dropped with a warning that names it; the other
-rules are kept.
+outcome processing, a top-level rule whose expression the model does not know
+(`qti-number-correct`, ...) is dropped with a warning that names it and the
+other rules are kept; a rule like that inside a `qti-outcome-condition` drops
+the whole condition, since keeping its other branches would silently change
+what the test scores.
 
 ## Notes
 

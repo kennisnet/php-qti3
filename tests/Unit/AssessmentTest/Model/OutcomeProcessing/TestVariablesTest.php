@@ -15,7 +15,7 @@ class TestVariablesTest extends TestCase
     {
         $testVariables = new TestVariables('SCORE', 'category');
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'variable-identifier' => 'SCORE',
                 'include-category' => 'category',

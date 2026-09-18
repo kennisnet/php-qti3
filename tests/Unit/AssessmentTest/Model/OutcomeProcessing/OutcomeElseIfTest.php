@@ -33,4 +33,18 @@ class OutcomeElseIfTest extends TestCase
         $this->assertInstanceOf(IsNull::class, $children[0]);
         $this->assertInstanceOf(SetOutcomeValue::class, $children[1]);
     }
+
+    #[Test]
+    public function holdsAnyNumberOfRulesAfterItsCondition(): void
+    {
+        $twoRules = new OutcomeElseIf(
+            new IsNull(new Variable('variable')),
+            new SetOutcomeValue('a', new BaseValue(BaseType::INTEGER, '1')),
+            new SetOutcomeValue('b', new BaseValue(BaseType::INTEGER, '2')),
+        );
+
+        $this->assertCount(2, $twoRules->elements);
+        $this->assertCount(3, $twoRules->children());
+        $this->assertSame([], new OutcomeElseIf(new IsNull(new Variable('variable')))->elements);
+    }
 }

@@ -152,6 +152,8 @@ class QtiExpressionParserTest extends TestCase
         $this->assertInstanceOf(TestVariables::class, $result);
         $this->assertNull($result->includeCategory);
         $this->assertNull($result->sectionIdentifier);
+        $this->assertNull($result->excludeCategory);
+        $this->assertNull($result->weightIdentifier);
         $this->assertNull($result->baseType);
     }
 }

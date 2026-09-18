@@ -249,7 +249,7 @@ final class PackageEditorTest extends TestCase
     {
         // The test carries an outcome rule whose expression the model cannot hold:
         // editing succeeds, but the loss is reported with file + line + selector.
-        $package = $this->draftWithUnsupportedTestConstruct();
+        $package = $this->draftWithAnUnknownOutcomeExpression();
 
         $result = $this->addItemResult($package);
 
@@ -307,6 +307,35 @@ final class PackageEditorTest extends TestCase
         $this->editor->reorderItemsInTest($package, self::TEST_ID, ['ITEM003', 'ITEM001', 'ITEM002']);
 
         $this->assertSame(['ITEM003', 'ITEM001', 'ITEM002'], $this->itemRefIdentifiers($package));
+    }
+
+    #[Test]
+    public function outcomeProcessingAndTestFeedbackSurviveEveryEditThatRewritesTheTest(): void
+    {
+        // Regression for #15: add, reorder and a rubric-block edit each regenerate AssessmentTest.xml.
+        $package = $this->draftWithOutcomeProcessingAndFeedback();
+
+        $added = $this->addItemResult($package);
+        $this->addItem($package);
+        $reordered = $this->editor->reorderItemsInTest($package, self::TEST_ID, ['ITEM002', 'ITEM001']);
+        $edited = $this->editor->setTestRubricBlocks($package, self::TEST_ID, new RubricBlockCollection([$this->rubricBlock('candidate', 'Lees eerst')]));
+
+        $this->assertSame([], [...$added->warnings->all(), ...$reordered->warnings->all(), ...$edited->warnings->all()]);
+        $xml = (string) $package->getFile('AssessmentTest.xml');
+        foreach ([
+            '<qti-outcome-processing>',
+            '<qti-test-variables variable-identifier="MAXSCORE"/>',
+            '<qti-outcome-if>',
+            '<qti-base-value base-type="float">55</qti-base-value>',
+            '<qti-outcome-else>',
+            '<qti-set-outcome-value identifier="PASS">',
+            '<qti-test-feedback identifier="F1"',
+            '<p>Geslaagd</p>',
+            '<p>Lees eerst</p>',
+        ] as $needle) {
+            $this->assertStringContainsString($needle, $xml);
+        }
+        $this->assertSame(['ITEM002', 'ITEM001'], $this->itemRefIdentifiers($package));
     }
 
     #[Test]
@@ -993,7 +1022,48 @@ final class PackageEditorTest extends TestCase
         return $package;
     }
 
-    private function draftWithUnsupportedTestConstruct(): QtiPackage
+    private function draftWithOutcomeProcessingAndFeedback(): QtiPackage
+    {
+        $manifest = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<manifest xmlns="%s" identifier="MANIFEST-1"><organizations/><resources>'
+            . '<resource identifier="%s" type="imsqti_test_xmlv3p0" href="AssessmentTest.xml"><file href="AssessmentTest.xml"/></resource>'
+            . '</resources></manifest>',
+            self::MANIFEST_NAMESPACE,
+            self::TEST_ID,
+        );
+
+        // The outcome processing Wikiwijs Maken writes: score sums plus a pass condition.
+        $test = sprintf(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<qti-assessment-test xmlns="%s" identifier="test-1" title="">'
+            . '<qti-outcome-declaration identifier="SCORE" cardinality="single" base-type="float"/>'
+            . '<qti-outcome-declaration identifier="MAX_SCORE" cardinality="single" base-type="float"/>'
+            . '<qti-outcome-declaration identifier="PASS" cardinality="single" base-type="boolean"/>'
+            . '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">'
+            . '<qti-assessment-section identifier="s" title="" visible="true"/>'
+            . '</qti-test-part>'
+            . '<qti-outcome-processing>'
+            . '<qti-set-outcome-value identifier="MAX_SCORE"><qti-sum><qti-test-variables variable-identifier="MAXSCORE"/></qti-sum></qti-set-outcome-value>'
+            . '<qti-set-outcome-value identifier="SCORE"><qti-sum><qti-test-variables variable-identifier="SCORE"/></qti-sum></qti-set-outcome-value>'
+            . '<qti-outcome-condition>'
+            . '<qti-outcome-if><qti-gt><qti-product><qti-divide><qti-variable identifier="SCORE"/><qti-variable identifier="MAX_SCORE"/></qti-divide><qti-base-value base-type="float">100</qti-base-value></qti-product><qti-base-value base-type="float">55</qti-base-value></qti-gt>'
+            . '<qti-set-outcome-value identifier="PASS"><qti-base-value base-type="boolean">true</qti-base-value></qti-set-outcome-value></qti-outcome-if>'
+            . '<qti-outcome-else><qti-set-outcome-value identifier="PASS"><qti-base-value base-type="boolean">false</qti-base-value></qti-set-outcome-value></qti-outcome-else>'
+            . '</qti-outcome-condition>'
+            . '</qti-outcome-processing>'
+            . '<qti-test-feedback identifier="F1" outcome-identifier="PASS" show-hide="show" access="atEnd"><qti-content-body><p>Geslaagd</p></qti-content-body></qti-test-feedback>'
+            . '</qti-assessment-test>',
+            self::ASI_NAMESPACE,
+        );
+
+        $this->filesystem->write(self::FOLDER . '/imsmanifest.xml', $manifest);
+        $this->filesystem->write(self::FOLDER . '/AssessmentTest.xml', $test);
+
+        return $this->readPackage();
+    }
+
+    private function draftWithAnUnknownOutcomeExpression(): QtiPackage
     {
         $manifest = sprintf(
             '<?xml version="1.0" encoding="UTF-8"?>'

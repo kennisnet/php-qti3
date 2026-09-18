@@ -10,6 +10,7 @@ use Qti3\AssessmentItem\Model\RubricBlock\RubricBlock;
 use Qti3\AssessmentItem\Model\RubricBlock\View;
 use Qti3\AssessmentItem\Model\RubricBlock\qtiUse;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Model\AssessmentTest;
 use Qti3\AssessmentTest\Model\Feedback\TestFeedback;
@@ -22,6 +23,8 @@ use Qti3\AssessmentTest\Model\TestPart\TestPart;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
+use Qti3\AssessmentTest\Service\Parser\OutcomeProcessingParser;
+use Qti3\AssessmentTest\Service\Parser\TestFeedbackParser;
 use Qti3\AssessmentTest\Service\Parser\TestPartParser;
 use Qti3\Shared\Model\HTMLTag;
 use Qti3\Shared\Model\OutcomeDeclaration\OutcomeDeclaration;
@@ -43,7 +46,9 @@ class AssessmentTestParserTest extends TestCase
         $this->parser = new AssessmentTestParser(
             $outcomeDeclarationParser,
             $testPartParser,
-            new RubricBlockParser()
+            new RubricBlockParser(),
+            new OutcomeProcessingParser(new QtiExpressionParser()),
+            new TestFeedbackParser(),
         );
     }
 
