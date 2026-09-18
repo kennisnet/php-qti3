@@ -40,10 +40,28 @@ use Qti3\Shared\Model\Processing\Sum;
 use Qti3\Shared\Model\Processing\Variable;
 use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponse;
 use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponsePoint;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\TestVariables;
 use DOMElement;
 
 class QtiExpressionParser extends AbstractParser
 {
+    /**
+     * The operand at `$index`, or a ParseError when the expression carries fewer than its
+     * operator needs. Reading it straight off the array raises a PHP warning first and a
+     * TypeError after it, and neither lets a caller treat this as a malformed expression.
+     *
+     * @param array<int, DOMElement> $children
+     */
+    private function operand(array $children, int $index, string $tagName): DOMElement
+    {
+        return $children[$index] ?? throw new ParseError(sprintf(
+            '<%s> needs at least %d operands, got %d',
+            $tagName,
+            $index + 1,
+            count($children),
+        ));
+    }
+
     public function parse(DOMElement $element): AbstractQtiExpression
     {
         $tagName = strtolower($element->nodeName);
@@ -55,50 +73,50 @@ class QtiExpressionParser extends AbstractParser
 
         if ($tagName === Lte::qtiTagName()) {
             return new Lte(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Lt::qtiTagName()) {
             return new Lt(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Gte::qtiTagName()) {
             return new Gte(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Gt::qtiTagName()) {
             return new Gt(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === qtiMatch::qtiTagName()) {
             return new qtiMatch(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Equal::qtiTagName()) {
             return new Equal(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Divide::qtiTagName()) {
             return new Divide(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
@@ -113,8 +131,10 @@ class QtiExpressionParser extends AbstractParser
                 throw new ParseError('Empty base value'); // @codeCoverageIgnore
             }
 
+            $baseType = $element->getAttribute('base-type');
+
             return new BaseValue(
-                BaseType::from($element->getAttribute('base-type')),
+                BaseType::tryFrom($baseType) ?? throw new ParseError(sprintf('<%s> has unknown base-type "%s"', $tagName, $baseType)),
                 $value,
             );
         }
@@ -123,8 +143,19 @@ class QtiExpressionParser extends AbstractParser
             return new Variable($element->getAttribute('identifier'));
         }
 
+        if ($tagName === TestVariables::qtiTagName()) {
+            return new TestVariables(
+                $element->getAttribute('variable-identifier'),
+                $element->getAttribute('include-category') ?: null,
+                $element->getAttribute('section-identifier') ?: null,
+                $element->getAttribute('exclude-category') ?: null,
+                $element->getAttribute('weight-identifier') ?: null,
+                $element->getAttribute('base-type') ?: null,
+            );
+        }
+
         if ($tagName === IsNull::qtiTagName()) {
-            $variable = $children[0];
+            $variable = $children[0] ?? null;
             $this->validateTag($variable, Variable::qtiTagName());
             return new IsNull(new Variable($variable->getAttribute('identifier')));
         }
@@ -180,48 +211,48 @@ class QtiExpressionParser extends AbstractParser
 
         if ($tagName === Member::qtiTagName()) {
             return new Member(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === qtiNot::qtiTagName()) {
-            return new qtiNot($this->parse($children[0]));
+            return new qtiNot($this->parse($this->operand($children, 0, $tagName)));
         }
 
         if ($tagName === Contains::qtiTagName()) {
             return new Contains(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Substring::qtiTagName()) {
             return new Substring(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
                 $element->getAttribute('case-sensitive') === 'true',
             );
         }
 
         if ($tagName === Subtract::qtiTagName()) {
             return new Subtract(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Power::qtiTagName()) {
             return new Power(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === Round::qtiTagName()) {
             $roundingMode = $element->getAttribute('rounding-mode') ?: 'nearest';
             return new Round(
-                $this->parse($children[0]),
+                $this->parse($this->operand($children, 0, $tagName)),
                 $roundingMode,
             );
         }
@@ -229,23 +260,23 @@ class QtiExpressionParser extends AbstractParser
         if ($tagName === RoundTo::qtiTagName()) {
             $roundingMode = $element->getAttribute('rounding-mode') ?: 'nearest';
             return new RoundTo(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
                 $roundingMode,
             );
         }
 
         if ($tagName === IntegerDivide::qtiTagName()) {
             return new IntegerDivide(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
         if ($tagName === IntegerModulus::qtiTagName()) {
             return new IntegerModulus(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 
@@ -269,15 +300,15 @@ class QtiExpressionParser extends AbstractParser
 
         if ($tagName === Index::qtiTagName()) {
             return new Index(
-                $this->parse($children[0]),
+                $this->parse($this->operand($children, 0, $tagName)),
                 new IndexExpression($element->getAttribute('n')),
             );
         }
 
         if ($tagName === Delete::qtiTagName()) {
             return new Delete(
-                $this->parse($children[0]),
-                $this->parse($children[1]),
+                $this->parse($this->operand($children, 0, $tagName)),
+                $this->parse($this->operand($children, 1, $tagName)),
             );
         }
 

@@ -106,6 +106,41 @@ final class ParserWarningsInvariantTest extends TestCase
                 self::test(self::rubricBlock('candidate', use: null) . self::testPart('')),
                 ['qti-rubric-block', 'view="candidate"', 'Welkom'],
             ],
+            'outcome processing as Wikiwijs Maken writes it' => [
+                self::test(self::testPart('') . self::outcomeProcessing(
+                    '<qti-set-outcome-value identifier="MAX_SCORE"><qti-sum><qti-test-variables variable-identifier="MAXSCORE"/></qti-sum></qti-set-outcome-value>'
+                    . '<qti-set-outcome-value identifier="SCORE"><qti-sum><qti-test-variables variable-identifier="SCORE"/></qti-sum></qti-set-outcome-value>'
+                    . '<qti-outcome-condition>'
+                    . '<qti-outcome-if><qti-gt><qti-product><qti-divide><qti-variable identifier="SCORE"/><qti-variable identifier="MAX_SCORE"/></qti-divide><qti-base-value base-type="float">100</qti-base-value></qti-product><qti-base-value base-type="float">55</qti-base-value></qti-gt>'
+                    . '<qti-set-outcome-value identifier="PASS"><qti-base-value base-type="boolean">true</qti-base-value></qti-set-outcome-value></qti-outcome-if>'
+                    . '<qti-outcome-else><qti-set-outcome-value identifier="PASS"><qti-base-value base-type="boolean">false</qti-base-value></qti-set-outcome-value></qti-outcome-else>'
+                    . '</qti-outcome-condition>',
+                )),
+                ['qti-outcome-processing', 'qti-test-variables variable-identifier="MAXSCORE"', 'qti-outcome-if', 'qti-gt', 'qti-divide', '>55<', 'qti-outcome-else', 'identifier="PASS"'],
+            ],
+            'outcome processing with every rule kind and a test-variables subset' => [
+                self::test(self::testPart('') . self::outcomeProcessing(
+                    '<qti-outcome-condition>'
+                    . '<qti-outcome-if><qti-lt><qti-variable identifier="SCORE"/><qti-base-value base-type="float">1</qti-base-value></qti-lt>'
+                    . '<qti-set-outcome-value identifier="A"><qti-base-value base-type="integer">1</qti-base-value></qti-set-outcome-value>'
+                    . '<qti-set-outcome-value identifier="B"><qti-base-value base-type="integer">2</qti-base-value></qti-set-outcome-value>'
+                    . '<qti-exit-test/></qti-outcome-if>'
+                    . '<qti-outcome-else-if><qti-lt><qti-variable identifier="SCORE"/><qti-base-value base-type="float">2</qti-base-value></qti-lt>'
+                    . '<qti-outcome-condition><qti-outcome-if><qti-is-null><qti-variable identifier="X"/></qti-is-null></qti-outcome-if></qti-outcome-condition></qti-outcome-else-if>'
+                    . '<qti-outcome-else/>'
+                    . '</qti-outcome-condition>'
+                    . '<qti-lookup-outcome-value identifier="GRADE"><qti-test-variables variable-identifier="SCORE" section-identifier="S1" include-category="core" exclude-category="skip" weight-identifier="W" base-type="float"/></qti-lookup-outcome-value>',
+                )),
+                ['identifier="A"', 'identifier="B"', 'qti-exit-test', 'qti-outcome-else-if', '<qti-outcome-else/>', 'qti-lookup-outcome-value identifier="GRADE"', 'section-identifier="S1"', 'include-category="core"', 'exclude-category="skip"', 'weight-identifier="W"', 'base-type="float"'],
+            ],
+            'test feedback' => [
+                self::test(self::testPart('') . '<qti-test-feedback identifier="F1" outcome-identifier="PASS" show-hide="hide" access="during" title="Resultaat"><qti-content-body><p>Goed <strong>gedaan</strong></p></qti-content-body></qti-test-feedback>'),
+                ['qti-test-feedback', 'identifier="F1"', 'outcome-identifier="PASS"', 'show-hide="hide"', 'access="during"', 'title="Resultaat"', '<strong>gedaan</strong>'],
+            ],
+            'test feedback without a content body wrapper' => [
+                self::test(self::testPart('') . '<qti-test-feedback identifier="F1" outcome-identifier="PASS"><p>Goed</p></qti-test-feedback>'),
+                ['qti-test-feedback', 'show-hide="show"', 'access="atEnd"', '<p>Goed</p>'],
+            ],
         ];
     }
 
@@ -115,9 +150,25 @@ final class ParserWarningsInvariantTest extends TestCase
     public static function lossyTestConstructs(): array
     {
         return [
-            'outcome processing' => [
-                self::test(self::testPart('') . '<qti-outcome-processing/>'),
-                'qti-outcome-processing',
+            'outcome rule with an expression the model does not know' => [
+                self::test(self::testPart('') . self::outcomeProcessing('<qti-set-outcome-value identifier="N"><qti-number-correct/></qti-set-outcome-value>')),
+                'qti-number-correct',
+            ],
+            'unknown outcome rule' => [
+                self::test(self::testPart('') . self::outcomeProcessing('<qti-outcome-rule-ext identifier="N"/>')),
+                'qti-outcome-rule-ext',
+            ],
+            'outcome condition without an if' => [
+                self::test(self::testPart('') . self::outcomeProcessing('<qti-outcome-condition><qti-outcome-else/></qti-outcome-condition>')),
+                'qti-outcome-condition',
+            ],
+            'second outcome processing' => [
+                self::test(self::testPart('') . self::outcomeProcessing('<qti-exit-test/>') . self::outcomeProcessing('<qti-set-outcome-value identifier="TWICE"><qti-base-value base-type="integer">1</qti-base-value></qti-set-outcome-value>')),
+                'TWICE',
+            ],
+            'test feedback with an unknown attribute' => [
+                self::test(self::testPart('') . '<qti-test-feedback identifier="F1" outcome-identifier="PASS" data-x="y"><p>Goed</p></qti-test-feedback>'),
+                'data-x',
             ],
             'nested section' => [
                 self::testWithSection('<qti-assessment-section identifier="inner" title="" visible="true"/>'),
@@ -262,6 +313,11 @@ final class ParserWarningsInvariantTest extends TestCase
             '<qti-test-part identifier="tp" navigation-mode="linear" submission-mode="individual">%s</qti-test-part>',
             $sections,
         );
+    }
+
+    private static function outcomeProcessing(string $rules): string
+    {
+        return sprintf('<qti-outcome-processing>%s</qti-outcome-processing>', $rules);
     }
 
     private static function rubricBlock(string $view, string $text = 'Welkom', ?string $use = 'instructions'): string

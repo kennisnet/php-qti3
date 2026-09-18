@@ -5,7 +5,9 @@ namespace Qti3\Tests\Integration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentTest\Model\AssessmentTest;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeCondition;
 use Qti3\AssessmentTest\Model\Section\AssessmentSection;
+use Qti3\Shared\Model\Processing\SetOutcomeValue;
 use Qti3\AssessmentTest\Model\TestPart\TestPart;
 use Qti3\Package\Model\Manifest\Manifest;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
@@ -107,5 +109,22 @@ XML;
         $this->assertSame('itemB', (string) $itemRef2->identifier);
         $this->assertSame('itemB.xml', $itemRef2->href);
         $this->assertSame('hard', $itemRef2->category);
+    }
+
+    public function testBuildFromPackageKeepsTheOutcomeProcessingOfARealWikiwijsPackage(): void
+    {
+        $client = $this->createClient();
+        $package = $client->getQtiPackageReader()->fromZip(__DIR__ . '/../../fixtures/valid-package.zip');
+
+        $result = $client->getTestBuilder()->buildFromPackage($package);
+
+        $this->assertSame([], $result->warnings->all());
+        $outcomeProcessing = $result->test->outcomeProcessing;
+        $this->assertNotNull($outcomeProcessing);
+        $this->assertCount(3, $outcomeProcessing->elements);
+        $first = $outcomeProcessing->elements[0];
+        $this->assertInstanceOf(SetOutcomeValue::class, $first);
+        $this->assertSame('MAX_SCORE', $first->identifier);
+        $this->assertInstanceOf(OutcomeCondition::class, $outcomeProcessing->elements[2]);
     }
 }

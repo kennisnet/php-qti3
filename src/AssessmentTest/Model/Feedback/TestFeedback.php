@@ -16,6 +16,7 @@ class TestFeedback extends QtiElement
         public readonly ContentBody $contentBody,
         public TestFeedbackAccess $access = TestFeedbackAccess::AT_END,
         public readonly Visibility $showHide = Visibility::SHOW,
+        public readonly ?string $title = null,
     ) {}
 
     public function attributes(): array
@@ -25,6 +26,7 @@ class TestFeedback extends QtiElement
             'outcome-identifier' => $this->outcomeIdentifier,
             'show-hide' => $this->showHide->value,
             'access' => $this->access->value,
+            'title' => $this->title,
         ];
     }
 

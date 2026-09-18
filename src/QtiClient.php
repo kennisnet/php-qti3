@@ -22,6 +22,8 @@ use Qti3\AssessmentItem\Service\ScoringOutcomeValidator;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
+use Qti3\AssessmentTest\Service\Parser\OutcomeProcessingParser;
+use Qti3\AssessmentTest\Service\Parser\TestFeedbackParser;
 use Qti3\AssessmentTest\Service\Parser\TestPartParser;
 use Qti3\AssessmentTest\Service\TestBuilder;
 use Qti3\Package\Filesystem\FileSystemUtils;
@@ -133,6 +135,8 @@ final class QtiClient
             new OutcomeDeclarationParser(),
             $this->getTestPartParser(),
             new RubricBlockParser(),
+            new OutcomeProcessingParser(new QtiExpressionParser()),
+            new TestFeedbackParser(),
         );
     }
 

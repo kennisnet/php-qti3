@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\ResponseProcessing\MapResponse;
 use Qti3\AssessmentItem\Service\Parser\ParseError;
 use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\TestVariables;
 use Qti3\Shared\Model\BaseType;
 use Qti3\Shared\Model\Processing\BaseValue;
 use Qti3\Shared\Model\Processing\Correct;
@@ -123,5 +124,36 @@ class QtiExpressionParserTest extends TestCase
         $this->expectExceptionMessage('Unknown qti expression tag qti-unknown-expression');
 
         $this->parser->parse($element);
+    }
+
+    #[Test]
+    public function parseTestVariablesKeepsEveryAttribute(): void
+    {
+        $element = $this->loadElement('<qti-test-variables variable-identifier="SCORE" section-identifier="S1" include-category="core" exclude-category="skip" weight-identifier="W" base-type="float"/>');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(TestVariables::class, $result);
+        $this->assertSame('SCORE', $result->variableIdentifier);
+        $this->assertSame('S1', $result->sectionIdentifier);
+        $this->assertSame('core', $result->includeCategory);
+        $this->assertSame('skip', $result->excludeCategory);
+        $this->assertSame('W', $result->weightIdentifier);
+        $this->assertSame('float', $result->baseType);
+    }
+
+    #[Test]
+    public function parseTestVariablesLeavesAbsentAttributesNull(): void
+    {
+        $element = $this->loadElement('<qti-test-variables variable-identifier="SCORE"/>');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertInstanceOf(TestVariables::class, $result);
+        $this->assertNull($result->includeCategory);
+        $this->assertNull($result->sectionIdentifier);
+        $this->assertNull($result->excludeCategory);
+        $this->assertNull($result->weightIdentifier);
+        $this->assertNull($result->baseType);
     }
 }
