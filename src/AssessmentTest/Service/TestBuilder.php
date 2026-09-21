@@ -18,13 +18,8 @@ final readonly class TestBuilder
     ) {}
 
     /**
-     * Build the {@see \Qti3\AssessmentTest\Model\AssessmentTest} model for a test
-     * resource, together with the warnings for any construct the model cannot
-     * hold (nested sections, an unknown attribute, an outcome rule on an
-     * expression the model does not know, ...). The test is not refused: the
-     * construct is reported as a warning and dropped when the model is
-     * serialized again. Test-level rubric blocks, outcome processing and test
-     * feedback are kept on {@see \Qti3\AssessmentTest\Model\AssessmentTest}.
+     * A construct the model cannot hold is not refused: it is reported in the warnings and
+     * dropped when the model is serialized again.
      */
     public function buildFromPackage(QtiPackage $package, ?string $testIdentifier = null): TestParseResult
     {

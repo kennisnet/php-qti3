@@ -12,11 +12,7 @@ use Qti3\Shared\Collection\StringCollection;
 
 class TestVariables extends AbstractQtiExpression
 {
-    /**
-     * The item-subset attributes (`section-identifier`, `include-category`,
-     * `exclude-category`) and the value selectors (`weight-identifier`,
-     * `base-type`) are carried as written so a parsed test regenerates unchanged.
-     */
+    /** Every attribute is carried as written, so a parsed test regenerates unchanged. */
     public function __construct(
         public readonly string $variableIdentifier,
         public readonly ?string $includeCategory = null,

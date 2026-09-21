@@ -21,11 +21,8 @@ use Qti3\Shared\Model\Processing\AbstractQtiExpression;
 use Qti3\Shared\Model\Processing\SetOutcomeValue;
 
 /**
- * Parses the test-level `<qti-outcome-processing>` into its model.
- *
- * A top-level rule the model cannot hold is dropped on its own, with a warning.
- * Inside a condition the whole <qti-outcome-condition> goes: keeping the other
- * branches would silently change what the test scores.
+ * A rule the model cannot hold is dropped on its own, but inside a condition the whole
+ * <qti-outcome-condition> goes: keeping the other branches would change what the test scores.
  */
 class OutcomeProcessingParser extends AbstractParser
 {

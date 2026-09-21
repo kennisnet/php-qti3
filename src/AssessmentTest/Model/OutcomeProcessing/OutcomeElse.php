@@ -11,7 +11,7 @@ class OutcomeElse extends QtiElement
     /** @var list<IOutcomeProcessingElement> */
     public readonly array $elements;
 
-    /** The rules run when no branch before it held; the schema allows any number, including none. */
+    /** The schema allows any number of rules here, including none. */
     public function __construct(
         IOutcomeProcessingElement ...$elements,
     ) {

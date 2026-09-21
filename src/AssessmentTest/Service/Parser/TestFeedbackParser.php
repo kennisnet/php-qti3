@@ -15,7 +15,6 @@ use Qti3\Shared\Html\ContentNodeParser;
 use Qti3\Shared\Model\ContentBody;
 use Qti3\Shared\Model\ContentNodeCollection;
 
-/** Parses a test-level `<qti-test-feedback>`, content included, so it survives regeneration. */
 class TestFeedbackParser extends AbstractParser
 {
     private const string CONTENT_BODY = 'qti-content-body';
@@ -27,9 +26,8 @@ class TestFeedbackParser extends AbstractParser
 
         $this->warnUnconsumedAttributes($element, ['identifier', 'outcome-identifier', 'show-hide', 'access', 'title'], $warnings);
 
-        // The schema wraps the content in <qti-content-body>; authored XML often leaves the wrapper out.
-        // With a wrapper, anything beside it (qti-stylesheet, qti-catalog-info) is dropped; the wrapper's
-        // own attributes have no place in the model either. Without one, every child is content.
+        // The schema wraps the content in <qti-content-body>, but authored XML often leaves it out;
+        // with a wrapper, its siblings and its own attributes have no place in the model.
         $contentRoot = $this->unwrapContentBody($element);
         if ($contentRoot !== $element) {
             $this->warnUnconsumedChildren($element, [self::CONTENT_BODY], $warnings);
@@ -41,10 +39,6 @@ class TestFeedbackParser extends AbstractParser
             try {
                 $node = ContentNodeParser::parse($child);
             } catch (InvalidArgumentException $exception) {
-                // Not content the model can hold: a qti-stylesheet where no wrapper separates it from the
-                // content, a tag outside the whitelist, or a supported tag carrying an attribute that is
-                // not. The whole child goes, since its tree is what failed to build, and the reason says
-                // which of the three it was.
                 $warnings->add(sprintf('%s: drops <%s>, %s', $this->locate($child), $child->nodeName, $exception->getMessage()));
                 continue;
             }

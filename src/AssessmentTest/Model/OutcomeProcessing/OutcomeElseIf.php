@@ -12,7 +12,7 @@ class OutcomeElseIf extends QtiElement
     /** @var list<IOutcomeProcessingElement> */
     public readonly array $elements;
 
-    /** The rules run when `$condition` holds; the schema allows any number, including none. */
+    /** The schema allows any number of rules here, including none. */
     public function __construct(
         public readonly AbstractQtiExpression $condition,
         IOutcomeProcessingElement ...$elements,

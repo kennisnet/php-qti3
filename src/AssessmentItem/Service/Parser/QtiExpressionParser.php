@@ -46,9 +46,8 @@ use DOMElement;
 class QtiExpressionParser extends AbstractParser
 {
     /**
-     * The operand at `$index`, or a ParseError when the expression carries fewer than its
-     * operator needs. Reading it straight off the array raises a PHP warning first and a
-     * TypeError after it, and neither lets a caller treat this as a malformed expression.
+     * Reading the array directly raises a PHP warning before the TypeError, so a caller
+     * cannot catch it as a malformed expression.
      *
      * @param array<int, DOMElement> $children
      */

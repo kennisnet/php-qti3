@@ -62,7 +62,7 @@ class AssessmentTestParser extends AbstractParser
             } elseif ($child->nodeName === TestPart::qtiTagName()) {
                 $testParts->add($this->testPartParser->parse($child, $warnings));
             } elseif ($child->nodeName === OutcomeProcessing::qtiTagName()) {
-                // The schema allows one; a second cannot be represented and is dropped like any other unsupported construct.
+                // The schema allows one; a second cannot be represented.
                 if ($outcomeProcessing !== null) {
                     $warnings->add(sprintf('%s: drops a second <%s>', $this->locate($child), $child->nodeName));
                     continue;

@@ -7,7 +7,7 @@ namespace Qti3\AssessmentTest\Model\OutcomeProcessing;
 use Qti3\Shared\Model\Processing\AbstractQtiExpression;
 use Qti3\Shared\Model\QtiElement;
 
-/** `<qti-lookup-outcome-value identifier="…">`: sets an outcome from its declaration's lookup table. */
+/** Sets an outcome from the lookup table in its outcome declaration. */
 class LookupOutcomeValue extends QtiElement implements IOutcomeProcessingElement
 {
     public function __construct(
