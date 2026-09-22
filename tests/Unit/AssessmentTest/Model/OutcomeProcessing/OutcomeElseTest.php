@@ -28,4 +28,17 @@ class OutcomeElseTest extends TestCase
         $children = $this->outcomeElse->children();
         $this->assertInstanceOf(SetOutcomeValue::class, $children[0]);
     }
+
+    #[Test]
+    public function holdsAnyNumberOfRules(): void
+    {
+        $twoRules = new OutcomeElse(
+            new SetOutcomeValue('a', new BaseValue(BaseType::INTEGER, '1')),
+            new SetOutcomeValue('b', new BaseValue(BaseType::INTEGER, '2')),
+        );
+
+        $this->assertCount(2, $twoRules->elements);
+        $this->assertCount(2, $twoRules->children());
+        $this->assertSame([], new OutcomeElse()->elements);
+    }
 }

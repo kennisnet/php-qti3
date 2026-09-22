@@ -173,6 +173,13 @@ abstract class AbstractParser
         array $consumedChildren,
         StringCollection $warnings,
     ): void {
+        $this->warnUnconsumedAttributes($element, $consumedAttributes, $warnings);
+        $this->warnUnconsumedChildren($element, $consumedChildren, $warnings);
+    }
+
+    /** @param list<string> $consumedAttributes attribute names the parser read */
+    protected function warnUnconsumedAttributes(DOMElement $element, array $consumedAttributes, StringCollection $warnings): void
+    {
         foreach ($element->attributes as $attribute) {
             if (!$attribute instanceof DOMAttr || $this->isNamespaceAttribute($attribute)) {
                 continue;
@@ -181,7 +188,11 @@ abstract class AbstractParser
                 $warnings->add(sprintf('%s: drops unsupported attribute "%s"', $this->locate($element), $attribute->nodeName));
             }
         }
+    }
 
+    /** @param list<string> $consumedChildren child element local names the parser read */
+    protected function warnUnconsumedChildren(DOMElement $element, array $consumedChildren, StringCollection $warnings): void
+    {
         foreach ($this->getChildren($element) as $child) {
             if (!in_array($child->localName, $consumedChildren, true)) {
                 $warnings->add(sprintf('%s: drops unsupported element <%s>', $this->locate($child), $child->localName));

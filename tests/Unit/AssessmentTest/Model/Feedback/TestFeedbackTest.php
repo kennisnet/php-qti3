@@ -34,7 +34,16 @@ class TestFeedbackTest extends TestCase
             'outcome-identifier' => 'outcomeIdentifier',
             'show-hide' => 'show',
             'access' => 'atEnd',
+            'title' => null,
         ], $this->testFeedback->attributes());
+    }
+
+    #[Test]
+    public function titleIsCarriedAsAnAttribute(): void
+    {
+        $feedback = new TestFeedback('f', 'PASS', new ContentBody(new ContentNodeCollection()), title: 'Geslaagd');
+
+        $this->assertSame('Geslaagd', $feedback->attributes()['title']);
     }
 
     #[Test]

@@ -6,10 +6,13 @@ namespace Qti3\Tests\Unit\Package\Service\QtiPackageBuilder;
 
 use DOMDocument;
 use Qti3\AssessmentItem\Service\Parser\OutcomeDeclarationParser;
+use Qti3\AssessmentItem\Service\Parser\QtiExpressionParser;
 use Qti3\AssessmentItem\Service\Parser\RubricBlockParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentItemRefParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentSectionParser;
 use Qti3\AssessmentTest\Service\Parser\AssessmentTestParser;
+use Qti3\AssessmentTest\Service\Parser\OutcomeProcessingParser;
+use Qti3\AssessmentTest\Service\Parser\TestFeedbackParser;
 use Qti3\AssessmentTest\Service\Parser\TestPartParser;
 use Qti3\Package\Model\Manifest\ManifestResourceDependencyCollection;
 use Qti3\Package\Model\Resource\Resource;
@@ -36,6 +39,8 @@ class TestResourceBuilderTest extends TestCase
             new OutcomeDeclarationParser(),
             new TestPartParser($sectionParser),
             new RubricBlockParser(),
+            new OutcomeProcessingParser(new QtiExpressionParser()),
+            new TestFeedbackParser(),
         );
     }
 

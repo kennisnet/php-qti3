@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qti3\Tests\Unit\AssessmentTest\Model\OutcomeProcessing;
 
 use Qti3\Shared\Model\BaseType;
+use Qti3\AssessmentTest\Model\OutcomeProcessing\ExitTest;
 use Qti3\AssessmentTest\Model\OutcomeProcessing\OutcomeIf;
 use Qti3\Shared\Model\Processing\BaseValue;
 use Qti3\Shared\Model\Processing\IsNull;
@@ -31,5 +32,19 @@ class OutcomeIfTest extends TestCase
         $children = $this->outcomeIf->children();
         $this->assertInstanceOf(IsNull::class, $children[0]);
         $this->assertInstanceOf(SetOutcomeValue::class, $children[1]);
+    }
+
+    #[Test]
+    public function aBranchHoldsAnyNumberOfRulesAfterItsCondition(): void
+    {
+        $outcomeIf = new OutcomeIf(
+            new IsNull(new Variable('variable')),
+            new SetOutcomeValue('a', new BaseValue(BaseType::INTEGER, '1')),
+            new ExitTest(),
+        );
+
+        $this->assertCount(2, $outcomeIf->elements);
+        $this->assertCount(3, $outcomeIf->children());
+        $this->assertSame([], new OutcomeIf(new IsNull(new Variable('variable')))->elements);
     }
 }
