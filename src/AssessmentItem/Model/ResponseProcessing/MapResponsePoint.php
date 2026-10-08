@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\AssessmentItem\Model\ResponseProcessing;
 
+use Qti3\AssessmentItem\Model\ResponseDeclaration\AreaMapEntry;
 use Qti3\AssessmentItem\Model\Shape\Circle;
 use Qti3\AssessmentItem\Model\Shape\Coordinate;
 use Qti3\AssessmentItem\Model\Shape\DefaultShape;
@@ -43,18 +44,38 @@ class MapResponsePoint extends AbstractQtiExpression
             return 0;
         }
 
+        $responseValue = array_unique($responseValue);
+
         $score = 0;
+        foreach ($responseValue as $responsePoint) {
+            if (!is_string($responsePoint)) {
+                throw new Exception('Response point is not a string');
+            }
+
+            $hitsAnArea = array_any(
+                $areaMapping->entries,
+                fn(AreaMapEntry $entry): bool => $this->responseCorrect($responsePoint, $entry->shape),
+            );
+            if (!$hitsAnArea) {
+                $score += $areaMapping->defaultValue ?? 0;
+            }
+        }
+
         foreach ($areaMapping->entries as $entry) {
             foreach ($responseValue as $responsePoint) {
-                if (!is_string($responsePoint)) {
-                    throw new Exception('Response point is not a string');
-                }
-
                 if ($this->responseCorrect($responsePoint, $entry->shape)) {
                     $score += $entry->mappedValue;
                     break;
                 }
             }
+        }
+
+        if ($areaMapping->lowerBound !== null) {
+            $score = max($score, $areaMapping->lowerBound);
+        }
+
+        if ($areaMapping->upperBound !== null) {
+            $score = min($score, $areaMapping->upperBound);
         }
 
         return $score;

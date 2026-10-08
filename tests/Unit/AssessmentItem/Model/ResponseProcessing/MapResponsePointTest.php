@@ -150,4 +150,84 @@ class MapResponsePointTest extends TestCase
         // Assert
         $this->assertEquals(2.5, $result);
     }
+
+    #[Test]
+    public function testEvaluateAddsDefaultValueForEachPointOutsideEveryArea(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 1.0)], 0.5);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, ['50 50', '200 200', '300 300', '300 300']);
+
+        // Assert
+        $this->assertSame(2.0, $result);
+    }
+
+    #[Test]
+    public function testEvaluateClampsToUpperBound(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping(
+            [$this->circleEntry('50', 8.0), $this->circleEntry('150', 8.0)],
+            upperBound: 10,
+        );
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, ['50 50', '150 150']);
+
+        // Assert
+        $this->assertSame(10.0, $result);
+    }
+
+    #[Test]
+    public function testEvaluateClampsToLowerBound(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', -3.0)], lowerBound: -1);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, ['50 50']);
+
+        // Assert
+        $this->assertSame(-1.0, $result);
+    }
+
+    #[Test]
+    public function testEvaluateWithoutDefaultValueOrBoundsOnlySumsHitAreas(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 8.0), $this->circleEntry('150', 8.0)]);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, ['50 50', '150 150', '300 300']);
+
+        // Assert
+        $this->assertEquals(16, $result);
+    }
+
+    private function circleEntry(string $center, float $mappedValue): AreaMapEntry
+    {
+        return new AreaMapEntry(new Circle(new Coordinate($center), new Coordinate($center), new Coordinate('10')), $mappedValue);
+    }
+
+    /**
+     * @param array<int,string> $points
+     */
+    private function evaluateWith(AreaMapping $areaMapping, array $points): float
+    {
+        $responseDeclaration = new ResponseDeclaration(
+            BaseType::POINT,
+            Cardinality::MULTIPLE,
+            'identifier',
+            null,
+            null,
+            $areaMapping,
+        );
+        $responseSet = new ResponseSet(new ResponseDeclarationCollection([$responseDeclaration]));
+        $responseSet->responses['identifier'] = $points;
+        $outcomeSet = new OutcomeSet(new OutcomeDeclarationCollection([]));
+
+        return $this->mapResponsePoint->evaluate(new ItemState($responseSet, $outcomeSet, new ResponseProcessing([])));
+    }
 }
