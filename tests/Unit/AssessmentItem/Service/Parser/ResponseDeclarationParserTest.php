@@ -88,6 +88,46 @@ class ResponseDeclarationParserTest extends TestCase
     }
 
     #[Test]
+    public function parseAreaMappingBoundsFromAreaMappingElement(): void
+    {
+        $element = $this->loadElement('
+            <qti-response-declaration identifier="RESPONSE" cardinality="multiple" base-type="point">
+                <qti-area-mapping default-value="2.5" lower-bound="0" upper-bound="10">
+                    <qti-area-map-entry shape="circle" coords="100,100,20" mapped-value="5"/>
+                </qti-area-mapping>
+            </qti-response-declaration>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertNotNull($result->areaMapping);
+        $this->assertSame(2.5, $result->areaMapping->defaultValue);
+        $this->assertSame(0.0, $result->areaMapping->lowerBound);
+        $this->assertSame(10.0, $result->areaMapping->upperBound);
+        $this->assertCount(1, $result->areaMapping->entries);
+        $this->assertSame(5.0, $result->areaMapping->entries[0]->mappedValue);
+    }
+
+    #[Test]
+    public function parseAreaMappingBoundsAreNullWhenOmitted(): void
+    {
+        $element = $this->loadElement('
+            <qti-response-declaration identifier="RESPONSE" cardinality="multiple" base-type="point">
+                <qti-area-mapping>
+                    <qti-area-map-entry shape="circle" coords="100,100,20" mapped-value="5"/>
+                </qti-area-mapping>
+            </qti-response-declaration>
+        ');
+
+        $result = $this->parser->parse($element);
+
+        $this->assertNotNull($result->areaMapping);
+        $this->assertNull($result->areaMapping->defaultValue);
+        $this->assertNull($result->areaMapping->lowerBound);
+        $this->assertNull($result->areaMapping->upperBound);
+    }
+
+    #[Test]
     public function parseWithoutMapping(): void
     {
         $element = $this->loadElement('

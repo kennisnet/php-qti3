@@ -72,7 +72,7 @@ class MapResponsePointTest extends TestCase
     public function testEvaluateWithNonArrayResponseValue(): void
     {
         // Arrange
-        $areaMapping = new AreaMapping([], '0');
+        $areaMapping = new AreaMapping([], 0);
         $responseDeclaration = new ResponseDeclaration(
             BaseType::STRING,
             Cardinality::SINGLE,
@@ -100,7 +100,7 @@ class MapResponsePointTest extends TestCase
         // Arrange
         $circle = new Circle(new Coordinate('50'), new Coordinate('50'), new Coordinate('10'));
         $areaMapEntry = new AreaMapEntry($circle, 1.0);
-        $areaMapping = new AreaMapping([$areaMapEntry], '0');
+        $areaMapping = new AreaMapping([$areaMapEntry], 0);
         $responseDeclaration = new ResponseDeclaration(
             BaseType::STRING,
             Cardinality::SINGLE,
@@ -127,7 +127,7 @@ class MapResponsePointTest extends TestCase
         // Arrange
         $defaultShape = new DefaultShape();
         $areaMapEntry = new AreaMapEntry($defaultShape, 2.5);
-        $areaMapping = new AreaMapping([$areaMapEntry], '0');
+        $areaMapping = new AreaMapping([$areaMapEntry], 0);
         $responseDeclaration = new ResponseDeclaration(
             BaseType::STRING,
             Cardinality::SINGLE,

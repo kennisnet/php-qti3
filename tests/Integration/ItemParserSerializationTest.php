@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qti3\Tests\Integration;
 
+use DOMDocument;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Qti3\AssessmentItem\Model\AssessmentItem;
@@ -590,6 +591,77 @@ XML;
 
         $img = $body[1]->children()[0];
         $this->assertSame('Kat & hond in een café', $img->attributes()['alt']);
+    }
+
+    /**
+     * FLEX-739: qti-area-mapping lost default-value, lower-bound and upper-bound
+     * on serialize, while qti-mapping kept them. Both must now round-trip alike.
+     */
+    public function testSerializeKeepsAreaMappingAttributes(): void
+    {
+        $serialized = $this->serializeItem($this->parseItem($this->itemWithMappings(
+            ' default-value="2.5" lower-bound="0" upper-bound="10"',
+        )));
+
+        $expected = ['default-value' => '2.5', 'lower-bound' => '0', 'upper-bound' => '10'];
+        $this->assertSame($expected, $this->elementAttributes($serialized, 'qti-mapping'));
+        $this->assertSame($expected, $this->elementAttributes($serialized, 'qti-area-mapping'));
+
+        $areaMapping = $this->parseItem($serialized)->responseDeclarations->getByIdentifier('RESPONSE')->areaMapping;
+        $this->assertSame(2.5, $areaMapping->defaultValue);
+        $this->assertSame(0.0, $areaMapping->lowerBound);
+        $this->assertSame(10.0, $areaMapping->upperBound);
+    }
+
+    public function testSerializeAddsNoAreaMappingAttributesThatWereAbsent(): void
+    {
+        $serialized = $this->serializeItem($this->parseItem($this->itemWithMappings('')));
+
+        $this->assertSame([], $this->elementAttributes($serialized, 'qti-mapping'));
+        $this->assertSame([], $this->elementAttributes($serialized, 'qti-area-mapping'));
+    }
+
+    private function itemWithMappings(string $mappingAttributes): string
+    {
+        return <<<XML
+<qti-assessment-item xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
+                    identifier="area-mapping-001"
+                    title="Area mapping"
+                    adaptive="false"
+                    time-dependent="false">
+    <qti-response-declaration identifier="RESPONSE2" cardinality="single" base-type="identifier">
+        <qti-mapping{$mappingAttributes}>
+            <qti-map-entry map-key="A" mapped-value="5" case-sensitive="false" />
+        </qti-mapping>
+    </qti-response-declaration>
+    <qti-response-declaration identifier="RESPONSE" cardinality="multiple" base-type="point">
+        <qti-area-mapping{$mappingAttributes}>
+            <qti-area-map-entry shape="circle" coords="100,100,20" mapped-value="5" />
+        </qti-area-mapping>
+    </qti-response-declaration>
+    <qti-item-body>
+        <p>Question</p>
+    </qti-item-body>
+</qti-assessment-item>
+XML;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private function elementAttributes(string $xml, string $tagName): array
+    {
+        $document = new DOMDocument();
+        $document->loadXML($xml);
+        $element = $document->getElementsByTagName($tagName)->item(0);
+        $this->assertNotNull($element);
+
+        $attributes = [];
+        foreach ($element->attributes as $attribute) {
+            $attributes[$attribute->name] = $attribute->value;
+        }
+
+        return $attributes;
     }
 
     private function collectText(object $node): string
