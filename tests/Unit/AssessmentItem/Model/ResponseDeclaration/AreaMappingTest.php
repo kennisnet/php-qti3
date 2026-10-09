@@ -16,7 +16,9 @@ class AreaMappingTest extends TestCase
     {
         $this->areaMapping = new AreaMapping(
             entries: [],
-            defaultValue: 'default-value',
+            defaultValue: 0,
+            lowerBound: 1,
+            upperBound: 2,
         );
     }
 
@@ -24,10 +26,18 @@ class AreaMappingTest extends TestCase
     public function testAttributes(): void
     {
         $expectedAttributes = [
-            'default-value' => 'default-value',
+            'default-value' => '0',
+            'lower-bound' => '1',
+            'upper-bound' => '2',
         ];
 
-        $this->assertEquals($expectedAttributes, $this->areaMapping->attributes());
+        $this->assertSame($expectedAttributes, $this->areaMapping->attributes());
+    }
+
+    #[Test]
+    public function testAttributesOmitUnsetValues(): void
+    {
+        $this->assertSame([], (new AreaMapping([]))->attributes());
     }
 
     #[Test]

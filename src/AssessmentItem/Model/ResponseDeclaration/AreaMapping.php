@@ -13,14 +13,25 @@ class AreaMapping extends QtiElement
      */
     public function __construct(
         public readonly array $entries,
-        public readonly ?string $defaultValue = null,
+        public readonly ?float $defaultValue = null,
+        public readonly ?float $lowerBound = null,
+        public readonly ?float $upperBound = null,
     ) {}
 
     public function attributes(): array
     {
-        return [
-            'default-value' => $this->defaultValue,
-        ];
+        $attributes = [];
+        if ($this->defaultValue !== null) {
+            $attributes['default-value'] = (string) $this->defaultValue;
+        }
+        if ($this->lowerBound !== null) {
+            $attributes['lower-bound'] = (string) $this->lowerBound;
+        }
+        if ($this->upperBound !== null) {
+            $attributes['upper-bound'] = (string) $this->upperBound;
+        }
+
+        return $attributes;
     }
 
     public function children(): array

@@ -107,6 +107,9 @@ class ResponseDeclarationParser extends AbstractParser
                 },
                 $areaMappingChildren,
             ),
+            $this->parseFloat($areaMapping->getAttribute('default-value')),
+            $this->parseFloat($areaMapping->getAttribute('lower-bound')),
+            $this->parseFloat($areaMapping->getAttribute('upper-bound')),
         );
     }
 }
