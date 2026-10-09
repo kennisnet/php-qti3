@@ -40,8 +40,11 @@ class MapResponsePoint extends AbstractQtiExpression
         }
 
         $responseValue = $state->responseSet->getResponseValue($this->identifier);
-        if (!is_array($responseValue)) {
+        if ($responseValue === null || $responseValue === '') {
             return 0;
+        }
+        if (!is_array($responseValue)) {
+            $responseValue = [$responseValue];
         }
 
         $responseValue = array_unique($responseValue);
@@ -83,7 +86,7 @@ class MapResponsePoint extends AbstractQtiExpression
 
     private function responseCorrect(string $responsePoint, IShapeWithCoords $shape): bool
     {
-        [$responseX, $responseY] = array_map('floatval', explode(' ', $responsePoint));
+        [$responseX, $responseY] = $this->parsePoint($responsePoint);
 
         if ($shape instanceof Rectangle) {
             return $responseX >= $shape->x1->toFloat()
@@ -127,6 +130,19 @@ class MapResponsePoint extends AbstractQtiExpression
         }
 
         throw new Exception(sprintf('Shape %s not implemented', $shape::class)); // @codeCoverageIgnore
+    }
+
+    /**
+     * @return array{float,float}
+     */
+    private function parsePoint(string $responsePoint): array
+    {
+        $coordinates = preg_split('/\s+/', trim($responsePoint));
+        if (count($coordinates) !== 2 || !is_numeric($coordinates[0]) || !is_numeric($coordinates[1])) {
+            throw new Exception(sprintf('Response point "%s" is not two coordinates', $responsePoint));
+        }
+
+        return [(float) $coordinates[0], (float) $coordinates[1]];
     }
 
     public function getBaseType(ItemState $state): BaseType
