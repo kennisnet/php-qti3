@@ -14,7 +14,12 @@ class AreaMappingTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->areaMapping = new AreaMapping([], 0, 1, 2);
+        $this->areaMapping = new AreaMapping(
+            entries: [],
+            defaultValue: 0,
+            lowerBound: 1,
+            upperBound: 2,
+        );
     }
 
     #[Test]
