@@ -69,21 +69,19 @@ class MapResponsePointTest extends TestCase
     }
 
     #[Test]
-    public function testEvaluateWithNonArrayResponseValue(): void
+    public function testEvaluateWithoutResponse(): void
     {
         // Arrange
-        $areaMapping = new AreaMapping([], 0);
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)], 1.0);
         $responseDeclaration = new ResponseDeclaration(
-            BaseType::STRING,
+            BaseType::POINT,
             Cardinality::SINGLE,
             'identifier',
             null,
             null,
             $areaMapping,
         );
-        $responseDeclarations = new ResponseDeclarationCollection([$responseDeclaration]);
-        $responseSet = new ResponseSet($responseDeclarations);
-        $responseSet->responses['identifier'] = 'not-an-array';
+        $responseSet = new ResponseSet(new ResponseDeclarationCollection([$responseDeclaration]));
         $outcomeSet = new OutcomeSet(new OutcomeDeclarationCollection([]));
         $itemState = new ItemState($responseSet, $outcomeSet, new ResponseProcessing([]));
 
@@ -92,6 +90,32 @@ class MapResponsePointTest extends TestCase
 
         // Assert
         $this->assertEquals(0, $result);
+    }
+
+    #[Test]
+    public function testEvaluateWithSinglePointInsideAnArea(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)]);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, '50 50', Cardinality::SINGLE);
+
+        // Assert
+        $this->assertEquals(5, $result);
+    }
+
+    #[Test]
+    public function testEvaluateWithSinglePointOutsideEveryArea(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)], 0.5);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, '200 200', Cardinality::SINGLE);
+
+        // Assert
+        $this->assertSame(0.5, $result);
     }
 
     #[Test]
@@ -225,13 +249,16 @@ class MapResponsePointTest extends TestCase
     }
 
     /**
-     * @param array<int,string> $points
+     * @param string|array<int,string> $points
      */
-    private function evaluateWith(AreaMapping $areaMapping, array $points): float
-    {
+    private function evaluateWith(
+        AreaMapping $areaMapping,
+        string|array $points,
+        Cardinality $cardinality = Cardinality::MULTIPLE,
+    ): float {
         $responseDeclaration = new ResponseDeclaration(
             BaseType::POINT,
-            Cardinality::MULTIPLE,
+            $cardinality,
             'identifier',
             null,
             null,

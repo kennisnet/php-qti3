@@ -40,8 +40,11 @@ class MapResponsePoint extends AbstractQtiExpression
         }
 
         $responseValue = $state->responseSet->getResponseValue($this->identifier);
-        if (!is_array($responseValue)) {
+        if ($responseValue === null) {
             return 0;
+        }
+        if (!is_array($responseValue)) {
+            $responseValue = [$responseValue];
         }
 
         $responseValue = array_unique($responseValue);
