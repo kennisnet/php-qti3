@@ -165,6 +165,19 @@ class MapResponsePointTest extends TestCase
     }
 
     #[Test]
+    public function testEvaluateCountsAnAreaOnceAndTheDefaultValueOnlyForMisses(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 1.0)], 0.5);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, ['48 50', '52 50', '200 200']);
+
+        // Assert
+        $this->assertSame(1.5, $result);
+    }
+
+    #[Test]
     public function testEvaluateClampsToUpperBound(): void
     {
         // Arrange
@@ -203,7 +216,7 @@ class MapResponsePointTest extends TestCase
         $result = $this->evaluateWith($areaMapping, ['50 50', '150 150', '300 300']);
 
         // Assert
-        $this->assertEquals(16, $result);
+        $this->assertSame(16.0, $result);
     }
 
     private function circleEntry(string $center, float $mappedValue): AreaMapEntry
