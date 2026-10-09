@@ -146,6 +146,56 @@ class MapResponsePointTest extends TestCase
     }
 
     #[Test]
+    public function testEvaluateWithEmptySinglePointResponse(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('0', 3.0)], 0.5);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, '', Cardinality::SINGLE);
+
+        // Assert
+        $this->assertSame(0.0, $result);
+    }
+
+    #[Test]
+    public function testEvaluateWithNonStringSinglePointResponse(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)]);
+
+        // Act & Assert
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Response point is not a string');
+        $this->evaluateWith($areaMapping, 123, Cardinality::SINGLE);
+    }
+
+    #[Test]
+    public function testEvaluateWithMalformedPoint(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)]);
+
+        // Act & Assert
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Response point "50,50" is not two coordinates');
+        $this->evaluateWith($areaMapping, ['50,50']);
+    }
+
+    #[Test]
+    public function testEvaluateToleratesExtraWhitespaceInAPoint(): void
+    {
+        // Arrange
+        $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)]);
+
+        // Act
+        $result = $this->evaluateWith($areaMapping, ' 50  50 ', Cardinality::SINGLE);
+
+        // Assert
+        $this->assertSame(5.0, $result);
+    }
+
+    #[Test]
     public function testEvaluateWithDefaultShape(): void
     {
         // Arrange
@@ -249,11 +299,11 @@ class MapResponsePointTest extends TestCase
     }
 
     /**
-     * @param string|array<int,string> $points
+     * @param string|int|array<int,string> $points
      */
     private function evaluateWith(
         AreaMapping $areaMapping,
-        string|array $points,
+        string|int|array $points,
         Cardinality $cardinality = Cardinality::MULTIPLE,
     ): float {
         $responseDeclaration = new ResponseDeclaration(
