@@ -483,6 +483,36 @@ class ResponseProcessorTest extends TestCase
         );
     }
 
+    #[Test]
+    public function processResponsesWithoutAnOrderResponseScoresZero(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/order-match-correct-template.xml',
+            [],
+            [
+                'completionStatus' => 'completed',
+                'SCORE' => 0.0,
+                'MAXSCORE' => 1.0,
+            ],
+        );
+    }
+
+    #[Test]
+    public function processResponsesWithTheCorrectOrderScoresOne(): void
+    {
+        $this->assertOutcomes(
+            __DIR__ . '/resources/order-match-correct-template.xml',
+            [
+                'RESPONSE' => ['step_data', 'num_sqrt2', 'step_result'],
+            ],
+            [
+                'completionStatus' => 'completed',
+                'SCORE' => 1.0,
+                'MAXSCORE' => 1.0,
+            ],
+        );
+    }
+
     /**
      * The `.xml` extension on a standard template URL is optional, so the
      * template must be applied for the extensionless URL too.

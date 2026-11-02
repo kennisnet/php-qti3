@@ -34,6 +34,10 @@ class qtiMatch extends AbstractQtiExpression
         $value1 = $this->expression1->evaluate($state);
         $value2 = $this->expression2->evaluate($state);
 
+        // QTI: a match with NULL is NULL, which a response condition reads as false.
+        if ($value1 === null || $value2 === null) {
+            return false;
+        }
         if ($this->expression1->getBaseType($state) !== $this->expression2->getBaseType($state)) {
             return false;
         }

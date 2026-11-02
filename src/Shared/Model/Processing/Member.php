@@ -26,12 +26,12 @@ class Member extends AbstractQtiExpression
 
     public function evaluate(ItemState $state): bool
     {
-        $haystackValue = $this->haystack->evaluateArray($state);
+        $needle = $this->needle->evaluate($state);
+        if ($needle === null || $this->haystack->evaluate($state) === null) {
+            return false;
+        }
 
-        return in_array(
-            $this->needle->evaluate($state),
-            $haystackValue,
-        );
+        return in_array($needle, $this->haystack->evaluateArray($state));
     }
 
     public function getBaseType(ItemState $state): BaseType

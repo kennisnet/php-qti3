@@ -23,6 +23,10 @@ class Contains extends AbstractQtiExpression
 
     public function evaluate(ItemState $state): bool
     {
+        if ($this->container->evaluate($state) === null || $this->contains->evaluate($state) === null) {
+            return false;
+        }
+
         $container = $this->container->evaluateArray($state);
         $contains = $this->contains->evaluateArray($state);
 
