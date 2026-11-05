@@ -66,6 +66,8 @@ class AbstractQtiExpressionTest extends TestCase
                 'RESPONSE2',
             ),
             new ResponseDeclaration(BaseType::STRING, Cardinality::SINGLE, 'identifier'),
+            new ResponseDeclaration(BaseType::IDENTIFIER, Cardinality::ORDERED, 'UNANSWERED_ORDERED'),
+            new ResponseDeclaration(BaseType::IDENTIFIER, Cardinality::MULTIPLE, 'UNANSWERED_MULTIPLE'),
         ]);
         $outcomeDeclarations = new OutcomeDeclarationCollection([]);
 
@@ -491,6 +493,82 @@ class AbstractQtiExpressionTest extends TestCase
         $this->expectExceptionMessage('Element is not an array');
 
         $member->evaluate($this->itemState);
+    }
+
+    #[Test]
+    public function qtiMatchWithAnUnansweredOrderedResponseIsFalse(): void
+    {
+        // Arrange
+        $expression = new qtiMatch(
+            new Variable('UNANSWERED_ORDERED'),
+            new Ordered([
+                new BaseValue(BaseType::IDENTIFIER, 'step_data'),
+                new BaseValue(BaseType::IDENTIFIER, 'num_sqrt2'),
+            ]),
+        );
+
+        // Act
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function qtiMatchWithAnUnansweredMultipleResponseIsFalse(): void
+    {
+        // Arrange
+        $expression = new qtiMatch(
+            new Variable('UNANSWERED_MULTIPLE'),
+            new Multiple([
+                new BaseValue(BaseType::IDENTIFIER, 'choice_a'),
+                new BaseValue(BaseType::IDENTIFIER, 'choice_b'),
+            ]),
+        );
+
+        // Act
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function memberOfAnUnansweredResponseIsFalse(): void
+    {
+        // Arrange
+        $expression = new Member(
+            new BaseValue(BaseType::IDENTIFIER, 'choice_a'),
+            new Variable('UNANSWERED_MULTIPLE'),
+        );
+
+        // Act
+        $result = $expression->evaluate($this->itemState);
+
+        // Assert
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function containsWithAnUnansweredResponseIsFalse(): void
+    {
+        // Arrange
+        $containerIsUnanswered = new Contains(
+            new Variable('UNANSWERED_MULTIPLE'),
+            new Multiple([new BaseValue(BaseType::IDENTIFIER, 'choice_a')]),
+        );
+        $containedIsUnanswered = new Contains(
+            new Multiple([new BaseValue(BaseType::IDENTIFIER, 'choice_a')]),
+            new Variable('UNANSWERED_MULTIPLE'),
+        );
+
+        // Act
+        $containerResult = $containerIsUnanswered->evaluate($this->itemState);
+        $containedResult = $containedIsUnanswered->evaluate($this->itemState);
+
+        // Assert
+        $this->assertFalse($containerResult);
+        $this->assertFalse($containedResult);
     }
 
     #[Test]
