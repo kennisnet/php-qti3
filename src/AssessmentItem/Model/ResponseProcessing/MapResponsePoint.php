@@ -17,6 +17,7 @@ use Qti3\Shared\Model\Processing\AbstractQtiExpression;
 use Qti3\AssessmentItem\Model\State\ItemState;
 use Qti3\Shared\Collection\StringCollection;
 use Exception;
+use InvalidArgumentException;
 
 class MapResponsePoint extends AbstractQtiExpression
 {
@@ -52,7 +53,7 @@ class MapResponsePoint extends AbstractQtiExpression
         $score = 0;
         foreach ($responseValue as $responsePoint) {
             if (!is_string($responsePoint)) {
-                throw new Exception('Response point is not a string');
+                throw new InvalidArgumentException('Response point is not a string');
             }
 
             $hitsAnArea = array_any(
@@ -139,7 +140,7 @@ class MapResponsePoint extends AbstractQtiExpression
     {
         $coordinates = preg_split('/\s+/', trim($responsePoint));
         if (count($coordinates) !== 2 || !is_numeric($coordinates[0]) || !is_numeric($coordinates[1])) {
-            throw new Exception(sprintf('Response point "%s" is not two coordinates', $responsePoint));
+            throw new InvalidArgumentException(sprintf('Response point "%s" is not two coordinates', $responsePoint));
         }
 
         return [(float) $coordinates[0], (float) $coordinates[1]];

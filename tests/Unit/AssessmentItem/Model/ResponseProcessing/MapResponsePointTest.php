@@ -19,7 +19,7 @@ use Qti3\AssessmentItem\Model\ResponseProcessing\ResponseProcessing;
 use Qti3\AssessmentItem\Model\State\ItemState;
 use Qti3\AssessmentItem\Model\State\OutcomeSet;
 use Qti3\AssessmentItem\Model\State\ResponseSet;
-use Exception;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -140,7 +140,7 @@ class MapResponsePointTest extends TestCase
         $itemState = new ItemState($responseSet, $outcomeSet, new ResponseProcessing([]));
 
         // Act & Assert
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Response point is not a string');
         $this->mapResponsePoint->evaluate($itemState);
     }
@@ -165,7 +165,7 @@ class MapResponsePointTest extends TestCase
         $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)]);
 
         // Act & Assert
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Response point is not a string');
         $this->evaluateWith($areaMapping, 123, Cardinality::SINGLE);
     }
@@ -177,7 +177,7 @@ class MapResponsePointTest extends TestCase
         $areaMapping = new AreaMapping([$this->circleEntry('50', 5.0)]);
 
         // Act & Assert
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Response point "50,50" is not two coordinates');
         $this->evaluateWith($areaMapping, ['50,50']);
     }
